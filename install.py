@@ -86,14 +86,14 @@ def install_dependencies():
         print("  Fedora: sudo dnf install python3-pip")
         print("  Arch: sudo pacman -S python-pip")
         print("  Or follow: https://pip.pypa.io/en/stable/installation/")
-        return False
+        return False, False
     
     # Try installing with --user first
     success, stdout, stderr = run_command(f"{pip_command} install --user -r requirements.txt")
     
     if success:
         print("✓ Dependencies installed successfully")
-        return True
+        return True, False
     
     # Check if this is an externally managed environment error
     if "externally-managed-environment" in stderr:
@@ -103,16 +103,16 @@ def install_dependencies():
         # Try creating a virtual environment
         venv_success = try_virtual_environment_install()
         if venv_success:
-            return True
+            return True, True  # Success, installed in venv
         
         # Provide distribution-specific guidance
         provide_distro_specific_guidance()
-        return False
+        return False, False
     else:
         print(f"✗ Failed to install dependencies: {stderr}")
         print("You may need to install dependencies manually:")
         print("pip install --user PySide6 psutil")
-        return False
+        return False, False
 
 
 def install_application():
@@ -152,7 +152,7 @@ def install_application():
 
 
 def create_desktop_entry():
-    """Create desktop entry"""
+    """Create desktop entry for regular installations"""
     print("Creating desktop entry...")
     
     # Get the installation path
@@ -188,6 +188,102 @@ Keywords=ASUS;ROG;TDP;GPU;refresh;rate;
     os.chmod(desktop_file, 0o755)
     
     print("✓ Desktop entry created")
+
+
+def create_venv_launcher():
+    """Create a launcher script for virtual environment installations"""
+    print("Creating virtual environment launcher...")
+    
+    venv_path = Path.home() / ".local" / "share" / "linux-armoury-venv"
+    repo_path = Path.cwd()
+    
+    launcher_content = f"""#!/bin/bash
+# Linux Armoury Virtual Environment Launcher
+# This script activates the virtual environment and runs Linux Armoury
+
+VENV_PATH="{venv_path}"
+REPO_PATH="{repo_path}"
+
+# Check if virtual environment exists
+if [ ! -d "$VENV_PATH" ]; then
+    echo "Error: Virtual environment not found at $VENV_PATH"
+    echo "Please run the installation script again: python3 install.py"
+    exit 1
+fi
+
+# Check if we're in the right directory
+if [ ! -d "$REPO_PATH/linux_armoury" ]; then
+    echo "Error: Please ensure the Linux-Armoury directory is available at $REPO_PATH"
+    exit 1
+fi
+
+# Activate virtual environment and run the application
+cd "$REPO_PATH"
+source "$VENV_PATH/bin/activate"
+python3 -m linux_armoury.main "$@"
+"""
+    
+    # Create the launcher script in a user-accessible location
+    launcher_dir = Path.home() / ".local" / "bin"
+    launcher_dir.mkdir(parents=True, exist_ok=True)
+    
+    launcher_file = launcher_dir / "linux-armoury"
+    with open(launcher_file, 'w') as f:
+        f.write(launcher_content)
+    
+    # Make executable
+    os.chmod(launcher_file, 0o755)
+    
+    print(f"✓ Virtual environment launcher created at {launcher_file}")
+    
+    # Check if ~/.local/bin is in PATH
+    user_bin = str(Path.home() / ".local" / "bin")
+    current_path = os.environ.get("PATH", "")
+    if user_bin not in current_path:
+        print(f"\nNote: Add {user_bin} to your PATH to use 'linux-armoury' command:")
+        print(f"  echo 'export PATH=\"$PATH:{user_bin}\"' >> ~/.bashrc")
+        print(f"  source ~/.bashrc")
+    
+    return True
+
+
+def create_venv_desktop_entry():
+    """Create desktop entry for virtual environment installations"""
+    print("Creating desktop entry for virtual environment installation...")
+    
+    launcher_file = Path.home() / ".local" / "bin" / "linux-armoury"
+    repo_path = Path.cwd()
+    icon_path = repo_path / "linux_armoury" / "assets" / "icon.png"
+    
+    # Use a fallback icon if the specific one doesn't exist
+    if not icon_path.exists():
+        icon_path = "applications-system"  # Use system icon as fallback
+    
+    desktop_content = f"""[Desktop Entry]
+Name=Linux Armoury
+Comment=ASUS ROG Laptop Control GUI (Virtual Environment)
+Exec={launcher_file}
+Icon={icon_path}
+Terminal=false
+Type=Application
+Categories=System;Settings;HardwareSettings;
+StartupNotify=true
+Keywords=ASUS;ROG;TDP;GPU;refresh;rate;
+"""
+    
+    # Create desktop entry
+    desktop_dir = Path.home() / ".local" / "share" / "applications"
+    desktop_dir.mkdir(parents=True, exist_ok=True)
+    
+    desktop_file = desktop_dir / "linux-armoury.desktop"
+    with open(desktop_file, 'w') as f:
+        f.write(desktop_content)
+    
+    # Make executable
+    os.chmod(desktop_file, 0o755)
+    
+    print("✓ Desktop entry created for virtual environment launcher")
+    return True
 
 
 def try_virtual_environment_install():
@@ -300,7 +396,7 @@ def main():
         sys.exit(1)
     
     # Install dependencies
-    deps_installed = install_dependencies()
+    deps_installed, venv_installation = install_dependencies()
     if not deps_installed:
         print("\nFailed to install dependencies automatically.")
         print("Please install them manually using one of the methods above,")
@@ -308,19 +404,28 @@ def main():
         print("  python3 -m linux_armoury.main")
         sys.exit(1)
     
-    # Install application
-    app_installed = install_application()
-    if not app_installed:
-        print("\nApplication installation failed, but dependencies are available.")
-        print("You can still run the application directly:")
-        print("  python3 -m linux_armoury.main")
-        # Don't exit here - continue with desktop entry creation
+    # Install application (only try if not using virtual environment)
+    app_installed = False
+    if not venv_installation:
+        app_installed = install_application()
+        if not app_installed:
+            print("\nApplication installation failed, but dependencies are available.")
+            print("You can still run the application directly:")
+            print("  python3 -m linux_armoury.main")
     
-    # Create desktop entry (only if application was installed successfully)
-    if app_installed:
+    # Create appropriate launcher and desktop entry
+    if venv_installation:
+        # Create virtual environment launcher
+        create_venv_launcher()
+        create_venv_desktop_entry()
+        launcher_created = True
+    elif app_installed:
+        # Create regular desktop entry for system installation
         create_desktop_entry()
+        launcher_created = True
     else:
         print("Skipping desktop entry creation due to installation issues.")
+        launcher_created = False
     
     # Check ROG tools
     rog_tools_available = check_rog_tools()
@@ -331,6 +436,18 @@ def main():
         print("\nTo start Linux Armoury:")
         print("  - Run 'linux-armoury' from terminal")
         print("  - Or find 'Linux Armoury' in your application menu")
+    elif venv_installation and launcher_created:
+        print("Virtual environment setup completed!")
+        print("\nTo start Linux Armoury:")
+        launcher_path = Path.home() / ".local" / "bin" / "linux-armoury"
+        if launcher_path.exists():
+            print("  - Run 'linux-armoury' from terminal (if ~/.local/bin is in your PATH)")
+            print("  - Or find 'Linux Armoury' in your application menu")
+            print(f"  - Or run directly: {launcher_path}")
+        else:
+            venv_path = Path.home() / ".local" / "share" / "linux-armoury-venv"
+            print(f"  - Activate the virtual environment: source {venv_path}/bin/activate")
+            print(f"  - Then run: python3 -m linux_armoury.main")
     else:
         print("Setup completed with limited functionality!")
         print("\nTo start Linux Armoury:")

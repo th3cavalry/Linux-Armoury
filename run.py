@@ -34,6 +34,27 @@ def get_pip_command():
     return None
 
 
+def check_venv_dependencies():
+    """Check if dependencies are available in a virtual environment"""
+    venv_path = Path.home() / ".local" / "share" / "linux-armoury-venv"
+    if not venv_path.exists():
+        return False
+    
+    # Try to activate the venv and check for dependencies
+    venv_python = venv_path / "bin" / "python"
+    if not venv_python.exists():
+        return False
+    
+    try:
+        # Check if PySide6 is available in the venv
+        result = subprocess.run([
+            str(venv_python), "-c", "import PySide6; import psutil; print('OK')"
+        ], capture_output=True, text=True, timeout=10)
+        return result.returncode == 0 and "OK" in result.stdout
+    except Exception:
+        return False
+
+
 def main():
     """Quick start the application"""
     
@@ -50,6 +71,28 @@ def main():
         import PySide6
         print("✓ PySide6 found")
     except ImportError:
+        print("PySide6 not found in system environment...")
+        
+        # Check if dependencies are available in virtual environment
+        if check_venv_dependencies():
+            print("✓ Dependencies found in virtual environment")
+            launcher_file = Path.home() / ".local" / "bin" / "linux-armoury"
+            if launcher_file.exists():
+                print(f"Using virtual environment launcher: {launcher_file}")
+                try:
+                    subprocess.run([str(launcher_file)], check=True)
+                    return
+                except subprocess.CalledProcessError as e:
+                    print(f"✗ Launcher failed: {e}")
+                    print("Falling back to manual virtual environment activation...")
+            
+            # Manual virtual environment activation
+            venv_path = Path.home() / ".local" / "share" / "linux-armoury-venv"
+            print("Please activate the virtual environment manually:")
+            print(f"  source {venv_path}/bin/activate")
+            print(f"  python3 -m linux_armoury.main")
+            sys.exit(1)
+        
         print("Installing PySide6...")
         
         pip_cmd = get_pip_command()

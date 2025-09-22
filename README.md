@@ -65,6 +65,13 @@ A sleek, lightweight GUI application for controlling ASUS ROG laptops on Linux. 
    linux-armoury
    ```
 
+**Note for Externally Managed Python Environments (PEP 668):**
+The installation script automatically handles externally managed environments by:
+- Creating a virtual environment for dependencies
+- Setting up an automatic launcher script
+- Creating desktop integration that works seamlessly
+- No manual virtual environment activation required!
+
 ### Manual Installation
 
 If you prefer manual installation:
@@ -241,6 +248,13 @@ Contributions are welcome! Please:
 - Fedora: `sudo dnf install python3-pip`
 - Arch: `sudo pacman -S python-pip`
 - Or follow: https://pip.pypa.io/en/stable/installation/
+
+**Externally managed Python environment (PEP 668):**
+The installation script automatically handles this by:
+- Creating a virtual environment with dependencies
+- Setting up `~/.local/bin/linux-armoury` launcher script
+- Creating desktop entry for GUI access
+- If the launcher doesn't work, manually activate: `source ~/.local/share/linux-armoury-venv/bin/activate`
 
 **No ROG controls available:**
 - Install asusctl: See [asus-linux.org](https://asus-linux.org)
