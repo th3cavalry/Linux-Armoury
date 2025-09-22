@@ -88,16 +88,30 @@ def install_dependencies():
         print("  Or follow: https://pip.pypa.io/en/stable/installation/")
         return False
     
-    # Install with pip
+    # Try installing with --user first
     success, stdout, stderr = run_command(f"{pip_command} install --user -r requirements.txt")
     
     if success:
         print("✓ Dependencies installed successfully")
         return True
+    
+    # Check if this is an externally managed environment error
+    if "externally-managed-environment" in stderr:
+        print("✗ Detected externally managed Python environment (PEP 668)")
+        print("Trying alternative installation methods...")
+        
+        # Try creating a virtual environment
+        venv_success = try_virtual_environment_install()
+        if venv_success:
+            return True
+        
+        # Provide distribution-specific guidance
+        provide_distro_specific_guidance()
+        return False
     else:
         print(f"✗ Failed to install dependencies: {stderr}")
         print("You may need to install dependencies manually:")
-        print("pip install PySide6 psutil")
+        print("pip install --user PySide6 psutil")
         return False
 
 
@@ -112,12 +126,26 @@ def install_application():
         print("✗ Could not find pip for application installation")
         return False
     
-    # Install in development mode
+    # Try installing in development mode with --user
     success, stdout, stderr = run_command(f"{pip_command} install --user -e .")
     
     if success:
         print("✓ Application installed successfully")
         return True
+    
+    # Check if this is an externally managed environment error
+    if "externally-managed-environment" in stderr:
+        print("✗ Cannot install application in externally managed environment")
+        print("Please use one of these methods:")
+        print("\n1. Virtual environment (recommended):")
+        print("   python3 -m venv ~/.local/share/linux-armoury-venv")
+        print("   source ~/.local/share/linux-armoury-venv/bin/activate")
+        print("   pip install -e .")
+        print("\n2. Run directly without installation:")
+        print("   python3 -m linux_armoury.main")
+        print("\n3. Force install (NOT RECOMMENDED):")
+        print("   pip install --break-system-packages --user -e .")
+        return False
     else:
         print(f"✗ Failed to install application: {stderr}")
         return False
@@ -160,6 +188,65 @@ Keywords=ASUS;ROG;TDP;GPU;refresh;rate;
     os.chmod(desktop_file, 0o755)
     
     print("✓ Desktop entry created")
+
+
+def try_virtual_environment_install():
+    """Try to install dependencies in a virtual environment"""
+    print("Attempting to create a virtual environment for installation...")
+    
+    venv_path = Path.home() / ".local" / "share" / "linux-armoury-venv"
+    
+    # Create virtual environment
+    success, stdout, stderr = run_command(f"{sys.executable} -m venv {venv_path}")
+    if not success:
+        print(f"✗ Failed to create virtual environment: {stderr}")
+        return False
+    
+    # Install dependencies in virtual environment
+    venv_pip = venv_path / "bin" / "pip"
+    if not venv_pip.exists():
+        print("✗ Virtual environment pip not found")
+        return False
+    
+    # Use the virtual environment's pip which should bypass externally managed restrictions
+    success, stdout, stderr = run_command(f"{venv_pip} install PySide6 psutil")
+    if not success:
+        print(f"✗ Failed to install dependencies in virtual environment: {stderr}")
+        return False
+    
+    print("✓ Dependencies installed in virtual environment")
+    print(f"Virtual environment created at: {venv_path}")
+    print("Note: You'll need to activate this environment to use the application:")
+    print(f"  source {venv_path}/bin/activate")
+    print(f"  python3 -m linux_armoury.main")
+    return True
+
+
+def provide_distro_specific_guidance():
+    """Provide distribution-specific guidance for installing dependencies"""
+    print("\nAlternative installation methods:")
+    print("\n1. Use system package manager:")
+    print("   Arch/Manjaro/EndeavourOS:")
+    print("     sudo pacman -S python-pyside6 python-psutil")
+    print("   Ubuntu/Debian/Pop!_OS:")
+    print("     sudo apt install python3-pyside6 python3-psutil")
+    print("   Fedora/Nobara:")
+    print("     sudo dnf install python3-pyside6 python3-psutil")
+    print("   OpenSUSE:")
+    print("     sudo zypper install python3-pyside6 python3-psutil")
+    
+    print("\n2. Use pipx (recommended for applications):")
+    print("   pipx install linux-armoury")
+    print("   (Note: You may need to install pipx first)")
+    
+    print("\n3. Create a virtual environment manually:")
+    print("   python3 -m venv ~/.local/share/linux-armoury-venv")
+    print("   source ~/.local/share/linux-armoury-venv/bin/activate")
+    print("   pip install PySide6 psutil")
+    print("   pip install -e .")
+    
+    print("\n4. Force install (NOT RECOMMENDED - may break system):")
+    print("   pip install --break-system-packages --user PySide6 psutil")
 
 
 def check_rog_tools():
@@ -213,26 +300,41 @@ def main():
         sys.exit(1)
     
     # Install dependencies
-    if not install_dependencies():
-        print("Failed to install dependencies. You may need to install them manually:")
-        print("pip install PySide6 psutil")
+    deps_installed = install_dependencies()
+    if not deps_installed:
+        print("\nFailed to install dependencies automatically.")
+        print("Please install them manually using one of the methods above,")
+        print("then run this script again or run the application directly:")
+        print("  python3 -m linux_armoury.main")
         sys.exit(1)
     
     # Install application
-    if not install_application():
-        sys.exit(1)
+    app_installed = install_application()
+    if not app_installed:
+        print("\nApplication installation failed, but dependencies are available.")
+        print("You can still run the application directly:")
+        print("  python3 -m linux_armoury.main")
+        # Don't exit here - continue with desktop entry creation
     
-    # Create desktop entry
-    create_desktop_entry()
+    # Create desktop entry (only if application was installed successfully)
+    if app_installed:
+        create_desktop_entry()
+    else:
+        print("Skipping desktop entry creation due to installation issues.")
     
     # Check ROG tools
     rog_tools_available = check_rog_tools()
     
     print("\n" + "=" * 40)
-    print("Installation completed!")
-    print("\nTo start Linux Armoury:")
-    print("  - Run 'linux-armoury' from terminal")
-    print("  - Or find 'Linux Armoury' in your application menu")
+    if app_installed:
+        print("Installation completed!")
+        print("\nTo start Linux Armoury:")
+        print("  - Run 'linux-armoury' from terminal")
+        print("  - Or find 'Linux Armoury' in your application menu")
+    else:
+        print("Setup completed with limited functionality!")
+        print("\nTo start Linux Armoury:")
+        print("  - Run 'python3 -m linux_armoury.main' from this directory")
     
     if not rog_tools_available:
         print("\nNote: Some ROG-specific features may not work without the")
