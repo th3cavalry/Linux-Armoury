@@ -1,5 +1,6 @@
 """
 ASUS ROG integration module for asusctl and supergfxctl
+Enhanced with advanced hardware monitoring and control features
 """
 
 import logging
@@ -293,3 +294,154 @@ class RefreshRateManager:
             self.logger.error(f"Failed to {'enable' if enable else 'disable'} VRR")
         
         return success
+
+
+class DisplayManager:
+    """Manager for display controls including panel overdrive and color profiles"""
+    
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.asusctl_available = check_command_exists("asusctl")
+        self.xrandr_available = check_command_exists("xrandr")
+        
+    def is_available(self) -> bool:
+        """Check if display management is available"""
+        return self.asusctl_available or self.xrandr_available
+    
+    def get_panel_overdrive_status(self) -> Dict[str, any]:
+        """Get panel overdrive status"""
+        if not self.asusctl_available:
+            return {"available": False}
+        
+        success, output = run_command(["asusctl", "panel-od", "-g"])
+        if success:
+            return {"available": True, "status": output}
+        
+        return {"available": False}
+    
+    def set_panel_overdrive(self, enabled: bool) -> bool:
+        """Enable/disable panel overdrive"""
+        if not self.asusctl_available:
+            return False
+        
+        try:
+            cmd = ["asusctl", "panel-od", "-s", "1" if enabled else "0"]
+            success, _ = run_command(cmd)
+            return success
+        except Exception as e:
+            self.logger.error(f"Failed to set panel overdrive: {e}")
+            return False
+    
+    def get_brightness(self) -> Optional[int]:
+        """Get current screen brightness (0-100)"""
+        try:
+            with open("/sys/class/backlight/intel_backlight/brightness", "r") as f:
+                current = int(f.read().strip())
+            
+            with open("/sys/class/backlight/intel_backlight/max_brightness", "r") as f:
+                max_brightness = int(f.read().strip())
+            
+            return int((current / max_brightness) * 100)
+        except Exception:
+            return None
+    
+    def set_brightness(self, brightness: int) -> bool:
+        """Set screen brightness (0-100)"""
+        try:
+            brightness = max(0, min(100, brightness))
+            
+            with open("/sys/class/backlight/intel_backlight/max_brightness", "r") as f:
+                max_brightness = int(f.read().strip())
+            
+            target_brightness = int((brightness / 100) * max_brightness)
+            
+            # Try direct write first
+            try:
+                with open("/sys/class/backlight/intel_backlight/brightness", "w") as f:
+                    f.write(str(target_brightness))
+                return True
+            except PermissionError:
+                # Try with pkexec
+                success, _ = run_command([
+                    "pkexec", "sh", "-c",
+                    f"echo {target_brightness} > /sys/class/backlight/intel_backlight/brightness"
+                ])
+                return success
+        except Exception as e:
+            self.logger.error(f"Failed to set brightness: {e}")
+            return False
+
+
+class PowerManagementManager:
+    """Enhanced power management beyond basic TDP control"""
+    
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.asusctl_available = check_command_exists("asusctl")
+        
+    def is_available(self) -> bool:
+        """Check if power management is available"""
+        return self.asusctl_available
+    
+    def get_platform_profile(self) -> Optional[str]:
+        """Get current platform power profile"""
+        try:
+            with open("/sys/firmware/acpi/platform_profile", "r") as f:
+                return f.read().strip()
+        except Exception:
+            return None
+    
+    def set_platform_profile(self, profile: str) -> bool:
+        """Set platform power profile"""
+        try:
+            # Try direct write first
+            try:
+                with open("/sys/firmware/acpi/platform_profile", "w") as f:
+                    f.write(profile)
+                return True
+            except PermissionError:
+                # Try with pkexec
+                success, _ = run_command([
+                    "pkexec", "sh", "-c",
+                    f"echo {profile} > /sys/firmware/acpi/platform_profile"
+                ])
+                return success
+        except Exception as e:
+            self.logger.error(f"Failed to set platform profile: {e}")
+            return False
+    
+    def get_available_platform_profiles(self) -> List[str]:
+        """Get available platform profiles"""
+        try:
+            with open("/sys/firmware/acpi/platform_profile_choices", "r") as f:
+                return f.read().strip().split()
+        except Exception:
+            return ["balanced", "performance", "power-saver"]  # Common defaults
+    
+    def get_cpu_boost_status(self) -> Optional[bool]:
+        """Get CPU boost status"""
+        try:
+            with open("/sys/devices/system/cpu/cpufreq/boost", "r") as f:
+                return f.read().strip() == "1"
+        except Exception:
+            return None
+    
+    def set_cpu_boost(self, enabled: bool) -> bool:
+        """Enable/disable CPU boost"""
+        try:
+            value = "1" if enabled else "0"
+            # Try direct write first
+            try:
+                with open("/sys/devices/system/cpu/cpufreq/boost", "w") as f:
+                    f.write(value)
+                return True
+            except PermissionError:
+                # Try with pkexec
+                success, _ = run_command([
+                    "pkexec", "sh", "-c",
+                    f"echo {value} > /sys/devices/system/cpu/cpufreq/boost"
+                ])
+                return success
+        except Exception as e:
+            self.logger.error(f"Failed to set CPU boost: {e}")
+            return False
