@@ -236,6 +236,12 @@ Contributions are welcome! Please:
 - Install dependencies: `pip install PySide6 psutil`
 - Check for Qt6: `python3 -c "import PySide6; print('Qt6 OK')"`
 
+**Installation fails with "No module named pip":**
+- Ubuntu/Debian: `sudo apt install python3-pip`
+- Fedora: `sudo dnf install python3-pip`
+- Arch: `sudo pacman -S python-pip`
+- Or follow: https://pip.pypa.io/en/stable/installation/
+
 **No ROG controls available:**
 - Install asusctl: See [asus-linux.org](https://asus-linux.org)
 - Install GZ302 setup script for TDP/refresh rate controls

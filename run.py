@@ -7,6 +7,33 @@ import sys
 import subprocess
 from pathlib import Path
 
+def get_pip_command():
+    """Get the best available pip command"""
+    # Try python -m pip first
+    try:
+        subprocess.run([sys.executable, "-m", "pip", "--version"], 
+                      check=True, capture_output=True)
+        return [sys.executable, "-m", "pip"]
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    
+    # Try pip3
+    try:
+        subprocess.run(["pip3", "--version"], check=True, capture_output=True)
+        return ["pip3"]
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    
+    # Try pip
+    try:
+        subprocess.run(["pip", "--version"], check=True, capture_output=True)
+        return ["pip"]
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    
+    return None
+
+
 def main():
     """Quick start the application"""
     
@@ -24,8 +51,17 @@ def main():
         print("✓ PySide6 found")
     except ImportError:
         print("Installing PySide6...")
+        
+        pip_cmd = get_pip_command()
+        if not pip_cmd:
+            print("✗ Could not find pip")
+            print("Please install pip and dependencies manually:")
+            print("  Ubuntu/Debian: sudo apt install python3-pip")
+            print("  Then: pip install PySide6 psutil")
+            sys.exit(1)
+        
         try:
-            subprocess.run([sys.executable, "-m", "pip", "install", "PySide6", "psutil"], check=True)
+            subprocess.run(pip_cmd + ["install", "PySide6", "psutil"], check=True)
             print("✓ Dependencies installed")
         except subprocess.CalledProcessError:
             print("✗ Failed to install dependencies")
