@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Linux Armoury
+Comment=ASUS ROG Laptop Control GUI
+GenericName=Laptop Control Center
+Exec=linux-armoury
+Icon=linux-armoury
+Terminal=false
+Type=Application
+Categories=System;Settings;HardwareSettings;
+StartupNotify=true
+Keywords=ASUS;ROG;TDP;GPU;refresh;rate;laptop;control;
+StartupWMClass=linux-armoury
+X-GNOME-Autostart-enabled=false
