@@ -61,11 +61,22 @@ def main():
             sys.exit(1)
         
         try:
-            subprocess.run(pip_cmd + ["install", "PySide6", "psutil"], check=True)
+            subprocess.run(pip_cmd + ["install", "--user", "PySide6", "psutil"], check=True)
             print("✓ Dependencies installed")
-        except subprocess.CalledProcessError:
-            print("✗ Failed to install dependencies")
-            print("Please install manually: pip install PySide6 psutil")
+        except subprocess.CalledProcessError as e:
+            # Check if this is an externally managed environment error
+            if hasattr(e, 'stderr') and e.stderr and "externally-managed-environment" in str(e.stderr):
+                print("✗ Externally managed Python environment detected")
+                print("Please install dependencies using one of these methods:")
+                print("\n1. System package manager:")
+                print("   Arch: sudo pacman -S python-pyside6 python-psutil")
+                print("   Ubuntu: sudo apt install python3-pyside6 python3-psutil")
+                print("   Fedora: sudo dnf install python3-pyside6 python3-psutil")
+                print("\n2. Run the full installation script:")
+                print("   python3 install.py")
+            else:
+                print("✗ Failed to install dependencies")
+                print("Please install manually: pip install --user PySide6 psutil")
             sys.exit(1)
     
     # Add current directory to Python path
