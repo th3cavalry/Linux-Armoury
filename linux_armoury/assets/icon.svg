@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="32" cy="32" r="28" fill="#1e90ff" stroke="white" stroke-width="2"/>
+  <text x="32" y="40" font-family="Arial, sans-serif" font-size="18" font-weight="bold" 
+        text-anchor="middle" fill="white">LA</text>
+</svg>
