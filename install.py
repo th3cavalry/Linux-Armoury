@@ -46,18 +46,58 @@ def check_dependencies():
     return True
 
 
+def check_pip_available():
+    """Check if pip is available and return the best pip command"""
+    # Try python -m pip first (preferred method)
+    success, _, _ = run_command(f"{sys.executable} -m pip --version")
+    if success:
+        return f"{sys.executable} -m pip"
+    
+    # Try pip3 command
+    success, _, _ = run_command("pip3 --version")
+    if success:
+        return "pip3"
+    
+    # Try pip command
+    success, _, _ = run_command("pip --version")
+    if success:
+        return "pip"
+    
+    # Try to install pip using ensurepip
+    print("Pip not found, attempting to install using ensurepip...")
+    success, _, stderr = run_command(f"{sys.executable} -m ensurepip --user")
+    if success:
+        return f"{sys.executable} -m pip"
+    
+    return None
+
+
 def install_dependencies():
     """Install Python dependencies"""
     print("Installing dependencies...")
     
+    # Check for pip availability
+    pip_command = check_pip_available()
+    
+    if not pip_command:
+        print("✗ Could not find or install pip")
+        print("Please install pip manually:")
+        print("  Ubuntu/Debian: sudo apt install python3-pip")
+        print("  Fedora: sudo dnf install python3-pip")
+        print("  Arch: sudo pacman -S python-pip")
+        print("  Or follow: https://pip.pypa.io/en/stable/installation/")
+        return False
+    
     # Install with pip
-    success, stdout, stderr = run_command(f"{sys.executable} -m pip install --user -r requirements.txt")
+    success, stdout, stderr = run_command(f"{pip_command} install --user -r requirements.txt")
     
     if success:
         print("✓ Dependencies installed successfully")
         return True
     else:
         print(f"✗ Failed to install dependencies: {stderr}")
+        print("You may need to install dependencies manually:")
+        print("pip install PySide6 psutil")
         return False
 
 
@@ -65,8 +105,15 @@ def install_application():
     """Install the application"""
     print("Installing Linux Armoury...")
     
+    # Check for pip availability
+    pip_command = check_pip_available()
+    
+    if not pip_command:
+        print("✗ Could not find pip for application installation")
+        return False
+    
     # Install in development mode
-    success, stdout, stderr = run_command(f"{sys.executable} -m pip install --user -e .")
+    success, stdout, stderr = run_command(f"{pip_command} install --user -e .")
     
     if success:
         print("✓ Application installed successfully")
