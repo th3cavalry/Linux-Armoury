@@ -151,13 +151,24 @@ Settings are stored in: `~/.config/linux-armoury/settings.json`
 
 ## 📚 Documentation
 
+### Getting Started
 - **[Quick Start Guide](QUICKSTART.md)** - Get started in 5 minutes
-- **[Beast Mode Guide](BEAST_MODE.md)** - Understanding ASUS performance modes
+- **[Project Summary](PROJECT_SUMMARY.md)** - Overview and quick facts
 - **[FAQ](FAQ.md)** - Frequently asked questions
+
+### Feature Documentation
+- **[Beast Mode Guide](BEAST_MODE.md)** - Understanding ASUS performance modes
+- **[UI Overview](UI_OVERVIEW.md)** - Interface layout and design
+
+### Development
+- **[Architecture](ARCHITECTURE.md)** - Technical architecture and design
 - **[Testing Guide](TESTING.md)** - How to test the application
 - **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
+
+### Reference
 - **[Changelog](CHANGELOG.md)** - Version history and updates
 - **[Screenshots](SCREENSHOTS.md)** - Visual overview of features
+- **[License](LICENSE)** - GPL-3.0 license
 
 ## 🎯 Supported Distributions
 
