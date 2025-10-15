@@ -149,6 +149,16 @@ Linux-Armoury/
 ### Configuration Location
 Settings are stored in: `~/.config/linux-armoury/settings.json`
 
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get started in 5 minutes
+- **[Beast Mode Guide](BEAST_MODE.md)** - Understanding ASUS performance modes
+- **[FAQ](FAQ.md)** - Frequently asked questions
+- **[Testing Guide](TESTING.md)** - How to test the application
+- **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
+- **[Changelog](CHANGELOG.md)** - Version history and updates
+- **[Screenshots](SCREENSHOTS.md)** - Visual overview of features
+
 ## 🎯 Supported Distributions
 
 All distributions receive equal support:

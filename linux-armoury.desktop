@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Linux Armoury
+GenericName=ASUS Laptop Control Center
+Comment=Control Center for ASUS GZ302EA Laptop - TDP and Performance Management
+Exec=linux-armoury
+Icon=applications-system
+Terminal=false
+Categories=System;Settings;HardwareSettings;
+Keywords=asus;laptop;tdp;power;performance;refresh;rate;gaming;beast;mode;
+StartupNotify=true
+X-GNOME-Autostart-Delay=5

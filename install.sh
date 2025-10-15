@@ -96,19 +96,18 @@ install_application() {
     # Copy the Python script
     sudo install -m 755 linux-armoury-gui.py "$INSTALL_DIR/linux-armoury"
     
-    # Create desktop entry
-    sudo tee "$DESKTOP_DIR/linux-armoury.desktop" > /dev/null <<EOF
-[Desktop Entry]
-Type=Application
-Name=Linux Armoury
-Comment=Control Center for ASUS GZ302EA Laptop
-Exec=linux-armoury
-Icon=applications-system
-Terminal=false
-Categories=System;Settings;
-Keywords=asus;laptop;tdp;power;performance;
-StartupNotify=true
-EOF
+    # Install tray icon module if it exists
+    if [ -f tray_icon.py ]; then
+        sudo install -m 644 tray_icon.py "$INSTALL_DIR/linux-armoury-tray.py"
+    fi
+    
+    # Install desktop entry
+    sudo install -m 644 linux-armoury.desktop "$DESKTOP_DIR/linux-armoury.desktop"
+    
+    # Update desktop database
+    if command -v update-desktop-database &> /dev/null; then
+        sudo update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
+    fi
     
     success "Application installed"
 }
