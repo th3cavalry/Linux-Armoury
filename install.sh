@@ -86,23 +86,39 @@ install_opensuse_deps() {
 
 # Install the application
 install_application() {
-    info "Installing Linux Armoury GUI..."
+    info "Installing Linux Armoury GUI and CLI..."
     
     # Create installation directory
     INSTALL_DIR="/usr/local/bin"
     DESKTOP_DIR="/usr/share/applications"
     ICON_DIR="/usr/share/icons/hicolor/scalable/apps"
     
-    # Copy the Python script
+    # Copy the GUI Python script
     sudo install -m 755 linux-armoury-gui.py "$INSTALL_DIR/linux-armoury"
+    
+    # Copy supporting Python modules
+    if [ -f config.py ]; then
+        sudo install -m 644 config.py "$INSTALL_DIR/config.py"
+    fi
+    if [ -f system_utils.py ]; then
+        sudo install -m 644 system_utils.py "$INSTALL_DIR/system_utils.py"
+    fi
+    
+    # Install CLI
+    if [ -f linux-armoury-cli.py ]; then
+        sudo install -m 755 linux-armoury-cli.py "$INSTALL_DIR/linux-armoury-cli"
+    fi
     
     # Install tray icon module if it exists
     if [ -f tray_icon.py ]; then
         sudo install -m 644 tray_icon.py "$INSTALL_DIR/linux-armoury-tray.py"
     fi
     
-    # Install desktop entry
+    # Install desktop entries (legacy and DBus activatable)
     sudo install -m 644 linux-armoury.desktop "$DESKTOP_DIR/linux-armoury.desktop"
+    if [ -f com.github.th3cavalry.linux-armoury.desktop ]; then
+        sudo install -m 644 com.github.th3cavalry.linux-armoury.desktop "$DESKTOP_DIR/com.github.th3cavalry.linux-armoury.desktop"
+    fi
     
     # Update desktop database
     if command -v update-desktop-database &> /dev/null; then

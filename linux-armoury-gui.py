@@ -13,6 +13,37 @@ import subprocess
 import sys
 import os
 import json
+from typing import Optional
+
+# New modules for configuration and system utilities
+try:
+    from config import Config
+except Exception:
+    class Config:  # minimal fallback if config.py not installed
+        APP_ID = 'com.github.th3cavalry.linux-armoury'
+        DEFAULT_RESOLUTION = '2560x1600'
+        VERSION = '1.0.0'
+
+try:
+    from system_utils import SystemUtils
+except Exception:
+    class SystemUtils:  # minimal fallbacks
+        @staticmethod
+        def get_primary_display():
+            return "eDP-1"
+        @staticmethod
+        def get_display_resolution():
+            try:
+                w, h = Config.DEFAULT_RESOLUTION.split('x')
+                return (int(w), int(h))
+            except Exception:
+                return (2560, 1600)
+        @staticmethod
+        def get_current_refresh_rate():
+            return None
+        @staticmethod
+        def get_current_tdp():
+            return None
 
 # Configuration paths
 CONFIG_DIR = os.path.expanduser("~/.config/linux-armoury")
@@ -22,10 +53,26 @@ class LinuxArmouryApp(Adw.Application):
     """Main application class"""
     
     def __init__(self):
-        super().__init__(application_id='com.github.th3cavalry.linux-armoury',
+        # Prefer Config.APP_ID if available
+        app_id = getattr(Config, 'APP_ID', 'com.github.th3cavalry.linux-armoury')
+        super().__init__(application_id=app_id,
                         flags=Gio.ApplicationFlags.FLAGS_NONE)
         self.window = None
         self.settings = self.load_settings()
+        
+        # Track last notification id counter
+        self._notify_counter = 0
+
+        # Application-level actions
+        quit_action = Gio.SimpleAction.new("quit", None)
+        quit_action.connect("activate", lambda a, p: self.quit())
+        self.add_action(quit_action)
+        # Global accelerators
+        try:
+            accel = getattr(Config, 'SHORTCUTS', {}).get('quit', '<Control>q')
+            self.set_accels_for_action("app.quit", [accel])
+        except Exception:
+            pass
         
     def do_activate(self):
         """Called when the application is activated"""
@@ -63,6 +110,25 @@ class LinuxArmouryApp(Adw.Application):
         except Exception as e:
             print(f"Error saving settings: {e}")
 
+    def notify(self, title: str, body: str, priority: str = "normal"):
+        """Send a desktop notification via Gio.Notification."""
+        try:
+            n = Gio.Notification.new(title)
+            n.set_body(body)
+            pr_map = {
+                'low': Gio.NotificationPriority.LOW,
+                'normal': Gio.NotificationPriority.NORMAL,
+                'high': Gio.NotificationPriority.HIGH,
+                'urgent': Gio.NotificationPriority.URGENT,
+            }
+            n.set_priority(pr_map.get(priority, Gio.NotificationPriority.NORMAL))
+            # Unique id per notification
+            self._notify_counter += 1
+            self.send_notification(f"linux-armoury-{self._notify_counter}", n)
+        except Exception as e:
+            # Notifications are optional; log and continue
+            print(f"Notification error: {e}")
+
 
 class MainWindow(Adw.ApplicationWindow):
     """Main application window"""
@@ -79,6 +145,9 @@ class MainWindow(Adw.ApplicationWindow):
         
         # Build UI
         self.setup_ui()
+        
+        # Setup keyboard shortcuts
+        self.setup_shortcuts()
         
         # Load current status
         self.refresh_status()
@@ -153,6 +222,29 @@ class MainWindow(Adw.ApplicationWindow):
         
         # Setup actions
         self.setup_actions()
+
+    def setup_shortcuts(self):
+        """Add a few useful keyboard shortcuts (Ctrl+Q, F5)."""
+        try:
+            controller = Gtk.ShortcutController()
+            controller.set_scope(Gtk.ShortcutScope.MANAGED)
+            # Quit with Ctrl+Q
+            controller.add_shortcut(
+                Gtk.Shortcut.new(
+                    Gtk.ShortcutTrigger.parse_string("<Control>q"),
+                    Gtk.CallbackAction.new(lambda *_: self.get_application().quit())
+                )
+            )
+            # Refresh status with F5
+            controller.add_shortcut(
+                Gtk.Shortcut.new(
+                    Gtk.ShortcutTrigger.parse_string("F5"),
+                    Gtk.CallbackAction.new(lambda *_: self.refresh_status())
+                )
+            )
+            self.add_controller(controller)
+        except Exception as e:
+            print(f"Shortcut setup failed: {e}")
     
     def create_status_section(self):
         """Create the status information section"""
@@ -288,11 +380,23 @@ class MainWindow(Adw.ApplicationWindow):
             
             if result.returncode == 0:
                 if "not found" in result.stdout:
-                    self.show_error_dialog("pwrcfg command not found. Please install GZ302 management tools.")
+                    self.show_error_dialog(
+                        "pwrcfg command not found.\n\n"
+                        "Linux Armoury requires the GZ302-Linux-Setup tools for power management.\n\n"
+                        "Quick install:\n"
+                        "1) curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/gz302-main.sh -o gz302-main.sh\n"
+                        "2) chmod +x gz302-main.sh\n"
+                        "3) sudo ./gz302-main.sh\n\n"
+                        "More info: https://github.com/th3cavalry/GZ302-Linux-Setup"
+                    )
                 else:
                     self.settings["current_power_profile"] = profile
                     self.get_application().save_settings()
                     self.show_success_dialog(f"Power profile set to {profile}")
+                    # Notify
+                    app = self.get_application()
+                    if hasattr(app, 'notify'):
+                        app.notify("Power Profile Changed", f"Applied '{profile}' profile successfully")
                     self.refresh_status()
             else:
                 self.show_error_dialog(f"Failed to set power profile: {result.stderr}")
@@ -304,9 +408,12 @@ class MainWindow(Adw.ApplicationWindow):
     def on_refresh_rate_clicked(self, button, rate):
         """Handle refresh rate button click"""
         try:
+            # Detect display and resolution
+            display = SystemUtils.get_primary_display()
+            width, height = SystemUtils.get_display_resolution()
             # Run xrandr command to set refresh rate
             result = subprocess.run(
-                ["pkexec", "bash", "-c", f"xrandr --output eDP-1 --mode 2560x1600 --rate {rate} 2>&1 || echo 'xrandr failed'"],
+                ["pkexec", "bash", "-c", f"xrandr --output {display} --mode {width}x{height} --rate {rate} 2>&1 || echo 'xrandr failed'"],
                 capture_output=True,
                 text=True,
                 timeout=10
@@ -319,6 +426,10 @@ class MainWindow(Adw.ApplicationWindow):
                     self.settings["current_refresh_rate"] = rate
                     self.get_application().save_settings()
                     self.show_success_dialog(f"Refresh rate set to {rate} Hz")
+                    # Notify
+                    app = self.get_application()
+                    if hasattr(app, 'notify'):
+                        app.notify("Refresh Rate Changed", f"Display set to {rate} Hz")
                     self.refresh_status()
             else:
                 self.show_error_dialog(f"Failed to set refresh rate: {result.stderr}")
@@ -334,11 +445,19 @@ class MainWindow(Adw.ApplicationWindow):
         self.power_status_row.set_subtitle(current_profile.capitalize())
         
         # Update refresh rate status
-        current_rate = self.settings.get("current_refresh_rate", "Unknown")
-        self.refresh_status_row.set_subtitle(f"{current_rate} Hz")
+        detected_rate = SystemUtils.get_current_refresh_rate()
+        if detected_rate:
+            self.refresh_status_row.set_subtitle(f"{detected_rate} Hz")
+        else:
+            current_rate = self.settings.get("current_refresh_rate", "Unknown")
+            self.refresh_status_row.set_subtitle(f"{current_rate} Hz")
         
-        # Update TDP status (this would require reading actual system values)
-        self.tdp_status_row.set_subtitle("Available via power profiles")
+        # Update TDP status (attempt to read actual system values)
+        tdp = SystemUtils.get_current_tdp()
+        if tdp:
+            self.tdp_status_row.set_subtitle(f"Current TDP: {tdp} W")
+        else:
+            self.tdp_status_row.set_subtitle("Available via power profiles")
     
     def show_success_dialog(self, message):
         """Show success message dialog"""
@@ -372,7 +491,7 @@ class MainWindow(Adw.ApplicationWindow):
             application_name="Linux Armoury",
             application_icon="applications-system",
             developer_name="th3cavalry",
-            version="1.0.0",
+            version=getattr(Config, 'VERSION', '1.0.0'),
             developers=["th3cavalry"],
             copyright="© 2025 th3cavalry",
             website="https://github.com/th3cavalry/Linux-Armoury",

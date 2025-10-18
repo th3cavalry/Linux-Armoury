@@ -9,6 +9,5 @@ Terminal=false
 Categories=System;Settings;HardwareSettings;
 Keywords=asus;laptop;tdp;power;performance;refresh;rate;gaming;beast;mode;
 StartupNotify=true
-X-GNOME-Autostart-Delay=5
 DBusActivatable=true
 X-GNOME-UsesNotifications=true

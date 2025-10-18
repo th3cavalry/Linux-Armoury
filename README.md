@@ -4,7 +4,7 @@
 
 Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intuitive interface to manage your ASUS ROG Flow Z13 (GZ302) laptop's performance settings including TDP control, refresh rate management, and system optimization.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
 
@@ -33,7 +33,7 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 ### 🔧 Integration
 - Works seamlessly with [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) scripts
 - Integrates with `pwrcfg` for power management
-- Uses `xrandr` for display control
+- Uses `xrandr` for display control (auto-detects primary display and current resolution)
 - PolicyKit integration for secure privilege elevation
 
 ## 📋 Requirements
@@ -86,6 +86,9 @@ sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 policykit-1 x11-
 
 # Copy the application
 sudo install -m 755 linux-armoury-gui.py /usr/local/bin/linux-armoury
+sudo install -m 755 linux-armoury-cli.py /usr/local/bin/linux-armoury-cli
+sudo install -m 644 config.py /usr/local/bin/config.py
+sudo install -m 644 system_utils.py /usr/local/bin/system_utils.py
 
 # Create desktop entry
 sudo cp linux-armoury.desktop /usr/share/applications/
@@ -97,6 +100,16 @@ sudo cp linux-armoury.desktop /usr/share/applications/
 
 - **From Application Menu**: Search for "Linux Armoury" in your application launcher
 - **From Terminal**: Run `linux-armoury`
+- **CLI Tool**: Use `linux-armoury-cli` for scripted/headless control
+
+Examples:
+
+```
+linux-armoury-cli --status
+linux-armoury-cli --profile gaming
+linux-armoury-cli --refresh 180
+linux-armoury-cli --monitor
+```
 
 ### Setting Power Profiles
 
@@ -197,11 +210,16 @@ sudo ./gz302-main.sh
 ```
 
 ### Display refresh rate changes don't work
-Check your display output name:
+We now auto-detect your primary display and current resolution. If issues persist:
 ```bash
-xrandr | grep " connected"
+xrandr --query
 ```
-Update the output name in the application if it differs from `eDP-1`.
+Ensure the requested mode/rate is supported by your panel.
+
+### Notifications don't show
+Make sure the D-Bus activatable desktop file is installed so your desktop allows app notifications:
+`/usr/share/applications/com.github.th3cavalry.linux-armoury.desktop` should include:
+DBusActivatable=true and X-GNOME-UsesNotifications=true
 
 ### Application doesn't start
 Ensure all dependencies are installed:
