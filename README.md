@@ -4,7 +4,7 @@
 
 Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intuitive interface to manage your ASUS ROG Flow Z13 (GZ302) laptop's performance settings including TDP control, refresh rate management, and system optimization.
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
 
