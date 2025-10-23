@@ -9,7 +9,7 @@ class Config:
     # Application Info
     APP_ID = 'com.github.th3cavalry.linux-armoury'
     APP_NAME = 'Linux Armoury'
-    VERSION = '1.1.0'
+    VERSION = '1.2.0'
     AUTHOR = 'th3cavalry'
     WEBSITE = 'https://github.com/th3cavalry/Linux-Armoury'
     
@@ -119,3 +119,42 @@ class Config:
     HELP_INSTALL_GZ302 = 'https://github.com/th3cavalry/GZ302-Linux-Setup'
     HELP_ISSUES = 'https://github.com/th3cavalry/Linux-Armoury/issues'
     HELP_DISCUSSIONS = 'https://github.com/th3cavalry/Linux-Armoury/discussions'
+    
+    # Supported ASUS laptop models and their configurations
+    SUPPORTED_MODELS = {
+        'GZ302EA': {
+            'name': 'ROG Flow Z13 (2022)',
+            'max_tdp': 90,
+            'min_tdp': 10,
+            'default_resolution': '2560x1600',
+            'supported_refresh_rates': [30, 60, 90, 120, 180],
+        },
+        'GZ302EZ': {
+            'name': 'ROG Flow Z13 (2023)',
+            'max_tdp': 95,
+            'min_tdp': 10,
+            'default_resolution': '2560x1600',
+            'supported_refresh_rates': [30, 60, 90, 120, 180],
+        },
+        'GZ301': {
+            'name': 'ROG Flow Z13 (2021)',
+            'max_tdp': 80,
+            'min_tdp': 10,
+            'default_resolution': '1920x1200',
+            'supported_refresh_rates': [30, 60, 120],
+        },
+        'GU502': {
+            'name': 'ROG Zephyrus M15',
+            'max_tdp': 90,
+            'min_tdp': 15,
+            'default_resolution': '1920x1080',
+            'supported_refresh_rates': [60, 144, 240],
+        },
+        'GA502': {
+            'name': 'ROG Zephyrus G15',
+            'max_tdp': 80,
+            'min_tdp': 15,
+            'default_resolution': '1920x1080',
+            'supported_refresh_rates': [60, 120, 144],
+        },
+    }

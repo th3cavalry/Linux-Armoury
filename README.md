@@ -4,7 +4,7 @@
 
 Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intuitive interface to manage your ASUS ROG Flow Z13 (GZ302) laptop's performance settings including TDP control, refresh rate management, and system optimization.
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
 
@@ -12,9 +12,10 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 
 ### 🎨 Modern Interface
 - **Light & Dark Mode** - Automatic or manual theme switching with system integration
-- **System Tray Integration** - Minimize to tray and quick access from taskbar
+- **System Tray Integration** - Minimize to tray and quick access from taskbar with quick profiles
 - **Autostart Support** - Launch automatically on system boot
 - **Clean & Intuitive UI** - Built with GTK4 and libadwaita for native GNOME look
+- **Real-time Dashboard** - Live monitoring with 2-second refresh intervals
 
 ### ⚡ Performance Control
 - **7 Power Profiles** - From emergency battery saver to maximum performance
@@ -27,19 +28,38 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
   - Maximum: 90W @ 180Hz
 
 - **Flexible Refresh Rate Control** - 30Hz to 180Hz display management
-- **Real-time Status Monitoring** - View current TDP and refresh rate settings
+- **Auto Profile Switching** - Automatically switch profiles when AC/Battery state changes
 - **One-Click Profile Switching** - Apply settings with a single click
+- **Quick Actions** - Change profiles and refresh rates from system tray
+
+### 📊 System Monitoring
+- **Real-time Temperature Monitoring** - CPU and GPU temperature tracking
+- **Battery Status** - Live battery percentage and charging state
+- **Power Source Detection** - AC or Battery mode with auto-switching support
+- **TDP Monitoring** - Current power limit display
+- **Refresh Rate Display** - Current display refresh rate
 
 ### 🔧 Integration
 - Works seamlessly with [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) scripts
 - Integrates with `pwrcfg` for power management
 - Uses `xrandr` for display control (auto-detects primary display and current resolution)
 - PolicyKit integration for secure privilege elevation
+- Temperature monitoring via lm-sensors or hwmon
 
 ## 📋 Requirements
 
 ### Hardware
+**Primary Support:**
 - ASUS ROG Flow Z13 (GZ302EA) - Models: XS99, XS64, XS32
+
+**Extended Support (Experimental):**
+- ASUS ROG Flow Z13 2023 (GZ302EZ)
+- ASUS ROG Flow Z13 2021 (GZ301)
+- ASUS ROG Zephyrus M15 (GU502)
+- ASUS ROG Zephyrus G15 (GA502)
+- Other ASUS ROG laptops (may require configuration)
+
+**System Requirements:**
 - Linux kernel 6.14+ (6.17+ recommended)
 
 ### Software Dependencies
@@ -53,6 +73,8 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 ### Optional but Recommended
 - [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) scripts for full functionality
 - asusctl for additional ASUS-specific features
+- libayatana-appindicator for system tray integration
+- lm-sensors for temperature monitoring
 
 ## 🚀 Installation
 
@@ -132,6 +154,25 @@ linux-armoury-cli --monitor
 3. Toggle options:
    - **Start on Boot**: Launch automatically when system starts
    - **Minimize to System Tray**: Keep running in background when closed
+   - **Auto Profile Switching**: Automatically change profiles when switching between AC and Battery power
+
+### Using Auto Profile Switching
+
+When enabled, the application will automatically:
+- Switch to "Performance" profile when AC adapter is connected
+- Switch to "Efficient" profile when running on battery
+- Notify you of automatic profile changes
+- Continue monitoring power source every 2 seconds
+
+This feature helps optimize battery life and performance without manual intervention.
+
+### System Tray Quick Actions
+
+Right-click the system tray icon to:
+- Show/Hide the main window
+- Quickly apply any power profile (all 7 profiles available)
+- Quickly change refresh rate (30, 60, 90, 120, 180 Hz)
+- Quit the application
 
 ### Changing Theme
 

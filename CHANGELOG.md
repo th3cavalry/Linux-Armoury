@@ -79,17 +79,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Real-Time System Monitoring Dashboard**
+  - CPU and GPU temperature monitoring with live updates
+  - Battery status with percentage and charging state
+  - AC/Battery power source detection
+  - Automatic status refresh every 2 seconds
+  - Visual indicators in GUI status section
+
+- **Expanded Hardware Support**
+  - Support for multiple ASUS laptop models:
+    - ROG Flow Z13 2023 (GZ302EZ)
+    - ROG Flow Z13 2021 (GZ301)
+    - ROG Zephyrus M15 (GU502)
+    - ROG Zephyrus G15 (GA502)
+  - Model-specific configurations (TDP limits, resolutions, refresh rates)
+  - Laptop model detection via DMI
+  - Hardware detection CLI command (`--detect`)
+
+- **Auto Profile Switching**
+  - Automatic profile changes when AC/Battery state changes
+  - Configurable via preferences dialog
+  - Default: Performance on AC, Efficient on Battery
+  - Desktop notifications for automatic switches
+
+- **Enhanced System Tray**
+  - Quick access to all 7 power profiles (not just 4)
+  - Quick refresh rate menu (30, 60, 90, 120, 180 Hz)
+  - Graceful fallback when libayatana-appindicator unavailable
+  - Better notification integration
+
+- **Plugin System Foundation**
+  - PluginBase class for creating extensions
+  - PluginManager for loading and managing plugins
+  - Plugin callbacks: on_load, on_status_update, on_profile_change
+  - Automatic plugin directory creation
+  - Example temperature alert plugin
+  - Comprehensive plugin documentation (PLUGIN_SYSTEM.md)
+
+- **Enhanced CLI**
+  - Improved monitoring with visual indicators (emojis)
+  - Gaming app detection in monitor mode
+  - Periodic timestamps in monitoring output
+  - Hardware detection command
+  - Better status display formatting
+
+- **Documentation**
+  - Updated README with hardware support list
+  - Auto-profile switching usage guide
+  - System tray quick actions documentation
+  - Plugin development guide
+  - Extended feature documentation
+
+### Changed
+- Status section now shows 5 rows (added temperature and power source)
+- CLI monitoring output more informative and visually appealing
+- System tray icon setup more robust with error handling
+
+### Technical Details
+- Added `plugin_system.py` for extensibility
+- Enhanced `system_utils.py` with laptop detection
+- Model configurations in `config.py`
+- Custom profile storage infrastructure
+
 ### Planned Features
 - Custom power profile editor
-- Temperature and fan speed monitoring
 - Integration with asusctl for additional ASUS features
 - Keyboard backlight control
 - Battery charge limit control
-- Game detection and auto-profile switching
 - Power consumption history graphs
-- Notification system for profile changes
 - Wayland native support improvements
-- Additional laptop model support
 
 ---
 

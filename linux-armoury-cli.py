@@ -103,6 +103,13 @@ https://github.com/th3cavalry/Linux-Armoury
             help='List available profiles'
         )
         
+        # Hardware detection
+        parser.add_argument(
+            '--detect',
+            action='store_true',
+            help='Detect laptop model and supported features'
+        )
+        
         # Verbose output
         parser.add_argument(
             '-v', '--verbose',
@@ -314,9 +321,10 @@ https://github.com/th3cavalry/Linux-Armoury
         print("-" * 60)
         
         try:
+            iteration = 0
             while True:
                 # Clear previous lines (simple version)
-                print("\r" + " " * 60, end="")
+                print("\r" + " " * 80, end="")
                 
                 # Get current stats
                 cpu_temp = SystemUtils.get_cpu_temperature()
@@ -324,21 +332,34 @@ https://github.com/th3cavalry/Linux-Armoury
                 battery = SystemUtils.get_battery_percentage()
                 on_ac = SystemUtils.is_on_ac_power()
                 refresh = SystemUtils.get_current_refresh_rate()
+                gaming = SystemUtils.detect_gaming_apps()
                 
                 # Display stats
                 stats = []
                 if cpu_temp:
-                    stats.append(f"CPU: {cpu_temp:.1f}°C")
+                    temp_status = "🔥" if cpu_temp > 80 else "❄️" if cpu_temp < 60 else "🌡️"
+                    stats.append(f"{temp_status} CPU: {cpu_temp:.1f}°C")
                 if gpu_temp:
                     stats.append(f"GPU: {gpu_temp:.1f}°C")
                 if battery is not None:
-                    stats.append(f"BAT: {battery}%")
-                stats.append(f"PWR: {'AC' if on_ac else 'BAT'}")
+                    bat_icon = "🔋" if battery > 20 else "⚠️"
+                    stats.append(f"{bat_icon} {battery}%")
+                pwr_icon = "⚡" if on_ac else "🔋"
+                stats.append(f"{pwr_icon} {'AC' if on_ac else 'BAT'}")
                 if refresh:
-                    stats.append(f"REF: {refresh}Hz")
+                    stats.append(f"📺 {refresh}Hz")
+                if gaming:
+                    stats.append(f"🎮 GAMING")
                 
-                print("\r" + " | ".join(stats), end="", flush=True)
+                # Print with timestamp every 10 iterations
+                if iteration % 10 == 0:
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime("%H:%M:%S")
+                    print(f"\n[{timestamp}] " + " | ".join(stats), flush=True)
+                else:
+                    print("\r" + " | ".join(stats), end="", flush=True)
                 
+                iteration += 1
                 time.sleep(2)
                 
         except KeyboardInterrupt:
@@ -352,6 +373,67 @@ https://github.com/th3cavalry/Linux-Armoury
         except FileNotFoundError:
             print("Error: GUI not found. Please install Linux Armoury first.")
             print("  ./install.sh")
+    
+    def detect_hardware(self):
+        """Detect and display laptop hardware information"""
+        print("\n🔍 Hardware Detection")
+        print("=" * 70)
+        
+        # Laptop model detection
+        model_info = SystemUtils.detect_laptop_model()
+        if model_info:
+            print(f"\n📱 Laptop Information:")
+            print(f"  Vendor: {model_info.get('vendor', 'Unknown')}")
+            print(f"  Model: {model_info.get('product', 'Unknown')}")
+            print(f"  Version: {model_info.get('version', 'Unknown')}")
+            if 'board' in model_info:
+                print(f"  Board: {model_info.get('board', 'Unknown')}")
+        
+        # ASUS detection
+        is_asus = SystemUtils.is_asus_laptop()
+        print(f"\n💻 ASUS Laptop: {'Yes ✓' if is_asus else 'No ✗'}")
+        
+        # Supported models
+        print(f"\n📋 Supported Models:")
+        supported = SystemUtils.get_supported_models()
+        for i, model in enumerate(supported, 1):
+            model_config = Config.SUPPORTED_MODELS.get(model, {})
+            model_name = model_config.get('name', model)
+            print(f"  {i}. {model} - {model_name}")
+        
+        # Current model match
+        if model_info and 'product' in model_info:
+            product = model_info['product']
+            matched = False
+            for model_id in supported:
+                if model_id in product:
+                    print(f"\n✓ Model Match: {model_id}")
+                    config = Config.SUPPORTED_MODELS.get(model_id, {})
+                    print(f"  TDP Range: {config.get('min_tdp', 10)}W - {config.get('max_tdp', 90)}W")
+                    print(f"  Resolution: {config.get('default_resolution', '2560x1600')}")
+                    print(f"  Refresh Rates: {config.get('supported_refresh_rates', [])}")
+                    matched = True
+                    break
+            if not matched:
+                print(f"\n⚠️  Model not in supported list (may still work)")
+        
+        # Feature availability
+        print(f"\n🔧 Feature Availability:")
+        print(f"  pwrcfg: {'✓ Available' if SystemUtils.check_command_exists('pwrcfg') else '✗ Not found'}")
+        print(f"  xrandr: {'✓ Available' if SystemUtils.check_command_exists('xrandr') else '✗ Not found'}")
+        print(f"  sensors: {'✓ Available' if SystemUtils.check_command_exists('sensors') else '✗ Not found'}")
+        
+        # Display detection
+        display = SystemUtils.get_primary_display()
+        resolution = SystemUtils.get_display_resolution()
+        refresh = SystemUtils.get_current_refresh_rate()
+        print(f"\n📺 Display:")
+        print(f"  Output: {display}")
+        print(f"  Resolution: {resolution[0]}x{resolution[1]}")
+        if refresh:
+            print(f"  Refresh Rate: {refresh}Hz")
+        
+        print()
     
     def run(self, args):
         """Run the CLI with given arguments"""
@@ -371,6 +453,9 @@ https://github.com/th3cavalry/Linux-Armoury
         
         if args.status:
             self.show_status()
+        
+        if args.detect:
+            self.detect_hardware()
         
         if args.temperature:
             self.show_temperature()
