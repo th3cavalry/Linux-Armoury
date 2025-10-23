@@ -140,6 +140,9 @@ class MainWindow(Adw.ApplicationWindow):
         self.set_title("Linux Armoury")
         self.set_default_size(800, 600)
         
+        # Track last AC state for auto-profile switching
+        self.last_ac_state = None
+        
         # Apply theme
         self.apply_theme(self.settings.get("theme", "auto"))
         
@@ -151,6 +154,10 @@ class MainWindow(Adw.ApplicationWindow):
         
         # Load current status
         self.refresh_status()
+        
+        # Setup periodic monitoring (every 2 seconds)
+        monitor_interval = getattr(Config, 'MONITOR_INTERVAL', 2000)
+        GLib.timeout_add(monitor_interval, self.refresh_status)
     
     def apply_theme(self, theme):
         """Apply light/dark theme"""
@@ -269,6 +276,18 @@ class MainWindow(Adw.ApplicationWindow):
         self.tdp_status_row.set_title("TDP Settings")
         self.tdp_status_row.set_subtitle("Loading...")
         group.add(self.tdp_status_row)
+        
+        # Temperature monitoring
+        self.temp_status_row = Adw.ActionRow()
+        self.temp_status_row.set_title("Temperature")
+        self.temp_status_row.set_subtitle("Loading...")
+        group.add(self.temp_status_row)
+        
+        # Battery and power source
+        self.battery_status_row = Adw.ActionRow()
+        self.battery_status_row.set_title("Power Source")
+        self.battery_status_row.set_subtitle("Loading...")
+        group.add(self.battery_status_row)
         
         return group
     
@@ -458,6 +477,63 @@ class MainWindow(Adw.ApplicationWindow):
             self.tdp_status_row.set_subtitle(f"Current TDP: {tdp} W")
         else:
             self.tdp_status_row.set_subtitle("Available via power profiles")
+        
+        # Update temperature status
+        cpu_temp = SystemUtils.get_cpu_temperature()
+        gpu_temp = SystemUtils.get_gpu_temperature()
+        temp_parts = []
+        if cpu_temp:
+            temp_parts.append(f"CPU: {cpu_temp:.1f}°C")
+        if gpu_temp:
+            temp_parts.append(f"GPU: {gpu_temp:.1f}°C")
+        if temp_parts:
+            self.temp_status_row.set_subtitle(" | ".join(temp_parts))
+        else:
+            self.temp_status_row.set_subtitle("Temperature monitoring unavailable")
+        
+        # Update battery and power source status
+        on_ac = SystemUtils.is_on_ac_power()
+        battery = SystemUtils.get_battery_percentage()
+        if battery is not None:
+            power_source = "AC Power" if on_ac else "Battery"
+            self.battery_status_row.set_subtitle(f"{power_source} - Battery: {battery}%")
+        else:
+            self.battery_status_row.set_subtitle("AC Power" if on_ac else "Battery")
+        
+        # Auto-profile switching on AC/Battery change
+        if self.settings.get("auto_profile_switch", False):
+            if self.last_ac_state is not None and self.last_ac_state != on_ac:
+                # Power source changed
+                auto_profiles = getattr(Config, 'AUTO_SWITCH_PROFILES', {})
+                target_profile = auto_profiles.get('ac' if on_ac else 'battery')
+                if target_profile:
+                    # Apply the profile automatically
+                    self.apply_auto_profile(target_profile, on_ac)
+            self.last_ac_state = on_ac
+        
+        # Return True to keep the timeout active
+        return True
+    
+    def apply_auto_profile(self, profile: str, on_ac: bool):
+        """Apply profile automatically (called by auto-switching)"""
+        try:
+            result = subprocess.run(
+                ["pkexec", "bash", "-c", f"command -v pwrcfg >/dev/null 2>&1 && pwrcfg {profile} || exit 1"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            if result.returncode == 0:
+                self.settings["current_power_profile"] = profile
+                self.get_application().save_settings()
+                # Notify user
+                app = self.get_application()
+                if hasattr(app, 'notify'):
+                    power_source = "AC Power" if on_ac else "Battery"
+                    app.notify("Auto Profile Switch", f"Switched to '{profile}' profile ({power_source})")
+        except Exception as e:
+            print(f"Auto-profile switch failed: {e}")
     
     def show_success_dialog(self, message):
         """Show success message dialog"""
@@ -549,6 +625,19 @@ class PreferencesDialog(Adw.PreferencesWindow):
         minimize_row.add_suffix(minimize_switch)
         
         behavior_group.add(minimize_row)
+        
+        # Auto-profile switching
+        auto_profile_row = Adw.ActionRow()
+        auto_profile_row.set_title("Auto Profile Switching")
+        auto_profile_row.set_subtitle("Automatically switch profiles on AC/Battery change")
+        
+        auto_profile_switch = Gtk.Switch()
+        auto_profile_switch.set_valign(Gtk.Align.CENTER)
+        auto_profile_switch.set_active(parent.settings.get("auto_profile_switch", False))
+        auto_profile_switch.connect("notify::active", self.on_auto_profile_toggled, parent)
+        auto_profile_row.add_suffix(auto_profile_switch)
+        
+        behavior_group.add(auto_profile_row)
         page.add(behavior_group)
         
         self.add(page)
@@ -564,6 +653,12 @@ class PreferencesDialog(Adw.PreferencesWindow):
         """Handle minimize to tray toggle"""
         enabled = switch.get_active()
         parent.settings["minimize_to_tray"] = enabled
+        parent.get_application().save_settings()
+    
+    def on_auto_profile_toggled(self, switch, param, parent):
+        """Handle auto profile switching toggle"""
+        enabled = switch.get_active()
+        parent.settings["auto_profile_switch"] = enabled
         parent.get_application().save_settings()
     
     def update_autostart(self, enabled):

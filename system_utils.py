@@ -315,3 +315,68 @@ class SystemUtils:
                 return True
         
         return False
+    
+    @staticmethod
+    def detect_laptop_model() -> Optional[Dict[str, str]]:
+        """
+        Detect laptop model information.
+        
+        Returns:
+            Optional[Dict[str, str]]: Model information including vendor, product, version
+        """
+        model_info = {}
+        
+        try:
+            # Read DMI information
+            dmi_paths = {
+                'vendor': '/sys/class/dmi/id/sys_vendor',
+                'product': '/sys/class/dmi/id/product_name',
+                'version': '/sys/class/dmi/id/product_version',
+                'board': '/sys/class/dmi/id/board_name'
+            }
+            
+            for key, path in dmi_paths.items():
+                if os.path.exists(path):
+                    with open(path, 'r') as f:
+                        model_info[key] = f.read().strip()
+            
+            return model_info if model_info else None
+            
+        except Exception as e:
+            print(f"Error detecting laptop model: {e}")
+        
+        return None
+    
+    @staticmethod
+    def is_asus_laptop() -> bool:
+        """
+        Check if the system is an ASUS laptop.
+        
+        Returns:
+            bool: True if ASUS laptop detected
+        """
+        model_info = SystemUtils.detect_laptop_model()
+        if model_info and 'vendor' in model_info:
+            vendor = model_info['vendor'].lower()
+            return 'asus' in vendor or 'asustek' in vendor
+        return False
+    
+    @staticmethod
+    def get_supported_models() -> List[str]:
+        """
+        Get list of supported ASUS laptop models.
+        
+        Returns:
+            List[str]: List of supported model identifiers
+        """
+        return [
+            'GZ302EA',  # ROG Flow Z13 (2022)
+            'GZ302EZ',  # ROG Flow Z13 (2023)
+            'GZ301',    # ROG Flow Z13 (2021)
+            'GU502',    # ROG Zephyrus M15
+            'GA502',    # ROG Zephyrus G15
+            'GX550',    # ROG Zephyrus Duo
+            'G513',     # ROG Strix G15
+            'G713',     # ROG Strix G17
+            'G733',     # ROG Strix Scar
+        ]
