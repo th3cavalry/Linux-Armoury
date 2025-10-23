@@ -89,7 +89,9 @@ class LinuxArmouryApp(Adw.Application):
             "autostart": False,
             "minimize_to_tray": True,
             "current_power_profile": "balanced",
-            "current_refresh_rate": "balanced"
+            "current_refresh_rate": "balanced",
+            "auto_profile_switch": False,
+            "custom_profiles": []  # User-defined custom profiles
         }
         
         if os.path.exists(CONFIG_FILE):
