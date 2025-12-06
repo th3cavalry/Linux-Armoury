@@ -35,6 +35,9 @@ cleanup:
 modules:
   - name: linux-armoury
     buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
     build-commands:
       - pip3 install --no-deps --prefix=/app .
     sources:

@@ -11,8 +11,7 @@
   <description>
     <p>
       Linux Armoury is a lightweight GTK4/libadwaita control center for ASUS ROG
-      laptops, specifically designed for the Flow Z13 (GZ302EA) but compatible
-      with other ASUS ROG models.
+      and other ASUS gaming laptops, compatible across a wide range of models.
     </p>
     <p>Features:</p>
     <ul>
@@ -41,6 +40,17 @@
     <control>touch</control>
   </supports>
   <releases>
+    <release version="0.5.0-beta" date="2024-12-06">
+      <description>
+        <p>Beta release with standardized ASUS support:</p>
+        <ul>
+          <li>Divorced from legacy GZ302 scripts</li>
+          <li>Added support for Arch, Fedora, Debian/Ubuntu, OpenSUSE</li>
+          <li>Automatic hardware detection and repo configuration</li>
+          <li>Improved system utilities backend</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.2.0" date="2024-12-05">
       <description>
         <p>Major improvements:</p>

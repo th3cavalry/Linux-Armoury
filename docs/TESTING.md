@@ -38,7 +38,7 @@ linux-armoury
 ```
 
 **This tests:**
-- Real power profile changes (via pwrcfg)
+- Real power profile changes (via asusctl/ppd/pwrcfg)
 - Actual refresh rate changes (via xrandr)
 - PolicyKit privilege elevation
 - System tray integration
@@ -62,17 +62,20 @@ pkg-config --modversion libadwaita-1
 python3 -c "import gi; print('PyGObject OK')"
 ```
 
-### Check GZ302 Tools (Optional but Recommended)
+### Check Power Management Backend
+
+Linux Armoury supports multiple backends. Check which one is active:
 
 ```bash
-# Check if pwrcfg is installed
+# Check for asusctl (Preferred for ASUS)
+which asusctl
+
+# Check for power-profiles-daemon
+which powerprofilesctl
+
+# Check for pwrcfg (Legacy)
 which pwrcfg
-
-# Check if it works
-pwrcfg status
 ```
-
-If not found, install from: https://github.com/th3cavalry/GZ302-Linux-Setup
 
 ## Test Plan
 
@@ -316,7 +319,7 @@ When reporting bugs, include:
 The application passes testing if:
 - ✅ All UI elements render correctly
 - ✅ All themes work properly
-- ✅ Power profiles apply successfully (with pwrcfg installed)
+- ✅ Power profiles apply successfully (with supported backend)
 - ✅ Refresh rates change correctly
 - ✅ Preferences save and persist
 - ✅ Autostart configuration works
@@ -329,7 +332,7 @@ The application passes testing if:
 Current known limitations:
 - System tray requires libayatana-appindicator
 - Display output hardcoded as eDP-1 (may vary)
-- Requires pwrcfg/rrcfg from GZ302-Linux-Setup for full functionality
+- May require model-specific helper scripts (e.g., asusctl) for full hardware integration
 - No temperature monitoring yet
 - No custom profile creation yet
 

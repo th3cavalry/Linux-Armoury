@@ -1,8 +1,8 @@
 # Linux Armoury
 
-**A modern, lightweight GUI control center for ASUS GZ302EA laptops running Linux**
+**A modern, lightweight GUI control center for ASUS ROG and other ASUS gaming laptops (2019–present)**
 
-Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intuitive interface to manage your ASUS ROG Flow Z13 (GZ302) laptop's performance settings including TDP control, refresh rate management, and system optimization.
+Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intuitive interface to manage ASUS gaming laptop performance settings including TDP control, refresh rate management, and system optimization.
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
@@ -40,8 +40,8 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 - **Refresh Rate Display** - Current display refresh rate
 
 ### 🔧 Integration
-- Works seamlessly with [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) scripts
-- Integrates with `pwrcfg` for power management
+-- Works with optional hardware support scripts (for some models)
+- Integrates with `asusctl`, `power-profiles-daemon`, or `pwrcfg` for power management
 - Uses `xrandr` for display control (auto-detects primary display and current resolution)
 - PolicyKit integration for secure privilege elevation
 - Temperature monitoring via lm-sensors or hwmon
@@ -49,15 +49,13 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 ## 📋 Requirements
 
 ### Hardware
-**Primary Support:**
-- ASUS ROG Flow Z13 (GZ302EA) - Models: XS99, XS64, XS32
+**Primary Focus:**
+- Modern ASUS ROG and ASUS gaming laptop models released within the last ~6 years (2019 — present)
 
-**Extended Support (Experimental):**
-- ASUS ROG Flow Z13 2023 (GZ302EZ)
-- ASUS ROG Flow Z13 2021 (GZ301)
-- ASUS ROG Zephyrus M15 (GU502)
-- ASUS ROG Zephyrus G15 (GA502)
-- Other ASUS ROG laptops (may require configuration)
+**Example models supported (non-exhaustive):**
+- ROG Flow Z13 series
+- ROG Zephyrus series (M15 / G15 and similar)
+- ASUS TUF / other gaming series (coverage varies by model)
 
 **System Requirements:**
 - Linux kernel 6.14+ (6.17+ recommended)
@@ -71,7 +69,7 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 - xrandr
 
 ### Optional but Recommended
-- [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) scripts for full functionality
+- Model-specific helper scripts may be required for full hardware integration on some laptops
 - asusctl for additional ASUS-specific features
 - libayatana-appindicator for system tray integration
 - lm-sensors for temperature monitoring
@@ -242,13 +240,8 @@ All distributions receive equal support:
 
 ## 🐛 Troubleshooting
 
-### "pwrcfg not found" error
-Install the GZ302-Linux-Setup scripts:
-```bash
-curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/gz302-main.sh -o gz302-main.sh
-chmod +x gz302-main.sh
-sudo ./gz302-main.sh
-```
+### Power backend not found
+Ensure you have `asusctl` (recommended), `power-profiles-daemon`, or `pwrcfg` installed. Linux Armoury requires one of these to manage power profiles.
 
 ### Display refresh rate changes don't work
 We now auto-detect your primary display and current resolution. If issues persist:
@@ -288,11 +281,11 @@ This project is licensed under the GPL-3.0 License - see the LICENSE file for de
 - **Inspired by**:
   - [G-Helper](https://github.com/seerge/g-helper) by seerge
   - [asusctl/rog-control-center](https://gitlab.com/asus-linux/asusctl) by asus-linux team
-- **Hardware research**: [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup)
+- **Hardware research / example scripts**: community-provided model-specific helper scripts (search your laptop family)
 
 ## 🔗 Related Projects
 
-- [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) - Core hardware fixes and management scripts
+- Example model-specific hardware helper scripts (community-maintained)
 - [asusctl](https://gitlab.com/asus-linux/asusctl) - ASUS laptop control daemon
 - [G-Helper](https://github.com/seerge/g-helper) - Windows ASUS control tool
 

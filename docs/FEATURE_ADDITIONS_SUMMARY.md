@@ -13,12 +13,10 @@ This release adds significant enhancements across six feature categories, implem
 - Model-specific configurations for TDP limits and display capabilities
 - Support matrix for 5+ ASUS ROG models
 
-**Supported Models:**
-- ROG Flow Z13 2022 (GZ302EA) - Primary support
-- ROG Flow Z13 2023 (GZ302EZ)
-- ROG Flow Z13 2021 (GZ301)
-- ROG Zephyrus M15 (GU502)
-- ROG Zephyrus G15 (GA502)
+**Supported model families (examples):**
+- ROG Flow Z13 series
+- ROG Zephyrus series (M15 / G15)
+- Other modern ASUS ROG / gaming series models
 
 **Technical Implementation:**
 - `SystemUtils.detect_laptop_model()` - DMI-based detection

@@ -37,7 +37,7 @@ ASUS laptops traditionally come with Armoury Crate software on Windows that prov
 
 1. **Maximum TDP Allocation**
    - Pushes CPU and GPU to maximum thermal design power
-   - For GZ302EA: up to 90W total system power
+   - Top-end models may be configured up to ~90W or more depending on vendor defaults
    - Removes conservative power limits
 
 2. **Aggressive Cooling**
@@ -88,7 +88,7 @@ Power Configuration:
 
 ### Power Limits (AMD Ryzen AI MAX+ 395)
 
-The GZ302EA uses AMD's power management system:
+Some models use AMD's power management system:
 
 1. **SPL (Stapm Power Limit)**
    - Long-term sustained power
@@ -125,7 +125,7 @@ Higher refresh rates consume more power but provide smoother visuals.
 
 ### Via Command Line
 
-If you have the GZ302-Linux-Setup scripts installed:
+If your laptop has model-specific helper scripts installed, you can use them to apply these configurations:
 
 ```bash
 # Apply maximum performance (Beast Mode)
@@ -250,7 +250,7 @@ Using maximum performance mode frequently can:
 
 ## References
 
-- [GZ302-Linux-Setup Repository](https://github.com/th3cavalry/GZ302-Linux-Setup)
+- Model-specific hardware helper scripts (search community resources for your laptop model)
 - [ASUS Armoury Crate Performance Modes](https://rog.asus.com/articles/guides/armoury-crate-performance-modes-explained/)
 - [AMD Ryzen Power Management](https://www.kernel.org/doc/html/latest/admin-guide/pm/amd-pstate.html)
 - [Linux Power Management](https://www.kernel.org/doc/html/latest/power/index.html)

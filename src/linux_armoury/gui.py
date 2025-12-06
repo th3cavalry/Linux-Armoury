@@ -2069,6 +2069,62 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.view_stack.add_named(scrolled, "monitor")
 
+    def _get_profile_metadata(self, profile_id):
+        """Get metadata (title, description, icon) for a profile ID"""
+        # Generic metadata map
+        meta = {
+            # GZ302 / pwrcfg
+            "emergency": (
+                "Emergency",
+                "Critical battery preservation",
+                "battery-caution-symbolic",
+            ),
+            "battery": (
+                "Battery Saver",
+                "Maximum battery life",
+                "battery-full-symbolic",
+            ),
+            "efficient": ("Efficient", "Balanced efficiency", "battery-good-symbolic"),
+            "balanced": (
+                "Balanced",
+                "Standard balanced mode",
+                "power-profile-balanced-symbolic",
+            ),
+            "performance": (
+                "Performance",
+                "High performance",
+                "power-profile-performance-symbolic",
+            ),
+            "gaming": ("Gaming", "Gaming optimized", "applications-games-symbolic"),
+            "maximum": (
+                "Maximum",
+                "Absolute maximum power",
+                "emblem-important-symbolic",
+            ),
+            # asusctl
+            "quiet": ("Quiet", "Silent operation", "battery-good-symbolic"),
+            # balanced is same
+            # performance is same
+            # power-profiles-daemon
+            "power-saver": (
+                "Power Saver",
+                "Maximum battery life",
+                "battery-full-symbolic",
+            ),
+        }
+
+        # Handle case-insensitive matching
+        for key, value in meta.items():
+            if key.lower() == profile_id.lower():
+                return value
+
+        # Fallback
+        return (
+            profile_id.capitalize(),
+            "Custom profile",
+            "preferences-system-symbolic",
+        )
+
     def create_performance_page(self):
         """Create the performance/power profiles page"""
         page = Adw.PreferencesPage()
@@ -2086,78 +2142,23 @@ class MainWindow(Adw.ApplicationWindow):
             "Select a performance profile to balance power and battery"
         )
 
-        # Power profiles with icons and TDP info
-        profiles = [
-            (
-                "emergency",
-                "Emergency",
-                "10W @ 30Hz",
-                "Critical battery preservation",
-                "battery-caution-symbolic",
-            ),
-            (
-                "battery",
-                "Battery Saver",
-                "18W @ 30Hz",
-                "Maximum battery life",
-                "battery-full-symbolic",
-            ),
-            (
-                "efficient",
-                "Efficient",
-                "30W @ 60Hz",
-                "Balanced efficiency",
-                "battery-good-symbolic",
-            ),
-            (
-                "balanced",
-                "Balanced",
-                "40W @ 90Hz",
-                "Default balanced mode",
-                "power-profile-balanced-symbolic",
-            ),
-            (
-                "performance",
-                "Performance",
-                "55W @ 120Hz",
-                "High performance",
-                "power-profile-performance-symbolic",
-            ),
-            (
-                "gaming",
-                "Gaming",
-                "70W @ 180Hz",
-                "Gaming optimized",
-                "applications-games-symbolic",
-            ),
-            (
-                "maximum",
-                "Maximum",
-                "90W @ 180Hz",
-                "Absolute maximum power",
-                "emblem-important-symbolic",
-            ),
-        ]
+        # Get available profiles dynamically
+        available_profiles = SystemUtils.get_available_power_profiles()
 
         # Detect current profile from system
         detected_profile = SystemUtils.get_current_power_profile()
-        if detected_profile:
-            profile_map = {
-                "low-power": "battery",
-                "balanced": "balanced",
-                "performance": "performance",
-                "quiet": "battery",
-            }
-            current_profile = profile_map.get(
-                detected_profile, self.settings.get("current_power_profile", "balanced")
-            )
-        else:
-            current_profile = self.settings.get("current_power_profile", "balanced")
+        current_profile = (
+            detected_profile
+            if detected_profile
+            else self.settings.get("current_power_profile", "balanced")
+        )
 
-        for profile_id, title, power_info, description, icon_name in profiles:
+        for profile_id in available_profiles:
+            title, description, icon_name = self._get_profile_metadata(profile_id)
+
             row = Adw.ActionRow()
             row.set_title(title)
-            row.set_subtitle(f"{power_info} • {description}")
+            row.set_subtitle(description)
 
             # Profile icon
             icon = Gtk.Image.new_from_icon_name(icon_name)
@@ -2166,14 +2167,16 @@ class MainWindow(Adw.ApplicationWindow):
             # Active checkmark (hidden by default)
             check_icon = Gtk.Image.new_from_icon_name("emblem-ok-symbolic")
             check_icon.add_css_class("success")
-            check_icon.set_visible(profile_id == current_profile)
+            # Case-insensitive comparison for active profile
+            is_active = str(profile_id).lower() == str(current_profile).lower()
+            check_icon.set_visible(is_active)
             row.add_prefix(check_icon)
 
             # Apply button
             button = Gtk.Button()
             button.set_valign(Gtk.Align.CENTER)
 
-            if profile_id == current_profile:
+            if is_active:
                 button.set_label("Active")
                 button.add_css_class("suggested-action")
                 button.set_sensitive(False)
@@ -2510,43 +2513,40 @@ class MainWindow(Adw.ApplicationWindow):
             "Higher refresh rates provide smoother visuals but use more power"
         )
 
-        # Refresh rate profiles with detailed info
-        profiles = [
-            (
-                "30",
-                "30 Hz",
-                "Battery saving • Best for static content",
-                "battery-full-symbolic",
-            ),
-            ("60", "60 Hz", "Standard • Good balance", "display-symbolic"),
-            (
-                "90",
-                "90 Hz",
-                "Smooth • Everyday use",
-                "preferences-desktop-display-symbolic",
-            ),
-            (
-                "120",
-                "120 Hz",
-                "High refresh • Gaming and productivity",
-                "video-display-symbolic",
-            ),
-            (
-                "180",
-                "180 Hz",
-                "Maximum • Competitive gaming",
-                "applications-games-symbolic",
-            ),
-        ]
+        # Get supported refresh rates
+        supported_rates = SystemUtils.get_supported_refresh_rates()
+        if not supported_rates:
+            # Fallback if detection fails
+            supported_rates = [60]
 
         # Get current refresh rate
         detected_rate = SystemUtils.get_current_refresh_rate()
         if detected_rate:
             current_rate = str(detected_rate)
         else:
-            current_rate = str(self.settings.get("current_refresh_rate", "90"))
+            current_rate = str(self.settings.get("current_refresh_rate", "60"))
 
-        for profile_id, title, description, icon_name in profiles:
+        for rate in supported_rates:
+            profile_id = str(rate)
+            title = f"{rate} Hz"
+
+            # Generate description based on rate
+            if rate <= 30:
+                description = "Battery saving • Best for static content"
+                icon_name = "battery-full-symbolic"
+            elif rate <= 60:
+                description = "Standard • Good balance"
+                icon_name = "display-symbolic"
+            elif rate <= 90:
+                description = "Smooth • Everyday use"
+                icon_name = "preferences-desktop-display-symbolic"
+            elif rate <= 120:
+                description = "High refresh • Gaming and productivity"
+                icon_name = "video-display-symbolic"
+            else:
+                description = "Maximum • Competitive gaming"
+                icon_name = "applications-games-symbolic"
+
             row = Adw.ActionRow()
             row.set_title(title)
             row.set_subtitle(description)
@@ -2590,7 +2590,7 @@ class MainWindow(Adw.ApplicationWindow):
         try:
             width, height = SystemUtils.get_display_resolution()
             resolution_text = f"{width}×{height}"
-        except:
+        except Exception:
             resolution_text = "Unknown"
 
         res_row = Adw.ActionRow()
@@ -4611,48 +4611,15 @@ class MainWindow(Adw.ApplicationWindow):
 
     def on_power_profile_clicked(self, button, profile):
         """Handle power profile button click"""
-        # Validate profile against known profiles to prevent injection
-        valid_profiles = [
-            "emergency",
-            "battery",
-            "efficient",
-            "balanced",
-            "performance",
-            "gaming",
-            "maximum",
-        ]
-        if profile not in valid_profiles:
-            self.show_error_dialog(f"Invalid profile: {profile}")
-            return
-
         try:
-            # Check if pwrcfg exists first
-            if not SystemUtils.check_command_exists("pwrcfg"):
-                self.show_error_dialog(
-                    "pwrcfg command not found.\n\n"
-                    "Linux Armoury requires the GZ302-Linux-Setup tools for power management.\n\n"
-                    "Quick install:\n"
-                    "1) curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/gz302-main.sh -o gz302-main.sh\n"
-                    "2) chmod +x gz302-main.sh\n"
-                    "3) sudo ./gz302-main.sh\n\n"
-                    "More info: https://github.com/th3cavalry/GZ302-Linux-Setup"
-                )
-                return
+            success, message = SystemUtils.set_power_profile(profile)
 
-            # Run pwrcfg command with validated profile (no shell=True)
-            result = subprocess.run(
-                ["pkexec", "pwrcfg", profile],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-
-            if result.returncode == 0:
+            if success:
                 self.settings["current_power_profile"] = profile
                 self.get_application().save_settings()
                 # Update visual indicator for active profile
                 self.update_power_profile_indicator(profile)
-                self.show_success_dialog(f"Power profile set to {profile}")
+                self.show_success_dialog(message)
                 # Notify
                 app = self.get_application()
                 if hasattr(app, "notify"):
@@ -4662,20 +4629,12 @@ class MainWindow(Adw.ApplicationWindow):
                     )
                 self.refresh_status()
             else:
-                self.show_error_dialog(f"Failed to set power profile: {result.stderr}")
-        except subprocess.TimeoutExpired:
-            self.show_error_dialog("Command timed out")
+                self.show_error_dialog(f"Failed to set power profile: {message}")
         except Exception as e:
             self.show_error_dialog(f"Error: {str(e)}")
 
     def on_refresh_rate_clicked(self, button, rate):
         """Handle refresh rate button click"""
-        # Validate rate against known rates
-        valid_rates = ["30", "60", "90", "120", "180"]
-        if str(rate) not in valid_rates:
-            self.show_error_dialog(f"Invalid refresh rate: {rate}")
-            return
-
         try:
             # Use unified set_refresh_rate method (handles X11 and Wayland)
             success, message = SystemUtils.set_refresh_rate(int(rate))
@@ -4701,14 +4660,7 @@ class MainWindow(Adw.ApplicationWindow):
         # Get current values - detect from system when possible
         detected_profile = SystemUtils.get_current_power_profile()
         if detected_profile:
-            # Map platform_profile to our profile names
-            profile_map = {
-                "low-power": "battery",
-                "balanced": "balanced",
-                "performance": "performance",
-                "quiet": "battery",
-            }
-            current_profile = profile_map.get(detected_profile, detected_profile)
+            current_profile = detected_profile
             # Sync with settings
             self.settings["current_power_profile"] = current_profile
         else:
@@ -4724,15 +4676,15 @@ class MainWindow(Adw.ApplicationWindow):
         # --- Update Dashboard Page ---
         # Power profile
         if hasattr(self, "dash_power_row"):
-            self.dash_power_row.set_subtitle(current_profile.capitalize())
+            self.dash_power_row.set_subtitle(str(current_profile).capitalize())
 
         # Refresh rate
         if hasattr(self, "dash_refresh_row"):
             if detected_rate:
                 self.dash_refresh_row.set_subtitle(f"{detected_rate} Hz")
             else:
-                current_rate = self.settings.get("current_refresh_rate", "90")
-                self.dash_refresh_row.set_subtitle(f"{current_rate} Hz")
+                current_rate_hz = self.settings.get("current_refresh_rate", "60")
+                self.dash_refresh_row.set_subtitle(f"{current_rate_hz} Hz")
 
         # TDP
         if hasattr(self, "dash_tdp_row"):
@@ -5091,33 +5043,10 @@ class MainWindow(Adw.ApplicationWindow):
 
     def apply_auto_profile(self, profile: str, on_ac: bool):
         """Apply profile automatically (called by auto-switching)"""
-        # Validate profile against known profiles
-        valid_profiles = [
-            "emergency",
-            "battery",
-            "efficient",
-            "balanced",
-            "performance",
-            "gaming",
-            "maximum",
-        ]
-        if profile not in valid_profiles:
-            print(f"Invalid auto-profile: {profile}")
-            return
-
-        if not SystemUtils.check_command_exists("pwrcfg"):
-            print("pwrcfg not available for auto-profile switching")
-            return
-
         try:
-            result = subprocess.run(
-                ["pkexec", "pwrcfg", profile],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
+            success, message = SystemUtils.set_power_profile(profile)
 
-            if result.returncode == 0:
+            if success:
                 self.settings["current_power_profile"] = profile
                 self.get_application().save_settings()
                 # Notify user
@@ -5128,8 +5057,11 @@ class MainWindow(Adw.ApplicationWindow):
                         "Auto Profile Switch",
                         f"Switched to '{profile}' profile ({power_source})",
                     )
+                self.refresh_status()
+            else:
+                print(f"Failed to auto-apply profile: {message}")
         except Exception as e:
-            print(f"Auto-profile switch failed: {e}")
+            print(f"Error auto-applying profile: {e}")
 
     def show_success_toast(self, message: str, timeout: int = 3):
         """Show a success toast notification (non-blocking)"""
@@ -5320,7 +5252,7 @@ class PreferencesDialog(Adw.PreferencesWindow):
             desktop_content = f"""[Desktop Entry]
 Type=Application
 Name=Linux Armoury
-Comment=ASUS GZ302EA Control Center
+Comment=ASUS Laptop Control Center
 Exec={sys.argv[0]}
 Icon=applications-system
 Terminal=false

@@ -5,6 +5,7 @@ System utilities for hardware detection and monitoring
 
 import os
 import re
+import shutil
 import subprocess
 from typing import Dict, List, Optional, Tuple
 
@@ -192,7 +193,7 @@ class SystemUtils:
         except Exception as e:
             print(f"Error getting X11 resolution: {e}")
 
-        return (2560, 1600)  # Default for GZ302EA
+        return (1920, 1080)  # Fallback default resolution
 
     @staticmethod
     def _get_display_resolution_wayland() -> Tuple[int, int]:
@@ -226,7 +227,7 @@ class SystemUtils:
             except Exception as e:
                 print(f"Error getting Wayland resolution with kscreen-doctor: {e}")
 
-        return (2560, 1600)  # Default for GZ302EA
+        return (1920, 1080)  # Fallback default resolution
 
     @staticmethod
     def get_current_refresh_rate() -> Optional[int]:
@@ -242,6 +243,99 @@ class SystemUtils:
             return SystemUtils._get_current_refresh_rate_wayland()
         else:
             return SystemUtils._get_current_refresh_rate_x11()
+
+    @staticmethod
+    def get_supported_refresh_rates() -> List[int]:
+        """
+        Get list of supported refresh rates for the primary display.
+
+        Returns:
+            List[int]: List of refresh rates in Hz (e.g. [60, 120, 144])
+        """
+        backend = SystemUtils.get_display_backend()
+
+        if backend == DisplayBackend.WAYLAND:
+            return SystemUtils._get_supported_refresh_rates_wayland()
+        else:
+            return SystemUtils._get_supported_refresh_rates_x11()
+
+    @staticmethod
+    def _get_supported_refresh_rates_x11() -> List[int]:
+        rates = set()
+        try:
+            # Get current resolution first
+            width, height = SystemUtils._get_display_resolution_x11()
+            res_str = f"{width}x{height}"
+
+            result = subprocess.run(
+                ["xrandr", "--query"], capture_output=True, text=True, timeout=5
+            )
+
+            # Parse output
+            # 1920x1080     60.00*+  120.00  144.00
+            for line in result.stdout.split("\n"):
+                if res_str in line:
+                    # Extract all numbers that look like rates
+                    # Skip the resolution part
+                    parts = line.split()
+                    if parts[0] == res_str:
+                        for part in parts[1:]:
+                            # Remove * and +
+                            clean_part = part.replace("*", "").replace("+", "")
+                            try:
+                                rate = float(clean_part)
+                                rates.add(int(round(rate)))
+                            except ValueError:
+                                pass
+        except Exception as e:
+            print(f"Error getting X11 rates: {e}")
+
+        return sorted(list(rates))
+
+    @staticmethod
+    def _get_supported_refresh_rates_wayland() -> List[int]:
+        rates = set()
+        tool = SystemUtils.get_wayland_tool()
+
+        if tool == "wlr-randr":
+            try:
+                result = subprocess.run(["wlr-randr"], capture_output=True, text=True)
+                # Output format needs parsing. Usually lists modes.
+                # 1920x1080 px, 144.000000 Hz
+                # 1920x1080 px, 60.000000 Hz
+
+                # Let's get current resolution first
+                width, height = SystemUtils._get_display_resolution_wayland()
+                res_str = f"{width}x{height}"
+
+                for line in result.stdout.split("\n"):
+                    if res_str in line and "Hz" in line:
+                        match = re.search(r"(\d+\.?\d*)\s*Hz", line)
+                        if match:
+                            rates.add(int(round(float(match.group(1)))))
+            except Exception:
+                pass
+
+        elif tool == "kscreen-doctor":
+            # kscreen-doctor -o output
+            # Mode: 1920x1080@144 ...
+            # Mode: 1920x1080@60 ...
+            try:
+                width, height = SystemUtils._get_display_resolution_wayland()
+                res_str = f"{width}x{height}"
+
+                result = subprocess.run(
+                    ["kscreen-doctor", "-o"], capture_output=True, text=True
+                )
+                for line in result.stdout.split("\n"):
+                    if "Mode:" in line and res_str in line:
+                        match = re.search(r"@(\d+)", line)
+                        if match:
+                            rates.add(int(match.group(1)))
+            except Exception:
+                pass
+
+        return sorted(list(rates))
 
     @staticmethod
     def _get_current_refresh_rate_x11() -> Optional[int]:
@@ -509,43 +603,57 @@ class SystemUtils:
         return None
 
     @staticmethod
+    def check_command_exists(command: str) -> bool:
+        return shutil.which(command) is not None
+
+    @staticmethod
     def get_current_power_profile() -> Optional[str]:
         """
-        Get the current power/performance profile from platform_profile.
-
-        The platform_profile interface provides a unified way to query
-        the power profile on Linux. For ASUS laptops, this maps to:
-        - low-power: Battery saver / quiet mode
-        - balanced: Balanced mode
-        - performance: Performance / turbo mode
-
-        Returns:
-            Optional[str]: Current profile name (low-power, balanced, performance)
-                          or None if not available
+        Get the current power/performance profile.
+        Supports pwrcfg, asusctl, power-profiles-daemon, and sysfs.
         """
-        platform_profile_path = "/sys/firmware/acpi/platform_profile"
+        # 1. pwrcfg (Legacy/GZ302)
+        if SystemUtils.check_command_exists("pwrcfg"):
+            # pwrcfg status parsing is complex, skip for now or implement if needed
+            pass
 
+        # 2. asusctl
+        if SystemUtils.check_command_exists("asusctl"):
+            try:
+                result = subprocess.run(
+                    ["asusctl", "profile", "-p"],
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                )
+                if result.returncode == 0:
+                    # "Active profile: Balanced"
+                    output = result.stdout.strip()
+                    if "Active profile:" in output:
+                        return output.split(":")[-1].strip()
+            except Exception:
+                pass
+
+        # 3. power-profiles-daemon
+        if SystemUtils.check_command_exists("powerprofilesctl"):
+            try:
+                result = subprocess.run(
+                    ["powerprofilesctl", "get"],
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                )
+                if result.returncode == 0:
+                    return result.stdout.strip()
+            except Exception:
+                pass
+
+        # 4. Sysfs
+        platform_profile_path = "/sys/firmware/acpi/platform_profile"
         try:
             if os.path.exists(platform_profile_path):
                 with open(platform_profile_path, "r") as f:
                     return f.read().strip()
-        except Exception as e:
-            print(f"Error reading platform_profile: {e}")
-
-        # Fallback: try to read from asusd via D-Bus
-        try:
-            result = subprocess.run(
-                ["asusctl", "profile", "-p"], capture_output=True, text=True, timeout=2
-            )
-            if result.returncode == 0:
-                # Parse output like "Active profile is Balanced"
-                output = result.stdout.strip().lower()
-                if "quiet" in output or "silent" in output:
-                    return "low-power"
-                elif "balanced" in output:
-                    return "balanced"
-                elif "performance" in output or "turbo" in output:
-                    return "performance"
         except Exception:
             pass
 
@@ -554,79 +662,97 @@ class SystemUtils:
     @staticmethod
     def get_available_power_profiles() -> List[str]:
         """
-        Get list of available power profiles from platform_profile.
-
-        Returns:
-            List[str]: Available profile names
+        Get list of available power profiles.
         """
-        choices_path = "/sys/firmware/acpi/platform_profile_choices"
+        # 1. pwrcfg
+        if SystemUtils.check_command_exists("pwrcfg"):
+            return [
+                "emergency",
+                "battery",
+                "efficient",
+                "balanced",
+                "performance",
+                "gaming",
+                "maximum",
+            ]
 
+        # 2. asusctl
+        if SystemUtils.check_command_exists("asusctl"):
+            return ["Quiet", "Balanced", "Performance"]
+
+        # 3. power-profiles-daemon
+        if SystemUtils.check_command_exists("powerprofilesctl"):
+            return ["power-saver", "balanced", "performance"]
+
+        # 4. Sysfs
+        choices_path = "/sys/firmware/acpi/platform_profile_choices"
         try:
             if os.path.exists(choices_path):
                 with open(choices_path, "r") as f:
                     return f.read().strip().split()
-        except Exception as e:
-            print(f"Error reading platform_profile_choices: {e}")
+        except Exception:
+            pass
 
-        # Fallback to default ASUS profiles
-        return ["low-power", "balanced", "performance"]
+        return ["balanced"]
 
     @staticmethod
     def set_power_profile(profile: str) -> Tuple[bool, str]:
         """
         Set the power/performance profile.
-
-        Args:
-            profile: Profile name (low-power, balanced, performance)
-
-        Returns:
-            Tuple[bool, str]: (success, message)
         """
+        # 1. pwrcfg
+        if SystemUtils.check_command_exists("pwrcfg"):
+            try:
+                subprocess.run(["pkexec", "pwrcfg", profile], check=True)
+                return True, f"Set profile to {profile}"
+            except subprocess.CalledProcessError as e:
+                return False, f"pwrcfg failed: {e}"
+
+        # 2. asusctl
+        if SystemUtils.check_command_exists("asusctl"):
+            target = profile
+            # Map generic names
+            p_lower = profile.lower()
+            if p_lower in ["silent", "battery", "power-saver", "low-power"]:
+                target = "Quiet"
+            elif p_lower in ["balanced"]:
+                target = "Balanced"
+            elif p_lower in ["performance", "gaming", "turbo", "maximum"]:
+                target = "Performance"
+
+            try:
+                subprocess.run(["asusctl", "profile", "-P", target], check=True)
+                return True, f"Set profile to {target}"
+            except subprocess.CalledProcessError as e:
+                return False, f"asusctl failed: {e}"
+
+        # 3. power-profiles-daemon
+        if SystemUtils.check_command_exists("powerprofilesctl"):
+            target = profile
+            p_lower = profile.lower()
+            if p_lower in ["silent", "quiet", "battery", "low-power"]:
+                target = "power-saver"
+            elif p_lower in ["balanced"]:
+                target = "balanced"
+            elif p_lower in ["performance", "gaming", "turbo", "maximum"]:
+                target = "performance"
+
+            try:
+                subprocess.run(["powerprofilesctl", "set", target], check=True)
+                return True, f"Set profile to {target}"
+            except subprocess.CalledProcessError as e:
+                return False, f"powerprofilesctl failed: {e}"
+
+        # 4. Sysfs (requires root)
         platform_profile_path = "/sys/firmware/acpi/platform_profile"
-        valid_profiles = SystemUtils.get_available_power_profiles()
-
-        if profile not in valid_profiles:
-            return (
-                False,
-                f"Invalid profile: {profile}. Available: {', '.join(valid_profiles)}",
-            )
-
-        # First try direct sysfs write (requires root)
         try:
             with open(platform_profile_path, "w") as f:
                 f.write(profile)
-            return (True, f"Profile set to {profile}")
+            return True, f"Set profile to {profile}"
         except PermissionError:
-            pass
+            return False, "Permission denied (need root)"
         except Exception as e:
-            print(f"Direct write failed: {e}")
-
-        # Try asusctl if available
-        try:
-            # Map platform_profile names to asusctl profile names
-            asusctl_map = {
-                "low-power": "Quiet",
-                "balanced": "Balanced",
-                "performance": "Performance",
-            }
-            asusctl_profile = asusctl_map.get(profile, profile.capitalize())
-
-            result = subprocess.run(
-                ["asusctl", "profile", "-P", asusctl_profile],
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            if result.returncode == 0:
-                return (True, f"Profile set to {profile} via asusctl")
-            else:
-                return (False, f"asusctl error: {result.stderr}")
-        except FileNotFoundError:
-            pass
-        except Exception as e:
-            return (False, f"Error: {str(e)}")
-
-        return (False, "Unable to set profile. Root access or asusctl required.")
+            return False, f"Error: {e}"
 
     @staticmethod
     def get_current_tdp() -> Optional[int]:
@@ -653,20 +779,6 @@ class SystemUtils:
             pass
 
         return None
-
-    @staticmethod
-    def check_command_exists(command: str) -> bool:
-        """
-        Check if a command exists in PATH.
-
-        Args:
-            command: Command name to check
-
-        Returns:
-            bool: True if command exists
-        """
-        result = subprocess.run(["which", command], capture_output=True, timeout=2)
-        return result.returncode == 0
 
     @staticmethod
     def find_battery_path() -> Optional[str]:
@@ -839,16 +951,13 @@ class SystemUtils:
         Returns:
             List[str]: List of supported model identifiers
         """
+        # Return supported model families / example model identifiers
         return [
-            "GZ302EA",  # ROG Flow Z13 (2022)
-            "GZ302EZ",  # ROG Flow Z13 (2023)
-            "GZ301",  # ROG Flow Z13 (2021)
-            "GU502",  # ROG Zephyrus M15
-            "GA502",  # ROG Zephyrus G15
-            "GX550",  # ROG Zephyrus Duo
-            "G513",  # ROG Strix G15
-            "G713",  # ROG Strix G17
-            "G733",  # ROG Strix Scar
+            "ROG_FLOW_Z13",
+            "ROG_ZEPHYRUS",
+            "ROG_STRIX",
+            "ASUS_TUF",
+            "OTHER_ASUS_GAMING",
         ]
 
     @staticmethod

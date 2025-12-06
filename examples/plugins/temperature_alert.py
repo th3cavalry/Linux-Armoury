@@ -34,8 +34,10 @@ class Plugin(PluginBase):
     def on_load(self):
         """Called when plugin is loaded"""
         print(f"[{self.name}] Plugin loaded")
+        print(f"[{self.name}] Monitoring temperature")
         print(
-            f"[{self.name}] Monitoring temperature (High: {self.high_temp_threshold}°C, Critical: {self.critical_temp_threshold}°C)"
+            f"  thresholds — high: {self.high_temp_threshold}°C, "
+            f"critical: {self.critical_temp_threshold}°C"
         )
 
     def on_status_update(self, status_data):
@@ -48,20 +50,19 @@ class Plugin(PluginBase):
         # Check thresholds
         if cpu_temp >= self.critical_temp_threshold:
             if self.last_alert_level != "critical":
-                print(
-                    f"\n[{self.name}] 🚨 CRITICAL: CPU temperature is {cpu_temp:.1f}°C!"
-                )
+                print(f"\n[{self.name}] 🚨 CRITICAL:")
+                print(f"  CPU temperature: {cpu_temp:.1f}°C")
                 self.last_alert_level = "critical"
         elif cpu_temp >= self.high_temp_threshold:
             if self.last_alert_level != "high":
-                print(
-                    f"\n[{self.name}] ⚠️  WARNING: CPU temperature is {cpu_temp:.1f}°C"
-                )
+                print(f"\n[{self.name}] ⚠️ WARNING:")
+                print(f"  CPU temperature: {cpu_temp:.1f}°C")
                 self.last_alert_level = "high"
         else:
             # Temperature is normal
             if self.last_alert_level is not None:
-                print(f"\n[{self.name}] ✓ Temperature normalized: {cpu_temp:.1f}°C")
+                print(f"\n[{self.name}] ✓ Temperature normalized")
+                print(f"  CPU temperature: {cpu_temp:.1f}°C")
                 self.last_alert_level = None
 
     def on_profile_change(self, old_profile, new_profile):

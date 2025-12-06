@@ -43,3 +43,9 @@ Thumbs.db
 
 # Configuration (user-specific)
 settings.json
+
+# Flatpak build artifacts
+*.flatpak
+repo/
+.flatpak-builder/
+flatpak-build/

@@ -369,13 +369,13 @@ class GpuController:
             def safe_int(s):
                 try:
                     return int(float(s))
-                except:
+                except Exception:
                     return 0
 
             def safe_float(s):
                 try:
                     return float(s)
-                except:
+                except Exception:
                     return 0.0
 
             stats.gpu_clock_mhz = safe_int(values[2])
@@ -456,7 +456,7 @@ class GpuController:
         if busy:
             try:
                 stats.gpu_usage_percent = int(busy)
-            except:
+            except Exception:
                 pass
 
         # Parse clock speeds
@@ -485,21 +485,21 @@ class GpuController:
         if temp:
             try:
                 stats.gpu_temp_c = int(temp) // 1000
-            except:
+            except Exception:
                 pass
 
         temp_edge = read_hwmon("temp2_input")
         if temp_edge:
             try:
                 stats.junction_temp_c = int(temp_edge) // 1000
-            except:
+            except Exception:
                 pass
 
         temp_mem = read_hwmon("temp3_input")
         if temp_mem:
             try:
                 stats.mem_temp_c = int(temp_mem) // 1000
-            except:
+            except Exception:
                 pass
 
         # Power
@@ -507,14 +507,14 @@ class GpuController:
         if power:
             try:
                 stats.power_draw_w = int(power) / 1_000_000
-            except:
+            except Exception:
                 pass
 
         power_cap = read_hwmon("power1_cap")
         if power_cap:
             try:
                 stats.power_limit_w = int(power_cap) / 1_000_000
-            except:
+            except Exception:
                 pass
 
         # Fan
@@ -522,7 +522,7 @@ class GpuController:
         if fan_rpm:
             try:
                 stats.fan_speed_rpm = int(fan_rpm)
-            except:
+            except Exception:
                 pass
 
         fan_max = read_hwmon("fan1_max")
@@ -531,7 +531,7 @@ class GpuController:
                 max_rpm = int(fan_max)
                 if max_rpm > 0:
                     stats.fan_speed_percent = (stats.fan_speed_rpm * 100) // max_rpm
-            except:
+            except Exception:
                 pass
 
         # VRAM
@@ -539,7 +539,7 @@ class GpuController:
         if vram_total:
             try:
                 stats.vram_total_mb = int(vram_total) // (1024 * 1024)
-            except:
+            except Exception:
                 pass
 
         vram_used = read_sysfs("mem_info_vram_used")
@@ -551,7 +551,7 @@ class GpuController:
                     stats.mem_usage_percent = (
                         stats.vram_used_mb * 100
                     ) // stats.vram_total_mb
-            except:
+            except Exception:
                 pass
 
         # Performance level
@@ -619,7 +619,7 @@ class GpuController:
         if temp:
             try:
                 stats.gpu_temp_c = int(temp) // 1000
-            except:
+            except Exception:
                 pass
 
         power = read_hwmon("power1_input")

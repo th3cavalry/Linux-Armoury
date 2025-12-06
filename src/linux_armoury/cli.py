@@ -69,7 +69,7 @@ class LinuxArmouryCLI:
     def create_parser(self) -> argparse.ArgumentParser:
         """Create argument parser"""
         parser = argparse.ArgumentParser(
-            description="Linux Armoury - Command-Line Control for ASUS GZ302EA",
+            description="Linux Armoury - Command-Line Control for ASUS ROG / ASUS gaming laptops",
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog="""
 Examples:
@@ -261,40 +261,41 @@ https://github.com/th3cavalry/Linux-Armoury
 
     def apply_profile(self, profile: str) -> bool:
         """Apply a power profile"""
+        # Try to get profile info if available in config, but don't fail if not
         profile_info = Config.POWER_PROFILES.get(profile)
-        if not profile_info:
-            print(f"Error: Unknown profile '{profile}'")
-            return False
-
-        print(f"Applying {profile_info['name']} profile...")
-        print(f"  TDP: {profile_info['tdp']}W")
-        print(f"  Refresh Rate: {profile_info['refresh']}Hz")
-
-        # Apply profile using pwrcfg
-        if not SystemUtils.check_command_exists("pwrcfg"):
-            print("\nError: pwrcfg command not found!")
-            print("Please install GZ302-Linux-Setup tools:")
-            print("  https://github.com/th3cavalry/GZ302-Linux-Setup")
-            return False
+        if profile_info:
+            print(f"Applying {profile_info['name']} profile...")
+            if "tdp" in profile_info:
+                print(f"  Target TDP: {profile_info['tdp']}W")
+        else:
+            print(f"Applying {profile} profile...")
 
         try:
-            result = subprocess.run(
-                ["pkexec", "pwrcfg", profile],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
+            success, message = SystemUtils.set_power_profile(profile)
 
-            if result.returncode == 0:
-                print("✓ Profile applied successfully!")
+            if success:
+                print(f"✓ {message}")
+
+                # Optional: Set refresh rate if defined in profile and we are not using pwrcfg
+                # (pwrcfg handles it internally usually)
+                if (
+                    profile_info
+                    and "refresh" in profile_info
+                    and not SystemUtils.check_command_exists("pwrcfg")
+                ):
+                    rate = profile_info["refresh"]
+                    print(f"  Setting refresh rate to {rate}Hz...")
+                    r_success, r_msg = SystemUtils.set_refresh_rate(rate)
+                    if r_success:
+                        print(f"  ✓ Refresh rate set")
+                    else:
+                        print(f"  ! Could not set refresh rate: {r_msg}")
+
                 return True
             else:
-                print(f"✗ Failed to apply profile: {result.stderr}")
+                print(f"✗ Failed to apply profile: {message}")
                 return False
 
-        except subprocess.TimeoutExpired:
-            print("✗ Command timed out")
-            return False
         except Exception as e:
             print(f"✗ Error: {e}")
             return False
@@ -303,31 +304,14 @@ https://github.com/th3cavalry/Linux-Armoury
         """Set display refresh rate"""
         print(f"Setting refresh rate to {rate}Hz...")
 
-        display = SystemUtils.get_primary_display()
-        resolution = SystemUtils.get_display_resolution()
-
         try:
-            result = subprocess.run(
-                [
-                    "pkexec",
-                    "xrandr",
-                    "--output",
-                    display,
-                    "--mode",
-                    f"{resolution[0]}x{resolution[1]}",
-                    "--rate",
-                    str(rate),
-                ],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
+            success, message = SystemUtils.set_refresh_rate(rate)
 
-            if result.returncode == 0:
-                print(f"✓ Refresh rate set to {rate}Hz")
+            if success:
+                print(f"✓ {message}")
                 return True
             else:
-                print(f"✗ Failed to set refresh rate: {result.stderr}")
+                print(f"✗ Failed to set refresh rate: {message}")
                 return False
 
         except Exception as e:

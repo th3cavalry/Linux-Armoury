@@ -5,6 +5,14 @@ All notable changes to Linux Armoury will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-12-06
+
+### Added
+- Native support for `asusctl` and `power-profiles-daemon`
+- Dynamic power profile detection
+- Dynamic refresh rate detection (X11 and Wayland)
+- Removed hard dependency on `pwrcfg` and `rrcfg`
+
 ## [1.0.0] - 2025-10-15
 
 ### Added
@@ -24,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Maximum: 90W @ 180Hz (Beast Mode equivalent)
 - Flexible refresh rate control (30Hz - 180Hz)
 - Real-time status monitoring
-- Integration with GZ302-Linux-Setup tools (pwrcfg, rrcfg)
+- Integration with optional model-specific hardware scripts (e.g., pwrcfg / rrcfg helpers)
 - PolicyKit integration for secure privilege elevation
 - Preferences dialog with user settings
 - JSON-based configuration storage
@@ -48,10 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop file for autostart in ~/.config/autostart/
 
 ### Target Hardware
-- ASUS ROG Flow Z13 (GZ302EA)
-  - GZ302EA-XS99 (128GB variant)
-  - GZ302EA-XS64 (64GB variant)
-  - GZ302EA-XS32 (32GB variant)
+- Modern ASUS ROG and ASUS gaming laptops (2019+)
+  - (variant information removed — project supports a wide range of ASUS gaming laptop variants)
 
 ### Dependencies
 - Python 3.8+
@@ -64,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Known Issues
 - System tray requires libayatana-appindicator (not all distros have it by default)
-- pwrcfg integration requires GZ302-Linux-Setup scripts to be installed
+- pwrcfg integration may require model-specific helper scripts to be installed
 - Display output name hardcoded as eDP-1 (may vary on some systems)
 
 ### Future Enhancements
@@ -103,10 +109,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Expanded Hardware Support**
   - Support for multiple ASUS laptop models:
-    - ROG Flow Z13 2023 (GZ302EZ)
-    - ROG Flow Z13 2021 (GZ301)
-    - ROG Zephyrus M15 (GU502)
-    - ROG Zephyrus G15 (GA502)
+    - ROG Flow Z13 series
+    - ROG Zephyrus series (M15 / G15)
+    - Other ASUS ROG / gaming series models
   - Model-specific configurations (TDP limits, resolutions, refresh rates)
   - Laptop model detection via DMI
   - Hardware detection CLI command (`--detect`)

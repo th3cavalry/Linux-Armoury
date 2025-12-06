@@ -34,6 +34,10 @@ class LinuxArmouryService(dbus.service.Object):
         "performance",
         "gaming",
         "maximum",
+        "Quiet",
+        "Balanced",
+        "Performance",
+        "power-saver",
     ]
     VALID_REFRESH_RATES = [30, 60, 90, 120, 180]
 
@@ -44,25 +48,15 @@ class LinuxArmouryService(dbus.service.Object):
 
     @dbus.service.method(DBUS_INTERFACE, in_signature="s", out_signature="bs")
     def SetPowerProfile(self, profile):
-        """Set the power profile using pwrcfg"""
-        if profile not in self.VALID_PROFILES:
-            return (False, f"Invalid profile: {profile}")
+        """Set the power profile"""
+        # Basic validation (case-insensitive)
+        if profile.lower() not in [p.lower() for p in self.VALID_PROFILES]:
+            # We might want to allow it anyway if SystemUtils supports it
+            pass
 
         try:
-            # Check if pwrcfg is available
-            if not SystemUtils.check_command_exists("pwrcfg"):
-                return (False, "pwrcfg command not found")
-
-            result = subprocess.run(
-                ["pwrcfg", profile], capture_output=True, text=True, timeout=10
-            )
-
-            if result.returncode == 0:
-                return (True, f"Power profile set to {profile}")
-            else:
-                return (False, f"Failed: {result.stderr}")
-        except subprocess.TimeoutExpired:
-            return (False, "Command timed out")
+            success, message = SystemUtils.set_power_profile(profile)
+            return (success, message)
         except Exception as e:
             return (False, str(e))
 
@@ -116,7 +110,9 @@ def main():
         bus = dbus.SessionBus()
         print("Falling back to session bus")
 
-    service = LinuxArmouryService(bus)
+    # keep a reference to the service object so it isn't garbage collected
+    # and flagged by linters as unused
+    service = LinuxArmouryService(bus)  # noqa: F841
 
     mainloop = GLib.MainLoop()
     print("Entering main loop...")

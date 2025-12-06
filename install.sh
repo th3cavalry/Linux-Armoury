@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # Linux Armoury Installation Script
-# Installs the GUI control center for ASUS GZ302EA laptops
+# Installs the GUI control center for ASUS ROG and other ASUS gaming laptops
 # ==============================================================================
 
 set -euo pipefail
@@ -47,12 +47,50 @@ detect_distro() {
     fi
 }
 
+# Detect hardware configuration
+detect_hardware() {
+    info "Detecting hardware configuration..."
+
+    # CPU Detection
+    if grep -q "AuthenticAMD" /proc/cpuinfo; then
+        CPU_VENDOR="AMD"
+        info "CPU: AMD detected"
+    elif grep -q "GenuineIntel" /proc/cpuinfo; then
+        CPU_VENDOR="Intel"
+        info "CPU: Intel detected"
+    else
+        CPU_VENDOR="Unknown"
+        info "CPU: Unknown vendor"
+    fi
+
+    # GPU Detection
+    HAS_NVIDIA=false
+    HAS_AMD_GPU=false
+    if lspci | grep -i "NVIDIA" > /dev/null; then
+        HAS_NVIDIA=true
+        info "GPU: NVIDIA detected"
+    fi
+    if lspci | grep -i "AMD" > /dev/null || lspci | grep -i "ATI" > /dev/null; then
+        HAS_AMD_GPU=true
+        info "GPU: AMD detected"
+    fi
+
+    # ASUS Laptop Detection
+    IS_ASUS=false
+    if [ -d "/sys/class/dmi/id" ]; then
+        if grep -qi "ASUS" /sys/class/dmi/id/sys_vendor 2>/dev/null; then
+            IS_ASUS=true
+            info "System: ASUS laptop detected"
+        fi
+    fi
+}
+
 # Install dependencies for Arch-based systems
 install_arch_deps() {
     info "Installing dependencies for Arch-based system..."
     sudo pacman -S --noconfirm --needed \
         python python-gobject gtk4 libadwaita \
-        polkit xorg-xrandr
+        polkit xorg-xrandr pciutils power-profiles-daemon
     success "Dependencies installed"
 }
 
@@ -62,7 +100,7 @@ install_debian_deps() {
     sudo apt update
     sudo apt install -y \
         python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
-        policykit-1 x11-xserver-utils
+        policykit-1 x11-xserver-utils pciutils power-profiles-daemon
     success "Dependencies installed"
 }
 
@@ -71,7 +109,7 @@ install_fedora_deps() {
     info "Installing dependencies for Fedora-based system..."
     sudo dnf install -y \
         python3 python3-gobject gtk4 libadwaita \
-        polkit xrandr
+        polkit xrandr pciutils power-profiles-daemon
     success "Dependencies installed"
 }
 
@@ -80,8 +118,111 @@ install_opensuse_deps() {
     info "Installing dependencies for OpenSUSE..."
     sudo zypper install -y \
         python3 python3-gobject gtk4 libadwaita-1-0 \
-        polkit xrandr
+        polkit xrandr pciutils power-profiles-daemon
     success "Dependencies installed"
+}
+
+# Install ASUS tools for Arch
+install_arch_asus_tools() {
+    info "Configuring ASUS tools for Arch..."
+
+    # Add g14 repo if not present
+    if ! grep -q "\[g14\]" /etc/pacman.conf; then
+        info "Adding g14 repository..."
+        sudo pacman-key --recv-keys 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35
+        sudo pacman-key --lsign-key 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35
+        echo -e "
+[g14]
+Server = https://arch.asus-linux.org" | sudo tee -a /etc/pacman.conf
+        sudo pacman -Sy
+    fi
+
+    sudo pacman -S --noconfirm --needed asusctl
+
+    if [ "$HAS_NVIDIA" = true ]; then
+        sudo pacman -S --noconfirm --needed supergfxctl
+        sudo systemctl enable --now supergfxd
+    fi
+
+    sudo systemctl enable --now asusd
+}
+
+# Install ASUS tools for Fedora
+install_fedora_asus_tools() {
+    info "Configuring ASUS tools for Fedora..."
+    sudo dnf copr enable -y lukenukem/asus-linux
+    sudo dnf install -y asusctl
+
+    if [ "$HAS_NVIDIA" = true ]; then
+        sudo dnf install -y supergfxctl
+        sudo systemctl enable --now supergfxd
+    fi
+
+    sudo systemctl enable --now asusd
+}
+
+# Install ASUS tools for Debian/Ubuntu
+install_debian_asus_tools() {
+    info "Configuring ASUS tools for Debian/Ubuntu..."
+    # Check for PPA support
+    if command -v add-apt-repository >/dev/null; then
+        sudo add-apt-repository -y ppa:mitchellaugustin/asusctl
+        sudo apt update
+        sudo apt install -y asusctl
+
+        if [ "$HAS_NVIDIA" = true ]; then
+            sudo apt install -y supergfxctl
+            sudo systemctl enable --now supergfxd
+        fi
+
+        sudo systemctl enable --now asusd
+    else
+        warning "add-apt-repository not found. Skipping automatic asusctl installation."
+        info "Please install asusctl manually from https://asus-linux.org"
+    fi
+}
+
+# Install ASUS tools for OpenSUSE
+install_opensuse_asus_tools() {
+    info "Configuring ASUS tools for OpenSUSE..."
+
+    if grep -q "Tumbleweed" /etc/os-release; then
+        sudo zypper ar -f https://download.opensuse.org/repositories/hardware:/asus/openSUSE_Tumbleweed/ hardware:asus
+    elif grep -q "Leap 15.6" /etc/os-release; then
+        sudo zypper ar -f https://download.opensuse.org/repositories/hardware:/asus/openSUSE_Leap_15.6/ hardware:asus
+    fi
+
+    sudo zypper ref
+    sudo zypper install -y asusctl
+
+    if [ "$HAS_NVIDIA" = true ]; then
+        sudo zypper install -y supergfxctl
+        sudo systemctl enable --now supergfxd
+    fi
+
+    sudo systemctl enable --now asusd
+}
+
+# Main hardware tool installer
+install_hardware_tools() {
+    if [ "$IS_ASUS" = true ]; then
+        case "$DISTRO_ID" in
+            arch|manjaro|endeavouros)
+                install_arch_asus_tools
+                ;;
+            fedora|nobara)
+                install_fedora_asus_tools
+                ;;
+            ubuntu|debian|pop|linuxmint)
+                install_debian_asus_tools
+                ;;
+            opensuse*|suse)
+                install_opensuse_asus_tools
+                ;;
+        esac
+    else
+        warning "Not an ASUS laptop (or detection failed). Skipping ASUS-specific tools."
+    fi
 }
 
 # Install the application
@@ -158,6 +299,9 @@ main() {
     # Detect distribution
     detect_distro
 
+    # Detect hardware
+    detect_hardware
+
     # Install dependencies based on distribution
     case "$DISTRO_ID" in
         arch|manjaro|endeavouros)
@@ -188,6 +332,9 @@ main() {
             ;;
     esac
 
+    # Install hardware tools (asusctl, supergfxctl, etc.)
+    install_hardware_tools
+
     # Install the application
     install_application
 
@@ -196,10 +343,6 @@ main() {
     echo
     info "You can now launch Linux Armoury from your application menu"
     info "or run 'linux-armoury' from the terminal"
-    echo
-    warning "Note: This GUI integrates with GZ302 management tools (pwrcfg, rrcfg)"
-    warning "Make sure you have installed the GZ302-Linux-Setup scripts first"
-    warning "See: https://github.com/th3cavalry/GZ302-Linux-Setup"
     echo
 }
 

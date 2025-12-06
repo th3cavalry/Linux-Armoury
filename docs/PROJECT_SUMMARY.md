@@ -2,7 +2,7 @@
 
 ## Linux Armoury v1.0.0
 
-**A modern GUI control center for ASUS GZ302EA laptops running Linux**
+**A modern GUI control center for ASUS ROG and other ASUS gaming laptops (2019–present)**
 
 ### Quick Facts
 
@@ -11,7 +11,7 @@
 - **License**: GPL-3.0
 - **Platform**: Linux (Multi-distro)
 - **Status**: Feature Complete v1.0
-- **Target Hardware**: ASUS ROG Flow Z13 (GZ302EA)
+- **Target Hardware**: Modern ASUS ROG and ASUS gaming laptops (2019–present)
 
 ### Features at a Glance
 
@@ -97,7 +97,7 @@ git clone https://github.com/th3cavalry/Linux-Armoury.git && cd Linux-Armoury &&
 
 **Optional:**
 - libayatana-appindicator (system tray)
-- pwrcfg/rrcfg (from GZ302-Linux-Setup)
+Model-specific hardware support scripts (community-maintained, varies by model)
 
 ### Project Statistics
 
@@ -165,7 +165,7 @@ git clone https://github.com/th3cavalry/Linux-Armoury.git && cd Linux-Armoury &&
 
 ### Related Projects
 
-- [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) - Hardware scripts
+- Example model-specific hardware helper scripts (community-maintained)
 - [asusctl](https://gitlab.com/asus-linux/asusctl) - ASUS Linux control
 - [G-Helper](https://github.com/seerge/g-helper) - Windows ASUS control
 

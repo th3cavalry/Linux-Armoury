@@ -16,7 +16,7 @@ Linux Armoury follows a modular, layered architecture:
 │  (PolicyKit, DBus, System Commands)                         │
 ├─────────────────────────────────────────────────────────────┤
 │                   System Layer                               │
-│  (pwrcfg, rrcfg, xrandr, Hardware Control)                  │
+│  (asusctl, ppd, pwrcfg, xrandr, Hardware Control)           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -200,7 +200,7 @@ User Space (No Privileges)
     │
 System Space (Root Privileges)
     │
-    └── System Commands (pwrcfg, xrandr)
+    └── System Commands (asusctl, ppd, pwrcfg, xrandr)
         └── Executed with elevated privileges
 ```
 
@@ -224,21 +224,16 @@ System Space (Root Privileges)
 
 ## Integration Points
 
-### GZ302-Linux-Setup Scripts
+### Hardware Abstraction Layer
 
 ```
 Linux Armoury
     ↓
-calls pwrcfg (power management)
+SystemUtils (Hardware Abstraction)
     ↓
-    ├── Sets SPL (Stapm Power Limit)
-    ├── Sets sPPT (Slow Package Power Tracking)
-    ├── Sets fPPT (Fast Package Power Tracking)
-    └── Updates system power profile
-
-calls rrcfg (refresh rate control)
-    ↓
-    └── Configures display refresh rate
+    ├── Detects available backend (asusctl, ppd, pwrcfg)
+    ├── Maps generic profiles to backend-specific profiles
+    └── Executes appropriate command
 ```
 
 ### Display Management
@@ -468,7 +463,7 @@ linux-armoury
     ├── System Tools
     │   ├── PolicyKit (pkexec)
     │   ├── xrandr
-    │   └── pwrcfg (from GZ302-Linux-Setup)
+    │   └── pwrcfg (may be provided by model-specific helper scripts)
     │
     └── Optional
         └── libayatana-appindicator (system tray)

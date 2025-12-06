@@ -4,25 +4,20 @@
 
 ### What is Linux Armoury?
 
-Linux Armoury is a GUI control center for ASUS GZ302EA laptops running Linux. It provides an easy-to-use interface for managing power profiles, TDP settings, and display refresh rates, similar to G-Helper (Windows) and ROG Control Center.
+Linux Armoury is a GUI control center for ASUS ROG and other ASUS gaming laptops running Linux. It provides an easy-to-use interface for managing power profiles, TDP settings, and display refresh rates, similar to G-Helper (Windows) and ROG Control Center.
 
 ### Which laptop models are supported?
 
-Currently supported:
-- ASUS ROG Flow Z13 (GZ302EA-XS99) - 128GB variant
-- ASUS ROG Flow Z13 (GZ302EA-XS64) - 64GB variant
-- ASUS ROG Flow Z13 (GZ302EA-XS32) - 32GB variant
+Currently supported (examples):
+- ROG Flow Z13 series
+- ROG Zephyrus series (M15 / G15)
+- Other ASUS ROG / gaming series models (coverage may vary)
 
-Future versions may support additional models.
+Future versions will continue to expand support for recent ASUS gaming laptops.
 
-### Do I need the GZ302-Linux-Setup scripts?
+### Do I need model-specific hardware scripts?
 
-While Linux Armoury can run independently, it works best with the [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup) scripts installed. These provide:
-- `pwrcfg` command for power management
-- `rrcfg` command for refresh rate control
-- Hardware fixes and optimizations
-
-Without them, the GUI will show errors when trying to apply profiles.
+Linux Armoury can run independently, but some laptops require model-specific scripts for full functionality (power management, refresh-rate control and other hardware-specific operations). Check your laptop family's documentation or community-maintained helper scripts if your model needs special support.
 
 ## Installation Questions
 
@@ -129,14 +124,14 @@ When enabled in Preferences:
    sudo apt install --reinstall python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
    ```
 
-### I get "pwrcfg not found" errors
+### I get "Power management tool not found" errors
 
-Install the GZ302-Linux-Setup scripts:
-```bash
-curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/gz302-main.sh -o gz302-main.sh
-chmod +x gz302-main.sh
-sudo ./gz302-main.sh
-```
+Linux Armoury requires a backend to manage power profiles. Ensure you have one of the following installed:
+- **asusctl** (Recommended for ASUS laptops)
+- **power-profiles-daemon** (Standard for GNOME/KDE)
+- **pwrcfg** (Legacy/Model-specific scripts)
+
+If your model has such scripts, follow the model-specific repository or community instructions for installation.
 
 ### Refresh rate changes don't work
 
@@ -232,11 +227,11 @@ No, battery charge limiting requires asusctl or similar tools and is not current
 
 ### Will it work on other ASUS laptops?
 
-The current version is specifically designed for GZ302EA. Support for other models may be added in the future. The UI would work, but power profile values would need adjustment for different hardware.
+Linux Armoury aims to support a wide range of ASUS ROG and ASUS gaming laptops. The GUI will work on most models, but power profile and TDP defaults may require model-specific tuning for optimal results.
 
 ### Can I use this on non-ASUS laptops?
 
-The GUI would load, but power profiles are optimized for GZ302EA hardware. You could modify the TDP values for your specific laptop, but this is not officially supported.
+The GUI would load on other laptops, but power profiles and TDP settings are tuned to gaming laptop hardware and may need to be adjusted for your model.
 
 ## Technical Questions
 
@@ -277,7 +272,7 @@ Yes:
 - G-Helper: Windows only (C#, .NET)
 - Linux Armoury: Linux only (Python, GTK)
 - G-Helper: Direct ASUS ACPI control
-- Linux Armoury: Uses system scripts (pwrcfg, xrandr)
+- Linux Armoury: Uses standard system tools (asusctl, ppd, xrandr)
 
 ### Can I run it on Wayland?
 
@@ -288,7 +283,7 @@ Yes, GTK4 supports both X11 and Wayland. However, some features may work differe
 
 ### Does it work over SSH/remote desktop?
 
-The GUI requires a display server. For headless systems, use the command-line tools (pwrcfg, rrcfg) directly.
+The GUI requires a display server. For headless systems, use the command-line tools (asusctl, powerprofilesctl) directly.
 
 ### How can I contribute?
 

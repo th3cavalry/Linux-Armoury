@@ -139,15 +139,14 @@ Manual switching helps optimize for your current situation.
 
 ## Troubleshooting
 
-### "pwrcfg not found" Error
+### Power Profile Issues
 
-You need the GZ302-Linux-Setup scripts:
+If power profiles are not working, ensure you have a supported power management tool installed:
+- **asusctl**: Recommended for ASUS ROG laptops.
+- **power-profiles-daemon**: Standard for GNOME/KDE.
+- **pwrcfg**: Legacy/Model-specific scripts (e.g. GZ302).
 
-```bash
-curl -L https://raw.githubusercontent.com/th3cavalry/GZ302-Linux-Setup/main/gz302-main.sh -o gz302-main.sh
-chmod +x gz302-main.sh
-sudo ./gz302-main.sh
-```
+Linux Armoury will automatically detect and use the available tool.
 
 ### App Won't Start
 

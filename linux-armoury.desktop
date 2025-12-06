@@ -2,7 +2,7 @@
 Type=Application
 Name=Linux Armoury
 GenericName=ASUS Laptop Control Center
-Comment=Control Center for ASUS GZ302EA Laptop - TDP and Performance Management
+Comment=Control Center for ASUS laptop power & performance management
 Exec=linux-armoury
 Icon=linux-armoury
 Terminal=false
