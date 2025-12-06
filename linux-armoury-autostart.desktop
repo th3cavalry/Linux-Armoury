@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=Linux Armoury (Background Service)
+GenericName=ASUS Laptop Control Center
+Comment=Auto-start Linux Armoury in background to apply custom settings
+Exec=linux-armoury --minimized
+Icon=linux-armoury
+Terminal=false
+Categories=System;Settings;
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5
+StartupNotify=false

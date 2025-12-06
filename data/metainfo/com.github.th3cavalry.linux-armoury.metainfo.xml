@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.github.th3cavalry.linux-armoury</id>
+  <name>Linux Armoury</name>
+  <summary>GTK4 control center for ASUS ROG laptops</summary>
+  <developer id="com.github.th3cavalry">
+    <name>th3cavalry</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>
+      Linux Armoury is a lightweight GTK4/libadwaita control center for ASUS ROG
+      laptops, specifically designed for the Flow Z13 (GZ302EA) but compatible
+      with other ASUS ROG models.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Power profile management with TDP control (10W-90W)</li>
+      <li>Display refresh rate management (30Hz-180Hz)</li>
+      <li>System monitoring (CPU temperature, battery status)</li>
+      <li>Light/dark theme support</li>
+      <li>System tray integration</li>
+      <li>Plugin system for extensibility</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">com.github.th3cavalry.linux-armoury.desktop</launchable>
+  <url type="homepage">https://github.com/th3cavalry/Linux-Armoury</url>
+  <url type="bugtracker">https://github.com/th3cavalry/Linux-Armoury/issues</url>
+  <content_rating type="oars-1.1" />
+  <provides>
+    <binary>linux-armoury</binary>
+    <binary>linux-armoury-cli</binary>
+  </provides>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  <releases>
+    <release version="1.2.0" date="2024-12-05">
+      <description>
+        <p>Major improvements:</p>
+        <ul>
+          <li>Added Wayland display backend support</li>
+          <li>Added toast notifications</li>
+          <li>Added visual indicators for active profiles</li>
+          <li>Restructured as proper Python package</li>
+          <li>Added unit tests</li>
+          <li>Fixed shell injection vulnerabilities</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

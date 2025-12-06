@@ -1,0 +1,18 @@
+# Linux Armoury - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core GUI Framework
+PyGObject>=3.42.0
+
+# Note: GTK4 and libadwaita must be installed via system package manager:
+# Arch: sudo pacman -S gtk4 libadwaita python-gobject
+# Debian/Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1 python3-gi
+# Fedora: sudo dnf install gtk4 libadwaita python3-gobject
+# openSUSE: sudo zypper install gtk4 libadwaita-1-0 python3-gobject
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# mypy>=1.0.0
+# black>=23.0.0
+# ruff>=0.1.0

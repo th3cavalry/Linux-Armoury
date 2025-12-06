@@ -88,30 +88,37 @@ install_opensuse_deps() {
 install_application() {
     info "Installing Linux Armoury GUI and CLI..."
     
-    # Create installation directory
-    INSTALL_DIR="/usr/local/bin"
+    # Directories
     DESKTOP_DIR="/usr/share/applications"
     ICON_DIR="/usr/share/icons/hicolor/scalable/apps"
+    DBUS_CONF_DIR="/etc/dbus-1/system.d"
+    SYSTEMD_DIR="/etc/systemd/system"
     
-    # Copy the GUI Python script
-    sudo install -m 755 linux-armoury-gui.py "$INSTALL_DIR/linux-armoury"
-    
-    # Copy supporting Python modules
-    if [ -f config.py ]; then
-        sudo install -m 644 config.py "$INSTALL_DIR/config.py"
-    fi
-    if [ -f system_utils.py ]; then
-        sudo install -m 644 system_utils.py "$INSTALL_DIR/system_utils.py"
+    # Install Python package
+    info "Installing Python package..."
+    if ! sudo pip install . --break-system-packages 2>/dev/null; then
+        sudo pip install .
     fi
     
-    # Install CLI
-    if [ -f linux-armoury-cli.py ]; then
-        sudo install -m 755 linux-armoury-cli.py "$INSTALL_DIR/linux-armoury-cli"
+    # Install app icon
+    if [ -f data/icons/linux-armoury.svg ]; then
+        sudo mkdir -p "$ICON_DIR"
+        sudo install -m 644 data/icons/linux-armoury.svg "$ICON_DIR/linux-armoury.svg"
+        info "App icon installed"
     fi
     
-    # Install tray icon module if it exists
-    if [ -f tray_icon.py ]; then
-        sudo install -m 644 tray_icon.py "$INSTALL_DIR/linux-armoury-tray.py"
+    # Install D-Bus configuration
+    if [ -f data/dbus/com.github.th3cavalry.LinuxArmoury.conf ]; then
+        sudo mkdir -p "$DBUS_CONF_DIR"
+        sudo install -m 644 data/dbus/com.github.th3cavalry.LinuxArmoury.conf "$DBUS_CONF_DIR/"
+        info "D-Bus configuration installed"
+    fi
+    
+    # Install systemd service
+    if [ -f data/systemd/linux-armoury.service ]; then
+        sudo install -m 644 data/systemd/linux-armoury.service "$SYSTEMD_DIR/"
+        sudo systemctl daemon-reload
+        info "Systemd service installed (enable with: sudo systemctl enable linux-armoury)"
     fi
     
     # Install desktop entries (legacy and DBus activatable)
@@ -120,9 +127,21 @@ install_application() {
         sudo install -m 644 com.github.th3cavalry.linux-armoury.desktop "$DESKTOP_DIR/com.github.th3cavalry.linux-armoury.desktop"
     fi
     
-    # Update desktop database
+    # Install autostart entry (starts minimized to tray on boot)
+    info "Installing autostart entry..."
+    AUTOSTART_DIR="$HOME/.config/autostart"
+    mkdir -p "$AUTOSTART_DIR"
+    if [ -f linux-armoury-autostart.desktop ]; then
+        install -m 644 linux-armoury-autostart.desktop "$AUTOSTART_DIR/linux-armoury.desktop"
+        success "Autostart entry installed - Linux Armoury will start on boot"
+    fi
+    
+    # Update desktop database and icon cache
     if command -v update-desktop-database &> /dev/null; then
         sudo update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
+    fi
+    if command -v gtk-update-icon-cache &> /dev/null; then
+        sudo gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
     fi
     
     success "Application installed"

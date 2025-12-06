@@ -1,0 +1,42 @@
+id: com.github.th3cavalry.linux-armoury
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: linux-armoury
+
+finish-args:
+  # X11 + XShm access (for systems without Wayland)
+  - --share=ipc
+  - --socket=fallback-x11
+  # Wayland access
+  - --socket=wayland
+  # GPU acceleration for display management
+  - --device=dri
+  # Access system D-Bus for power management
+  - --socket=system-bus
+  # Talk to session D-Bus for notifications
+  - --socket=session-bus
+  # Access home directory for config files
+  - --filesystem=~/.config/linux-armoury:create
+  # Access to system files for hardware monitoring
+  - --filesystem=/sys/class/power_supply:ro
+  - --filesystem=/sys/devices/system/cpu:ro
+  - --filesystem=/sys/class/hwmon:ro
+  # Allow executing pkexec for privileged operations
+  - --talk-name=org.freedesktop.PolicyKit1
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/man
+  - '*.a'
+  - '*.la'
+
+modules:
+  - name: linux-armoury
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-deps --prefix=/app .
+    sources:
+      - type: dir
+        path: .

@@ -1,0 +1,21 @@
+[Unit]
+Description=Linux Armoury D-Bus Service
+Documentation=https://github.com/th3cavalry/Linux-Armoury
+After=dbus.service
+
+[Service]
+Type=dbus
+BusName=com.github.th3cavalry.LinuxArmoury
+ExecStart=/usr/bin/python3 -m linux_armoury.dbus_service
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+NoNewPrivileges=false
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_DAC_OVERRIDE
+
+[Install]
+WantedBy=multi-user.target
