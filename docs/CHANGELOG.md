@@ -77,6 +77,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Power consumption graphs
 - Battery health monitoring
 
+## [1.3.0b1] - 2025-12-06
+
+### Added
+- Package refactor: source moved to src/linux_armoury and proper Python package layout
+- CI workflow for linting, formatting and tests (GitHub Actions)
+- Pre-commit configuration with black, isort and flake8
+- Makefile developer helpers for formatting, linting and tests
+- System utilities improvements (dynamic /sys path detection for battery/AC/hwmon)
+- Tests updated and hardened to be more robust across different platform permutations
+
+### Changed
+- Formatting applied (black/isort) and flake8 relaxations for a smooth migration
+- Documentation moved into docs/ and updated
+
 ## [Unreleased]
 
 ### Added
