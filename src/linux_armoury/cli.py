@@ -16,14 +16,16 @@ License: GPL-3.0
 import argparse
 import subprocess
 import sys
-from typing import Optional
 
 from .config import Config
 from .system_utils import SystemUtils
 
+# typing imports not required here
+
+
 # Optional new feature modules
 try:
-    from .modules.battery_control import ChargeLimitPreset, get_battery_controller
+    from .modules.battery_control import get_battery_controller
 
     HAS_BATTERY_CONTROL = True
 except ImportError:
@@ -227,7 +229,7 @@ https://github.com/th3cavalry/Linux-Armoury
 
         # Overclocking - GPU performance level
         parser.add_argument(
-            "--gpu-perf",
+            "--gpu-per",
             type=str,
             choices=["auto", "low", "high", "manual"],
             metavar="LEVEL",
@@ -284,7 +286,7 @@ https://github.com/th3cavalry/Linux-Armoury
             )
 
             if result.returncode == 0:
-                print(f"✓ Profile applied successfully!")
+                print("✓ Profile applied successfully!")
                 return True
             else:
                 print(f"✗ Failed to apply profile: {result.stderr}")
@@ -343,7 +345,7 @@ https://github.com/th3cavalry/Linux-Armoury
         resolution = SystemUtils.get_display_resolution()
         refresh = SystemUtils.get_current_refresh_rate()
 
-        print(f"\n📺 Display Information:")
+        print("\n📺 Display Information:")
         print(f"  Output: {display}")
         print(f"  Resolution: {resolution[0]}x{resolution[1]}")
         print(f"  Refresh Rate: {refresh}Hz" if refresh else "  Refresh Rate: Unknown")
@@ -352,7 +354,7 @@ https://github.com/th3cavalry/Linux-Armoury
         on_ac = SystemUtils.is_on_ac_power()
         battery = SystemUtils.get_battery_percentage()
 
-        print(f"\n🔋 Power Information:")
+        print("\n🔋 Power Information:")
         print(f"  Power Source: {'AC Adapter' if on_ac else 'Battery'}")
         if battery is not None:
             print(f"  Battery Level: {battery}%")
@@ -361,21 +363,21 @@ https://github.com/th3cavalry/Linux-Armoury
         cpu_temp = SystemUtils.get_cpu_temperature()
         gpu_temp = SystemUtils.get_gpu_temperature()
 
-        print(f"\n🌡️  Temperature:")
+        print("\n🌡️  Temperature:")
         if cpu_temp:
             print(f"  CPU: {cpu_temp:.1f}°C")
         else:
-            print(f"  CPU: N/A")
+            print("  CPU: N/A")
 
         if gpu_temp:
             print(f"  GPU: {gpu_temp:.1f}°C")
         else:
-            print(f"  GPU: N/A")
+            print("  GPU: N/A")
 
         # TDP info
         tdp = SystemUtils.get_current_tdp()
         if tdp:
-            print(f"\n⚡ Power Limits:")
+            print("\n⚡ Power Limits:")
             print(f"  Current TDP: {tdp}W")
 
         print()
@@ -394,7 +396,7 @@ https://github.com/th3cavalry/Linux-Armoury
             )
             print(f"  CPU: {cpu_temp:.1f}°C  {status}")
         else:
-            print(f"  CPU: Unable to read temperature")
+            print("  CPU: Unable to read temperature")
 
         if gpu_temp:
             status = (
@@ -402,7 +404,7 @@ https://github.com/th3cavalry/Linux-Armoury
             )
             print(f"  GPU: {gpu_temp:.1f}°C  {status}")
         else:
-            print(f"  GPU: Unable to read temperature")
+            print("  GPU: Unable to read temperature")
 
         print()
 
@@ -432,9 +434,9 @@ https://github.com/th3cavalry/Linux-Armoury
 
             # Battery health estimation
             if battery < 20 and not on_ac:
-                print(f"  ⚠️  Warning: Low battery!")
+                print("  ⚠️  Warning: Low battery!")
         else:
-            print(f"  Unable to read battery information")
+            print("  Unable to read battery information")
 
         print()
 
@@ -490,7 +492,7 @@ https://github.com/th3cavalry/Linux-Armoury
                 if refresh:
                     stats.append(f"📺 {refresh}Hz")
                 if gaming:
-                    stats.append(f"🎮 GAMING")
+                    stats.append("🎮 GAMING")
 
                 # Print with timestamp every 10 iterations
                 if iteration % 10 == 0:
@@ -524,7 +526,7 @@ https://github.com/th3cavalry/Linux-Armoury
         # Laptop model detection
         model_info = SystemUtils.detect_laptop_model()
         if model_info:
-            print(f"\n📱 Laptop Information:")
+            print("\n📱 Laptop Information:")
             print(f"  Vendor: {model_info.get('vendor', 'Unknown')}")
             print(f"  Model: {model_info.get('product', 'Unknown')}")
             print(f"  Version: {model_info.get('version', 'Unknown')}")
@@ -536,7 +538,7 @@ https://github.com/th3cavalry/Linux-Armoury
         print(f"\n💻 ASUS Laptop: {'Yes ✓' if is_asus else 'No ✗'}")
 
         # Supported models
-        print(f"\n📋 Supported Models:")
+        print("\n📋 Supported Models:")
         supported = SystemUtils.get_supported_models()
         for i, model in enumerate(supported, 1):
             model_config = Config.SUPPORTED_MODELS.get(model, {})
@@ -551,9 +553,9 @@ https://github.com/th3cavalry/Linux-Armoury
                 if model_id in product:
                     print(f"\n✓ Model Match: {model_id}")
                     config = Config.SUPPORTED_MODELS.get(model_id, {})
-                    print(
-                        f"  TDP Range: {config.get('min_tdp', 10)}W - {config.get('max_tdp', 90)}W"
-                    )
+                    min_tdp = config.get("min_tdp", 10)
+                    max_tdp = config.get("max_tdp", 90)
+                    print(f"  TDP Range: {min_tdp}W - {max_tdp}W")
                     print(
                         f"  Resolution: {config.get('default_resolution', '2560x1600')}"
                     )
@@ -563,25 +565,35 @@ https://github.com/th3cavalry/Linux-Armoury
                     matched = True
                     break
             if not matched:
-                print(f"\n⚠️  Model not in supported list (may still work)")
+                print("\n⚠️  Model not in supported list (may still work)")
 
         # Feature availability
-        print(f"\n🔧 Feature Availability:")
-        print(
-            f"  pwrcfg: {'✓ Available' if SystemUtils.check_command_exists('pwrcfg') else '✗ Not found'}"
+        print("\n🔧 Feature Availability:")
+        pwrcfg_status = (
+            "✓ Available"
+            if SystemUtils.check_command_exists("pwrcfg")
+            else "✗ Not found"
         )
-        print(
-            f"  xrandr: {'✓ Available' if SystemUtils.check_command_exists('xrandr') else '✗ Not found'}"
+        xrandr_status = (
+            "✓ Available"
+            if SystemUtils.check_command_exists("xrandr")
+            else "✗ Not found"
         )
-        print(
-            f"  sensors: {'✓ Available' if SystemUtils.check_command_exists('sensors') else '✗ Not found'}"
+        sensors_status = (
+            "✓ Available"
+            if SystemUtils.check_command_exists("sensors")
+            else "✗ Not found"
         )
+
+        print(f"  pwrcfg: {pwrcfg_status}")
+        print(f"  xrandr: {xrandr_status}")
+        print(f"  sensors: {sensors_status}")
 
         # Display detection
         display = SystemUtils.get_primary_display()
         resolution = SystemUtils.get_display_resolution()
         refresh = SystemUtils.get_current_refresh_rate()
-        print(f"\n📺 Display:")
+        print("\n📺 Display:")
         print(f"  Output: {display}")
         print(f"  Resolution: {resolution[0]}x{resolution[1]}")
         if refresh:
@@ -633,7 +645,7 @@ https://github.com/th3cavalry/Linux-Armoury
             )
             print(f"    CPU: {cpu_temp:.1f}°C  {status}")
         else:
-            print(f"    CPU: N/A")
+            print("    CPU: N/A")
 
         if gpu_temp:
             status = (
@@ -641,7 +653,7 @@ https://github.com/th3cavalry/Linux-Armoury
             )
             print(f"    GPU: {gpu_temp:.1f}°C  {status}")
         else:
-            print(f"    GPU: N/A")
+            print("    GPU: N/A")
 
         # Fan speeds
         if fan.is_supported():
@@ -721,7 +733,7 @@ https://github.com/th3cavalry/Linux-Armoury
         if oc.set_cpu_governor(governor):
             print(f"✓ CPU governor set to {governor}")
         else:
-            print(f"✗ Failed to set CPU governor")
+            print("✗ Failed to set CPU governor")
 
     def set_turbo_boost(self, enabled: bool):
         """Enable or disable turbo boost"""
@@ -733,7 +745,7 @@ https://github.com/th3cavalry/Linux-Armoury
         if oc.set_turbo_boost(enabled):
             print(f"✓ Turbo Boost {'enabled' if enabled else 'disabled'}")
         else:
-            print(f"✗ Failed to change Turbo Boost setting")
+            print("✗ Failed to change Turbo Boost setting")
 
     def apply_tdp_preset(self, preset_name: str):
         """Apply a TDP preset"""
@@ -762,7 +774,7 @@ https://github.com/th3cavalry/Linux-Armoury
             print(f"    Fast:  {preset['fast']}W")
             print(f"    Slow:  {preset['slow']}W")
         else:
-            print(f"✗ Failed to apply TDP preset")
+            print("✗ Failed to apply TDP preset")
 
     def apply_custom_tdp(self, tdp_string: str):
         """Apply custom TDP values (STAPM,FAST,SLOW)"""
@@ -785,12 +797,12 @@ https://github.com/th3cavalry/Linux-Armoury
             return
 
         if oc.set_ryzenadj_tdp(stapm_limit=stapm, fast_limit=fast, slow_limit=slow):
-            print(f"✓ Applied custom TDP:")
+            print("✓ Applied custom TDP:")
             print(f"    STAPM: {stapm}W")
             print(f"    Fast:  {fast}W")
             print(f"    Slow:  {slow}W")
         else:
-            print(f"✗ Failed to apply TDP settings")
+            print("✗ Failed to apply TDP settings")
 
     def set_gpu_perf_level(self, level: str):
         """Set AMD GPU performance level"""
@@ -806,7 +818,7 @@ https://github.com/th3cavalry/Linux-Armoury
         if oc.set_gpu_performance_level(level):
             print(f"✓ GPU performance level set to {level}")
         else:
-            print(f"✗ Failed to set GPU performance level")
+            print("✗ Failed to set GPU performance level")
 
     def show_cpu_info(self):
         """Display CPU information"""
@@ -838,7 +850,7 @@ https://github.com/th3cavalry/Linux-Armoury
         if epp_prefs:
             print(f"  Available EPP: {', '.join(epp_prefs)}")
 
-        print(f"\n  Tools Available:")
+        print("\n  Tools Available:")
         print(f"    cpupower:  {'Yes ✓' if oc.cpupower_available else 'No ✗'}")
         print(f"    RyzenAdj:  {'Yes ✓' if oc.ryzenadj_available else 'No ✗'}")
         print()
@@ -872,7 +884,7 @@ https://github.com/th3cavalry/Linux-Armoury
 
         profiles = oc.get_gpu_power_profiles()
         if profiles:
-            print(f"\n  Available Power Profiles:")
+            print("\n  Available Power Profiles:")
             for idx, name, is_active in profiles:
                 active_mark = " *" if is_active else ""
                 print(f"    {idx}: {name}{active_mark}")
@@ -885,12 +897,12 @@ https://github.com/th3cavalry/Linux-Armoury
 
         if HAS_HARDWARE_DETECTION:
             caps = detect_hardware()
-            print(f"\n  System Information:")
+            print("\n  System Information:")
             print(f"    ASUS Laptop: {'Yes ✓' if caps.is_asus_laptop else 'No'}")
             print(f"    Model: {caps.laptop_model or 'Unknown'}")
             print(f"    Kernel: {caps.kernel_version or 'Unknown'}")
 
-            print(f"\n  Available Features:")
+            print("\n  Available Features:")
             features = {
                 HardwareFeature.PLATFORM_PROFILE: "Platform Profile",
                 HardwareFeature.CHARGE_CONTROL: "Battery Charge Control",
@@ -907,44 +919,41 @@ https://github.com/th3cavalry/Linux-Armoury
                 available = feature in caps.features
                 print(f"    {name}: {'✓ Yes' if available else '✗ No'}")
 
-            print(f"\n  Daemon Status:")
-            print(
-                f"    asusd: {'✓ Running' if caps.asusd_available else '✗ Not running'}"
+            print("\n  Daemon Status:")
+            asusd_status = "✓ Running" if caps.asusd_available else "✗ Not running"
+            supergfx_status = (
+                "✓ Running" if caps.supergfxctl_available else "✗ Not running"
             )
-            print(
-                f"    supergfxctl: {'✓ Running' if caps.supergfxctl_available else '✗ Not running'}"
-            )
+            print(f"    asusd: {asusd_status}")
+            print(f"    supergfxctl: {supergfx_status}")
         else:
             print("\n  Hardware detection module not available")
 
         # Check available control modules
-        print(f"\n  Control Modules:")
-        print(
-            f"    Battery Control: {'✓ Available' if HAS_BATTERY_CONTROL else '✗ Not installed'}"
-        )
-        print(
-            f"    Fan Control: {'✓ Available' if HAS_FAN_CONTROL else '✗ Not installed'}"
-        )
-        print(
-            f"    Keyboard Control: {'✓ Available' if HAS_KEYBOARD_CONTROL else '✗ Not installed'}"
-        )
-        print(
-            f"    Overclocking: {'✓ Available' if HAS_OVERCLOCKING else '✗ Not installed'}"
-        )
+        print("\n  Control Modules:")
+        bat_status = "✓ Available" if HAS_BATTERY_CONTROL else "✗ Not installed"
+        fan_status = "✓ Available" if HAS_FAN_CONTROL else "✗ Not installed"
+        kbd_status = "✓ Available" if HAS_KEYBOARD_CONTROL else "✗ Not installed"
+        oc_status = "✓ Available" if HAS_OVERCLOCKING else "✗ Not installed"
+        print(f"    Battery Control: {bat_status}")
+        print(f"    Fan Control: {fan_status}")
+        print(f"    Keyboard Control: {kbd_status}")
+        print(f"    Overclocking: {oc_status}")
 
         # Show overclocking tools if module available
         if HAS_OVERCLOCKING:
             oc = OverclockingController()
-            print(f"\n  Overclocking Tools:")
-            print(
-                f"    cpupower:  {'✓ Available' if oc.cpupower_available else '✗ Not installed'}"
+            print("\n  Overclocking Tools:")
+            cpupower_status = (
+                "✓ Available" if oc.cpupower_available else "✗ Not installed"
             )
-            print(
-                f"    RyzenAdj:  {'✓ Available' if oc.ryzenadj_available else '✗ Not installed'}"
+            ryzenadj_status = (
+                "✓ Available" if oc.ryzenadj_available else "✗ Not installed"
             )
-            print(
-                f"    AMD GPU:   {'✓ Detected' if oc.amd_gpu_path else '✗ Not detected'}"
-            )
+            amd_status = "✓ Detected" if oc.amd_gpu_path else "✗ Not detected"
+            print(f"    cpupower:  {cpupower_status}")
+            print(f"    RyzenAdj:  {ryzenadj_status}")
+            print(f"    AMD GPU:   {amd_status}")
 
         print()
 
