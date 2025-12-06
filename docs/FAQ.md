@@ -10,7 +10,7 @@ Linux Armoury is a GUI control center for ASUS GZ302EA laptops running Linux. It
 
 Currently supported:
 - ASUS ROG Flow Z13 (GZ302EA-XS99) - 128GB variant
-- ASUS ROG Flow Z13 (GZ302EA-XS64) - 64GB variant  
+- ASUS ROG Flow Z13 (GZ302EA-XS64) - 64GB variant
 - ASUS ROG Flow Z13 (GZ302EA-XS32) - 32GB variant
 
 Future versions may support additional models.
@@ -117,7 +117,7 @@ When enabled in Preferences:
    ```bash
    python3 -c "import gi; gi.require_version('Gtk', '4.0'); gi.require_version('Adw', '1')"
    ```
-   
+
 2. **Run from terminal to see errors:**
    ```bash
    linux-armoury
@@ -153,10 +153,10 @@ sudo ./gz302-main.sh
    ```bash
    # Ubuntu/Debian
    sudo apt install gir1.2-ayatanaappindicator3-0.1
-   
+
    # Arch
    sudo pacman -S libayatana-appindicator
-   
+
    # Fedora
    sudo dnf install libayatana-appindicator-gtk3
    ```

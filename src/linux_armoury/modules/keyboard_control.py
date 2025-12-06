@@ -5,15 +5,16 @@ Keyboard Control Module for Linux Armoury
 Provides keyboard backlight and Aura RGB control for ASUS laptops.
 """
 
-import os
 import glob
-from typing import Optional, List, Tuple, Dict
+import os
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
 
 
 class AuraEffect(Enum):
     """Aura RGB lighting effects"""
+
     STATIC = "Static"
     BREATHE = "Breathe"
     COLOR_CYCLE = "ColorCycle"
@@ -32,6 +33,7 @@ class AuraEffect(Enum):
 @dataclass
 class RGB:
     """RGB color value"""
+
     red: int
     green: int
     blue: int
@@ -50,7 +52,7 @@ class RGB:
         return cls(
             red=int(hex_color[0:2], 16),
             green=int(hex_color[2:4], 16),
-            blue=int(hex_color[4:6], 16)
+            blue=int(hex_color[4:6], 16),
         )
 
 
@@ -158,9 +160,7 @@ class KeyboardController:
                 values = f.read().strip().split()
             if len(values) >= 3:
                 return RGB(
-                    red=int(values[0]),
-                    green=int(values[1]),
-                    blue=int(values[2])
+                    red=int(values[0]), green=int(values[1]), blue=int(values[2])
                 )
         except Exception:
             pass

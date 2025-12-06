@@ -5,16 +5,17 @@ Fan Control Module for Linux Armoury
 Provides fan curve and fan speed control for ASUS laptops.
 """
 
-import os
 import glob
+import os
 import subprocess
-from typing import Optional, List, Tuple, Dict
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
 
 
 class FanProfile(Enum):
     """Fan control profiles"""
+
     QUIET = "quiet"
     BALANCED = "balanced"
     PERFORMANCE = "performance"
@@ -24,13 +25,15 @@ class FanProfile(Enum):
 @dataclass
 class FanCurvePoint:
     """A point on the fan curve"""
+
     temperature: int  # Celsius
-    fan_speed: int    # Percentage (0-100)
+    fan_speed: int  # Percentage (0-100)
 
 
 @dataclass
 class FanStatus:
     """Current fan status"""
+
     rpm: int
     pwm: int
     name: str
@@ -45,28 +48,44 @@ class FanController:
     # Default fan curve presets (temperature, speed %)
     CURVE_PRESETS = {
         FanProfile.QUIET: [
-            FanCurvePoint(30, 0), FanCurvePoint(40, 10),
-            FanCurvePoint(50, 25), FanCurvePoint(60, 35),
-            FanCurvePoint(70, 50), FanCurvePoint(80, 65),
-            FanCurvePoint(90, 80), FanCurvePoint(100, 100),
+            FanCurvePoint(30, 0),
+            FanCurvePoint(40, 10),
+            FanCurvePoint(50, 25),
+            FanCurvePoint(60, 35),
+            FanCurvePoint(70, 50),
+            FanCurvePoint(80, 65),
+            FanCurvePoint(90, 80),
+            FanCurvePoint(100, 100),
         ],
         FanProfile.BALANCED: [
-            FanCurvePoint(30, 0), FanCurvePoint(40, 20),
-            FanCurvePoint(50, 35), FanCurvePoint(60, 50),
-            FanCurvePoint(70, 65), FanCurvePoint(80, 80),
-            FanCurvePoint(90, 95), FanCurvePoint(100, 100),
+            FanCurvePoint(30, 0),
+            FanCurvePoint(40, 20),
+            FanCurvePoint(50, 35),
+            FanCurvePoint(60, 50),
+            FanCurvePoint(70, 65),
+            FanCurvePoint(80, 80),
+            FanCurvePoint(90, 95),
+            FanCurvePoint(100, 100),
         ],
         FanProfile.PERFORMANCE: [
-            FanCurvePoint(30, 20), FanCurvePoint(40, 35),
-            FanCurvePoint(50, 50), FanCurvePoint(60, 65),
-            FanCurvePoint(70, 80), FanCurvePoint(80, 90),
-            FanCurvePoint(90, 100), FanCurvePoint(100, 100),
+            FanCurvePoint(30, 20),
+            FanCurvePoint(40, 35),
+            FanCurvePoint(50, 50),
+            FanCurvePoint(60, 65),
+            FanCurvePoint(70, 80),
+            FanCurvePoint(80, 90),
+            FanCurvePoint(90, 100),
+            FanCurvePoint(100, 100),
         ],
         FanProfile.FULL_SPEED: [
-            FanCurvePoint(30, 100), FanCurvePoint(40, 100),
-            FanCurvePoint(50, 100), FanCurvePoint(60, 100),
-            FanCurvePoint(70, 100), FanCurvePoint(80, 100),
-            FanCurvePoint(90, 100), FanCurvePoint(100, 100),
+            FanCurvePoint(30, 100),
+            FanCurvePoint(40, 100),
+            FanCurvePoint(50, 100),
+            FanCurvePoint(60, 100),
+            FanCurvePoint(70, 100),
+            FanCurvePoint(80, 100),
+            FanCurvePoint(90, 100),
+            FanCurvePoint(100, 100),
         ],
     }
 
@@ -104,11 +123,13 @@ class FanController:
                                 label = f.read().strip()
                         except Exception:
                             pass
-                    self._fans.append({
-                        "id": i,
-                        "name": label,
-                        "rpm_path": rpm_path,
-                    })
+                    self._fans.append(
+                        {
+                            "id": i,
+                            "name": label,
+                            "rpm_path": rpm_path,
+                        }
+                    )
 
         # Check for fan curve support
         curve_enable_path = os.path.join(self.PLATFORM_PATH, "fan_curve_enable")
@@ -145,11 +166,9 @@ class FanController:
             try:
                 with open(fan["rpm_path"], "r") as f:
                     rpm = int(f.read().strip())
-                result.append(FanStatus(
-                    rpm=rpm,
-                    pwm=0,  # Not always available
-                    name=fan["name"]
-                ))
+                result.append(
+                    FanStatus(rpm=rpm, pwm=0, name=fan["name"])  # Not always available
+                )
             except Exception:
                 pass
         return result
@@ -181,7 +200,9 @@ class FanController:
         try:
             result = subprocess.run(
                 ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.returncode == 0:
                 return float(result.stdout.strip())
@@ -220,7 +241,9 @@ class FanController:
         except PermissionError:
             try:
                 cmd = ["pkexec", "tee", self._fan_curve_path]
-                result = subprocess.run(cmd, input=value, capture_output=True, text=True, timeout=30)
+                result = subprocess.run(
+                    cmd, input=value, capture_output=True, text=True, timeout=30
+                )
                 if result.returncode == 0:
                     return True, f"Custom fan curve {status_msg}"
                 return False, f"Failed: {result.stderr}"

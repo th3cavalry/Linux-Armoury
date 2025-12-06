@@ -7,12 +7,13 @@ Falls back to direct sysfs access when asusd is not available.
 """
 
 import subprocess
-from typing import Optional, List, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class ThrottlePolicy(Enum):
     """Platform throttle policies supported by asusd"""
+
     BALANCED = 0
     PERFORMANCE = 1
     QUIET = 2
@@ -20,6 +21,7 @@ class ThrottlePolicy(Enum):
 
 class GpuMode(Enum):
     """GPU modes supported by supergfxctl"""
+
     HYBRID = "Hybrid"
     INTEGRATED = "Integrated"
     DEDICATED = "Dedicated"
@@ -32,6 +34,7 @@ class GpuMode(Enum):
 
 class AuraEffect(Enum):
     """Aura keyboard lighting effects"""
+
     STATIC = "Static"
     BREATHE = "Breathe"
     STROBE = "Strobe"
@@ -69,6 +72,7 @@ class AsusdClient:
         if self._bus is None:
             try:
                 import dbus
+
                 self._bus = dbus.SystemBus()
             except Exception:
                 self._bus = False
@@ -86,6 +90,7 @@ class AsusdClient:
 
         try:
             import dbus
+
             proxy = bus.get_object(self.SERVICE_NAME, self.PLATFORM_PATH)
             proxy.Introspect(dbus_interface=dbus.INTROSPECTABLE_IFACE)
             self._available = True
@@ -100,9 +105,10 @@ class AsusdClient:
             return None
         if self._platform_proxy is None:
             import dbus
+
             self._platform_proxy = dbus.Interface(
                 self._bus.get_object(self.SERVICE_NAME, self.PLATFORM_PATH),
-                self.PLATFORM_IFACE
+                self.PLATFORM_IFACE,
             )
         return self._platform_proxy
 
@@ -112,9 +118,9 @@ class AsusdClient:
             return None
         if self._led_proxy is None:
             import dbus
+
             self._led_proxy = dbus.Interface(
-                self._bus.get_object(self.SERVICE_NAME, self.LED_PATH),
-                self.LED_IFACE
+                self._bus.get_object(self.SERVICE_NAME, self.LED_PATH), self.LED_IFACE
             )
         return self._led_proxy
 
@@ -227,6 +233,7 @@ class SupergfxClient:
         if self._bus is None:
             try:
                 import dbus
+
                 self._bus = dbus.SystemBus()
             except Exception:
                 self._bus = False
@@ -244,6 +251,7 @@ class SupergfxClient:
 
         try:
             import dbus
+
             proxy = bus.get_object(self.SERVICE_NAME, self.PATH)
             proxy.Introspect(dbus_interface=dbus.INTROSPECTABLE_IFACE)
             self._available = True
@@ -258,9 +266,9 @@ class SupergfxClient:
             return None
         if self._proxy is None:
             import dbus
+
             self._proxy = dbus.Interface(
-                self._bus.get_object(self.SERVICE_NAME, self.PATH),
-                self.IFACE
+                self._bus.get_object(self.SERVICE_NAME, self.PATH), self.IFACE
             )
         return self._proxy
 

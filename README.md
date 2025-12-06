@@ -285,7 +285,7 @@ This project is licensed under the GPL-3.0 License - see the LICENSE file for de
 ## 🙏 Credits
 
 - **Author**: th3cavalry
-- **Inspired by**: 
+- **Inspired by**:
   - [G-Helper](https://github.com/seerge/g-helper) by seerge
   - [asusctl/rog-control-center](https://gitlab.com/asus-linux/asusctl) by asus-linux team
 - **Hardware research**: [GZ302-Linux-Setup](https://github.com/th3cavalry/GZ302-Linux-Setup)

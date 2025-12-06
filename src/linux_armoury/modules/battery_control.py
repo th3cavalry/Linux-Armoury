@@ -5,16 +5,18 @@ Battery Control Module for Linux Armoury
 Provides battery charge limit control for ASUS laptops.
 """
 
-import os
 import glob
+import os
 import subprocess
-from typing import Optional, List, Tuple
 from enum import IntEnum
+from typing import List, Optional, Tuple
+
 from ..system_utils import SystemUtils
 
 
 class ChargeLimitPreset(IntEnum):
     """Common charge limit presets"""
+
     MAXIMUM = 100
     BALANCED = 80
     LIFESPAN = 60
@@ -52,8 +54,10 @@ class BatteryController:
         battery_path = SystemUtils.find_battery_path()
         if battery_path:
             self._battery_path = battery_path
-            self._charge_limit_path = os.path.join(battery_path, "charge_control_end_threshold")
-            
+            self._charge_limit_path = os.path.join(
+                battery_path, "charge_control_end_threshold"
+            )
+
             # Verify charge limit path exists
             if not os.path.exists(self._charge_limit_path):
                 self._charge_limit_path = None
@@ -97,11 +101,7 @@ class BatteryController:
             try:
                 cmd = ["pkexec", "tee", self._charge_limit_path]
                 result = subprocess.run(
-                    cmd,
-                    input=str(limit),
-                    capture_output=True,
-                    text=True,
-                    timeout=30
+                    cmd, input=str(limit), capture_output=True, text=True, timeout=30
                 )
                 if result.returncode == 0:
                     return True, f"Charge limit set to {limit}%"
@@ -150,7 +150,12 @@ class BatteryController:
 
         # Additional info if battery path available
         if self._battery_path:
-            for attr in ["energy_full", "energy_full_design", "voltage_now", "current_now"]:
+            for attr in [
+                "energy_full",
+                "energy_full_design",
+                "voltage_now",
+                "current_now",
+            ]:
                 path = os.path.join(self._battery_path, attr)
                 if os.path.exists(path):
                     try:

@@ -317,18 +317,18 @@ Created when "Start on Boot" is enabled in preferences.
 try:
     # Execute command
     result = subprocess.run(...)
-    
+
     if result.returncode == 0:
         # Success path
         show_success_dialog()
     else:
         # Command failed
         show_error_dialog(result.stderr)
-        
+
 except subprocess.TimeoutExpired:
     # Command timed out
     show_error_dialog("Command timed out")
-    
+
 except Exception as e:
     # Unexpected error
     show_error_dialog(f"Error: {str(e)}")

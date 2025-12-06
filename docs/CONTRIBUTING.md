@@ -150,13 +150,13 @@ def createPowerProfileSection(self):
 def apply_power_profile(self, profile: str) -> bool:
     """
     Apply a power profile using pwrcfg command.
-    
+
     Args:
         profile: Name of the profile to apply (e.g., 'balanced', 'gaming')
-    
+
     Returns:
         True if profile was applied successfully, False otherwise
-    
+
     Raises:
         subprocess.TimeoutExpired: If the command times out
         subprocess.CalledProcessError: If pwrcfg returns an error

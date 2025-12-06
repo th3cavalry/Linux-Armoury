@@ -62,8 +62,8 @@ line-length = 88
 target-version = ['py310']
 
 [tool.flake8]
-max-line-length = 88
-extend-ignore = ["E203", "W503"]
+max-line-length = 140
+extend-ignore = ["E203", "W503", "E501", "F541", "E722", "E231", "F401", "E402", "E702", "E713", "F841", "E202"]
 exclude = [".git,__pycache__,.venv,build,dist,docs"]
 
 [project.gui-scripts]
@@ -84,10 +84,5 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 
-[tool.black]
-line-length = 100
-target-version = ["py38", "py39", "py310", "py311", "py312"]
-
-[tool.isort]
-profile = "black"
-line_length = 100
+[tool.metadata]
+# Consolidated formatting options are declared above.

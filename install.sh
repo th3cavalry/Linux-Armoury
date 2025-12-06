@@ -87,46 +87,46 @@ install_opensuse_deps() {
 # Install the application
 install_application() {
     info "Installing Linux Armoury GUI and CLI..."
-    
+
     # Directories
     DESKTOP_DIR="/usr/share/applications"
     ICON_DIR="/usr/share/icons/hicolor/scalable/apps"
     DBUS_CONF_DIR="/etc/dbus-1/system.d"
     SYSTEMD_DIR="/etc/systemd/system"
-    
+
     # Install Python package
     info "Installing Python package..."
     if ! sudo pip install . --break-system-packages 2>/dev/null; then
         sudo pip install .
     fi
-    
+
     # Install app icon
     if [ -f data/icons/linux-armoury.svg ]; then
         sudo mkdir -p "$ICON_DIR"
         sudo install -m 644 data/icons/linux-armoury.svg "$ICON_DIR/linux-armoury.svg"
         info "App icon installed"
     fi
-    
+
     # Install D-Bus configuration
     if [ -f data/dbus/com.github.th3cavalry.LinuxArmoury.conf ]; then
         sudo mkdir -p "$DBUS_CONF_DIR"
         sudo install -m 644 data/dbus/com.github.th3cavalry.LinuxArmoury.conf "$DBUS_CONF_DIR/"
         info "D-Bus configuration installed"
     fi
-    
+
     # Install systemd service
     if [ -f data/systemd/linux-armoury.service ]; then
         sudo install -m 644 data/systemd/linux-armoury.service "$SYSTEMD_DIR/"
         sudo systemctl daemon-reload
         info "Systemd service installed (enable with: sudo systemctl enable linux-armoury)"
     fi
-    
+
     # Install desktop entries (legacy and DBus activatable)
     sudo install -m 644 linux-armoury.desktop "$DESKTOP_DIR/linux-armoury.desktop"
     if [ -f com.github.th3cavalry.linux-armoury.desktop ]; then
         sudo install -m 644 com.github.th3cavalry.linux-armoury.desktop "$DESKTOP_DIR/com.github.th3cavalry.linux-armoury.desktop"
     fi
-    
+
     # Install autostart entry (starts minimized to tray on boot)
     info "Installing autostart entry..."
     AUTOSTART_DIR="$HOME/.config/autostart"
@@ -135,7 +135,7 @@ install_application() {
         install -m 644 linux-armoury-autostart.desktop "$AUTOSTART_DIR/linux-armoury.desktop"
         success "Autostart entry installed - Linux Armoury will start on boot"
     fi
-    
+
     # Update desktop database and icon cache
     if command -v update-desktop-database &> /dev/null; then
         sudo update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
@@ -143,7 +143,7 @@ install_application() {
     if command -v gtk-update-icon-cache &> /dev/null; then
         sudo gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
     fi
-    
+
     success "Application installed"
 }
 
@@ -154,10 +154,10 @@ main() {
     echo "  Linux Armoury GUI Installation"
     echo "============================================================"
     echo
-    
+
     # Detect distribution
     detect_distro
-    
+
     # Install dependencies based on distribution
     case "$DISTRO_ID" in
         arch|manjaro|endeavouros)
@@ -187,10 +187,10 @@ main() {
             fi
             ;;
     esac
-    
+
     # Install the application
     install_application
-    
+
     echo
     success "Installation complete!"
     echo

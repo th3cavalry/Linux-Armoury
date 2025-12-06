@@ -22,21 +22,21 @@ from plugin_system import PluginBase
 class Plugin(PluginBase):
     def __init__(self):
         super().__init__("My Plugin Name")
-    
+
     def on_load(self):
         """Called when plugin is loaded"""
         print(f"{self.name} loaded!")
-    
+
     def on_status_update(self, status_data):
         """Called every 2 seconds with current system status"""
         cpu_temp = status_data.get('cpu_temp')
         if cpu_temp and cpu_temp > 80:
             print(f"Warning: CPU is hot! {cpu_temp}°C")
-    
+
     def on_profile_change(self, old_profile, new_profile):
         """Called when power profile changes"""
         print(f"Profile changed: {old_profile} → {new_profile}")
-    
+
     def get_info(self):
         """Return plugin metadata"""
         return {
@@ -57,7 +57,7 @@ Called periodically (every 2 seconds) with current system status.
 
 **status_data dictionary contains:**
 - `cpu_temp`: float - CPU temperature in Celsius
-- `gpu_temp`: float - GPU temperature in Celsius  
+- `gpu_temp`: float - GPU temperature in Celsius
 - `battery`: int - Battery percentage (0-100)
 - `on_ac`: bool - True if on AC power
 - `refresh_rate`: int - Current refresh rate in Hz
@@ -91,16 +91,16 @@ class Plugin(PluginBase):
     def __init__(self):
         super().__init__("Smart Switcher")
         self.last_gaming = False
-    
+
     def on_status_update(self, status_data):
         from system_utils import SystemUtils
-        
+
         gaming_active = SystemUtils.detect_gaming_apps()
-        
+
         # Switch to gaming profile when game detected
         if gaming_active and not self.last_gaming:
             print("🎮 Game detected! Consider switching to gaming profile")
-        
+
         self.last_gaming = gaming_active
 ```
 

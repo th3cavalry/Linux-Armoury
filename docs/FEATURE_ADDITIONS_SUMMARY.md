@@ -172,7 +172,7 @@ This release adds significant enhancements across six feature categories, implem
 
 **From v1.0.0 or v1.1.0:**
 1. Pull latest code
-2. Run `./install.sh` 
+2. Run `./install.sh`
 3. Configuration automatically upgraded
 4. New features available immediately
 5. Plugins directory auto-created

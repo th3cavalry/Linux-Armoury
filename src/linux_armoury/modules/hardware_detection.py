@@ -5,17 +5,18 @@ Hardware Detection Module for Linux Armoury
 Detects ASUS laptop hardware capabilities and available features.
 """
 
-import os
 import glob
+import os
 import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Set
 from dataclasses import dataclass, field
 from enum import Enum, auto
+from pathlib import Path
+from typing import Dict, List, Optional, Set
 
 
 class HardwareFeature(Enum):
     """Available hardware features"""
+
     PLATFORM_PROFILE = auto()
     CHARGE_CONTROL = auto()
     KEYBOARD_BACKLIGHT = auto()
@@ -30,6 +31,7 @@ class HardwareFeature(Enum):
 @dataclass
 class HardwareCapabilities:
     """Detected hardware capabilities"""
+
     is_asus_laptop: bool = False
     laptop_model: str = ""
     kernel_version: str = ""
@@ -99,7 +101,7 @@ class HardwareDetector:
             paths = glob.glob(self.SYSFS_PATHS["kbd_backlight"])
             if paths:
                 caps.kbd_backlight_path = paths[0]
-            
+
             # Check for RGB support
             if self._has_rgb_keyboard():
                 caps.features.add(HardwareFeature.KEYBOARD_RGB)
@@ -154,7 +156,9 @@ class HardwareDetector:
     def _get_kernel_version(self) -> str:
         """Get kernel version"""
         try:
-            result = subprocess.run(["uname", "-r"], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                ["uname", "-r"], capture_output=True, text=True, timeout=5
+            )
             return result.stdout.strip()
         except Exception:
             return ""
@@ -171,7 +175,9 @@ class HardwareDetector:
         try:
             result = subprocess.run(
                 ["systemctl", "is-active", "asusd"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             return result.stdout.strip() == "active"
         except Exception:
@@ -182,7 +188,9 @@ class HardwareDetector:
         try:
             result = subprocess.run(
                 ["systemctl", "is-active", "supergfxd"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             return result.stdout.strip() == "active"
         except Exception:
@@ -191,7 +199,9 @@ class HardwareDetector:
     def _has_rgb_keyboard(self) -> bool:
         """Check if keyboard has RGB support"""
         # Check for aura devices
-        aura_paths = glob.glob("/sys/class/leds/asus::kbd_backlight/device/leds/*/brightness")
+        aura_paths = glob.glob(
+            "/sys/class/leds/asus::kbd_backlight/device/leds/*/brightness"
+        )
         if aura_paths:
             return True
         # Check for multi_intensity support
