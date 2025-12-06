@@ -3,6 +3,7 @@
 Unit tests for plugin_system.py
 """
 
+import os
 import tempfile
 import shutil
 

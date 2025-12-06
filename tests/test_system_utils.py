@@ -3,6 +3,7 @@
 Unit tests for system_utils.py
 """
 
+import os
 import pytest
 from unittest.mock import patch, MagicMock
 from linux_armoury.system_utils import SystemUtils, DisplayBackend
