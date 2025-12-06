@@ -23,11 +23,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            pkg-config \
-            python3-dev \
             libcairo2-dev \
             libgirepository1.0-dev \
-            libglib2.0-dev
+            python3-gi \
+            python3-cairo \
+            pkg-config \
+            gir1.2-gtk-3.0
 
       - name: Install dependencies
         run: |
