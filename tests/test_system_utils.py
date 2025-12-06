@@ -69,6 +69,78 @@ class TestBattery:
         result = SystemUtils.is_on_ac_power()
         assert isinstance(result, bool)
 
+    def test_find_battery_path_behaviour(self, monkeypatch):
+        """Test find_battery_path handles missing /sys and finds BAT0 when present"""
+
+        # Case 1: /sys not present
+        original_exists = os.path.exists
+        monkeypatch.setattr(
+            "os.path.exists",
+            lambda p: False if p == "/sys/class/power_supply" else original_exists(p),
+        )
+        assert SystemUtils.find_battery_path() is None
+
+        # Case 2: /sys exists and contains BAT0
+        def fake_exists(path):
+            if path == "/sys/class/power_supply":
+                return True
+            if path.endswith("BAT0"):
+                return True
+            return False
+
+        monkeypatch.setattr("os.path.exists", fake_exists)
+        monkeypatch.setattr(
+            "os.listdir",
+            lambda path: ["BAT0"] if path == "/sys/class/power_supply" else [],
+        )
+        assert SystemUtils.find_battery_path() == "/sys/class/power_supply/BAT0"
+
+    def test_find_ac_path_behaviour(self, monkeypatch):
+        """Test find_ac_path behavior under various /sys layouts"""
+        # No /sys
+        original_exists = os.path.exists
+        monkeypatch.setattr(
+            "os.path.exists",
+            lambda p: False if p == "/sys/class/power_supply" else original_exists(p),
+        )
+        assert SystemUtils.find_ac_path() is None
+
+        # AC path exists as ADP1
+        def fake_exists2(path):
+            if path == "/sys/class/power_supply":
+                return True
+            if path.endswith("ADP1"):
+                return True
+            if path.endswith("ADP1/type"):
+                return True
+            return False
+
+        monkeypatch.setattr("os.path.exists", fake_exists2)
+        monkeypatch.setattr(
+            "os.listdir",
+            lambda path: ["ADP1"] if path == "/sys/class/power_supply" else [],
+        )
+
+        class _FakeTypeFile:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self):
+                return "Mains"
+
+        monkeypatch.setattr(
+            "builtins.open",
+            lambda p, *a, **k: _FakeTypeFile()
+            if p.endswith("type")
+            else open(p, *a, **k),
+        )
+        # For the simulated path, find_ac_path should return a path ending with ADP1
+        p = SystemUtils.find_ac_path()
+        assert p is not None and p.endswith("ADP1")
+
     def test_battery_percentage_returns_int_or_none(self):
         """Test battery percentage returns correct type"""
         result = SystemUtils.get_battery_percentage()
