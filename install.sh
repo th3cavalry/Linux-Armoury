@@ -90,7 +90,8 @@ install_arch_deps() {
     info "Installing dependencies for Arch-based system..."
     sudo pacman -S --noconfirm --needed \
         python python-gobject gtk4 libadwaita \
-        polkit xorg-xrandr pciutils power-profiles-daemon
+        polkit xorg-xrandr pciutils power-profiles-daemon \
+        python-pip lm_sensors libayatana-appindicator git
     success "Dependencies installed"
 }
 
@@ -100,7 +101,8 @@ install_debian_deps() {
     sudo apt update
     sudo apt install -y \
         python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
-        policykit-1 x11-xserver-utils pciutils power-profiles-daemon
+        policykit-1 x11-xserver-utils pciutils power-profiles-daemon \
+        python3-pip lm-sensors gir1.2-ayatanaappindicator3-0.1 git
     success "Dependencies installed"
 }
 
@@ -109,7 +111,8 @@ install_fedora_deps() {
     info "Installing dependencies for Fedora-based system..."
     sudo dnf install -y \
         python3 python3-gobject gtk4 libadwaita \
-        polkit xrandr pciutils power-profiles-daemon
+        polkit xrandr pciutils power-profiles-daemon \
+        python3-pip lm_sensors libayatana-appindicator-gtk3 git
     success "Dependencies installed"
 }
 
@@ -118,7 +121,8 @@ install_opensuse_deps() {
     info "Installing dependencies for OpenSUSE..."
     sudo zypper install -y \
         python3 python3-gobject gtk4 libadwaita-1-0 \
-        polkit xrandr pciutils power-profiles-daemon
+        polkit xrandr pciutils power-profiles-daemon \
+        python3-pip sensors libayatana-appindicator3-1 git
     success "Dependencies installed"
 }
 
@@ -166,8 +170,14 @@ install_debian_asus_tools() {
     info "Configuring ASUS tools for Debian/Ubuntu..."
     # Check for PPA support
     if command -v add-apt-repository >/dev/null; then
-        sudo add-apt-repository -y ppa:mitchellaugustin/asusctl
-        sudo apt update
+        if ! grep -r "mitchellaugustin/asusctl" /etc/apt/sources.list /etc/apt/sources.list.d/ >/dev/null 2>&1; then
+            info "Adding ASUS PPA..."
+            sudo add-apt-repository -y ppa:mitchellaugustin/asusctl
+            sudo apt update
+        else
+            info "ASUS PPA already configured."
+        fi
+
         sudo apt install -y asusctl
 
         if [ "$HAS_NVIDIA" = true ]; then
@@ -237,8 +247,8 @@ install_application() {
 
     # Install Python package
     info "Installing Python package..."
-    if ! sudo pip install . --break-system-packages 2>/dev/null; then
-        sudo pip install .
+    if ! sudo python3 -m pip install . --break-system-packages 2>/dev/null; then
+        sudo python3 -m pip install .
     fi
 
     # Install app icon
@@ -260,6 +270,21 @@ install_application() {
         sudo install -m 644 data/systemd/linux-armoury.service "$SYSTEMD_DIR/"
         sudo systemctl daemon-reload
         info "Systemd service installed (enable with: sudo systemctl enable linux-armoury)"
+    fi
+
+    # Install udev rules
+    if [ -f data/udev/99-linux-armoury.rules ]; then
+        info "Installing udev rules..."
+        sudo install -m 644 data/udev/99-linux-armoury.rules /etc/udev/rules.d/
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger
+
+        # Ensure user is in video group
+        if ! groups | grep -q "video"; then
+            info "Adding user to 'video' group for backlight control..."
+            sudo usermod -aG video $USER
+            warning "You may need to log out and back in for group changes to take effect."
+        fi
     fi
 
     # Install desktop entries (legacy and DBus activatable)

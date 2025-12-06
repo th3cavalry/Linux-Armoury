@@ -15,3 +15,12 @@ precommit-install:
 
 test:
 	PYTHONPATH=src pytest -q
+
+build:
+	$(PY) -m build
+
+clean:
+	rm -rf dist/ build/ *.egg-info/ .pytest_cache/ .coverage
+
+install:
+	$(PIP) install .

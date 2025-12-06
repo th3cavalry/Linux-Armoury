@@ -5,11 +5,11 @@ Keyboard Control Module for Linux Armoury
 Provides keyboard backlight and Aura RGB control for ASUS laptops.
 """
 
-import glob
 import os
+import subprocess
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 
 class AuraEffect(Enum):
@@ -129,16 +129,28 @@ class KeyboardController:
             return False, "Keyboard backlight not supported"
 
         level = max(0, min(self._max_brightness, level))
+        brightness_path = os.path.join(self._backlight_path, "brightness")
 
+        # 1. Try direct write (fastest, works with udev rules)
         try:
-            brightness_path = os.path.join(self._backlight_path, "brightness")
             with open(brightness_path, "w") as f:
                 f.write(str(level))
             return True, f"Brightness set to {level}"
         except PermissionError:
-            return False, "Permission denied. Try running as root."
+            pass  # Fall through to fallback
         except Exception as e:
             return False, str(e)
+
+        # 2. Try pkexec (fallback)
+        try:
+            # Use pkexec to write to the file
+            cmd = ["pkexec", "sh", "-c", f"echo {level} > {brightness_path}"]
+            subprocess.run(cmd, check=True)
+            return True, f"Brightness set to {level} (via pkexec)"
+        except subprocess.CalledProcessError:
+            return False, "Failed to set brightness (pkexec denied or failed)"
+        except Exception as e:
+            return False, f"Error: {e}"
 
     def cycle_brightness(self) -> Tuple[bool, str]:
         """Cycle to next brightness level"""
@@ -171,16 +183,28 @@ class KeyboardController:
         if not self._has_rgb:
             return False, "RGB control not supported"
 
+        mi_path = os.path.join(self._backlight_path, "multi_intensity")
+        value = f"{color.red} {color.green} {color.blue}"
+
+        # 1. Try direct write
         try:
-            mi_path = os.path.join(self._backlight_path, "multi_intensity")
-            value = f"{color.red} {color.green} {color.blue}"
             with open(mi_path, "w") as f:
                 f.write(value)
             return True, f"Color set to {color.to_hex()}"
         except PermissionError:
-            return False, "Permission denied. Try running as root."
+            pass  # Fall through to fallback
         except Exception as e:
             return False, str(e)
+
+        # 2. Try pkexec (fallback)
+        try:
+            cmd = ["pkexec", "sh", "-c", f"echo '{value}' > {mi_path}"]
+            subprocess.run(cmd, check=True)
+            return True, f"Color set to {color.to_hex()} (via pkexec)"
+        except subprocess.CalledProcessError:
+            return False, "Failed to set color (pkexec denied or failed)"
+        except Exception as e:
+            return False, f"Error: {e}"
 
     def set_preset_color(self, name: str) -> Tuple[bool, str]:
         """Set a preset color by name"""
