@@ -55,8 +55,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Flatpak to GitHub Release
+        if: success() && steps.create_bundle.outputs.bundle != ''
         uses: softprops/action-gh-release@v1
         with:
-          files: linux-armoury-${{ github.ref_name }}.flatpak
+          files: ${{ steps.create_bundle.outputs.bundle }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Fallback: if the built artifact is not available, attach the repo-provided
+      # pre-built flatpak as an asset to the release so the tag has a usable artifact.
+      - name: Upload repo-provided Flatpak (fallback)
+        if: always()
+        uses: softprops/action-gh-release@v1
+        with:
+          files: linux-armoury-0.5.0b0.flatpak
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
