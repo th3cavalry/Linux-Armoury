@@ -39,7 +39,8 @@ modules:
       build-args:
         - --share=network
     build-commands:
-      - pip3 install --no-deps --prefix=/app .
+      # Use python3 -m pip to ensure pip entrypoint works inside the SDK
+      - python3 -m pip install --no-deps --prefix=/app .
     sources:
       - type: dir
         path: .
