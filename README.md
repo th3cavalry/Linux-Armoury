@@ -50,15 +50,23 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 
 ### Hardware
 **Primary Focus:**
-- Modern ASUS ROG and ASUS gaming laptop models released within the last ~6 years (2019 — present)
+- Modern ASUS ROG and ASUS gaming laptop models (2019–present)
+- Broader ASUS laptop support including TUF, VivoBook Pro, and other gaming-focused lines
 
 **Example models supported (non-exhaustive):**
-- ROG Flow Z13 series
-- ROG Zephyrus series (M15 / G15 and similar)
-- ASUS TUF / other gaming series (coverage varies by model)
+- ROG Flow Z13 series (GZ302, GZ302VU, etc.)
+- ROG Zephyrus series (M15 / G15 / G16 and similar)
+- ROG Strix Scar series (16 / 18 and variants)
+- ASUS TUF Gaming series (A15 / A16 / F15 / F17 and variants)
+- ROG Ally / ROG Ally X (handheld gaming device) — Hardware control varies by SoC
+- Other ASUS gaming-focused models with similar hardware architecture
+
+**Note:** Not all features are available on all models. Hardware control capabilities depend on available ASUS-specific drivers (`asusctl`, `supergfxctl`) and standard Linux power management tools (`power-profiles-daemon`). The application gracefully falls back to available backends.
 
 **System Requirements:**
-- Linux kernel 6.14+ (6.17+ recommended)
+- Linux kernel 6.14+ (6.17+ recommended for full stability)
+- Modern GNOME Stack (GTK4, libadwaita)
+- systemd-based init system
 
 ### Software Dependencies
 - Python 3.8+
@@ -76,7 +84,29 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 
 ## 🚀 Installation
 
-### Quick Install
+### Flatpak (Recommended for Immutable Systems)
+
+For Bazzite, Fedora Silverblue, uBlue, and other immutable/containerized systems:
+
+```bash
+# Build and install from source
+flatpak install flathub org.gnome.Platform//46 org.gnome.Sdk//46
+flatpak-builder --user --install --force-clean build-dir com.github.th3cavalry.linux-armoury.yml
+
+# Run the application
+flatpak run com.github.th3cavalry.linux-armoury
+```
+
+Or install the pre-built `.flatpak` file:
+
+```bash
+flatpak install linux-armoury-0.5.0b0.flatpak
+flatpak run com.github.th3cavalry.linux-armoury
+```
+
+**Note:** Flatpak support is essential for systems like Bazzite that have removed native `asusctl` packages. The Flatpak includes all necessary runtime permissions for hardware monitoring and power management.
+
+### Quick Install (Traditional Linux)
 
 ```bash
 # Clone the repository
@@ -93,8 +123,9 @@ chmod +x install.sh
 The installer will automatically:
 1. Detect your Linux distribution
 2. Install required dependencies
-3. Install the Linux Armoury application
-4. Create desktop entry for easy launching
+3. Configure hardware-specific repositories (asusctl, power-profiles-daemon)
+4. Install the Linux Armoury application
+5. Create desktop entry for easy launching
 
 ### Manual Installation
 
@@ -113,6 +144,22 @@ sudo install -m 644 system_utils.py /usr/local/bin/system_utils.py
 # Create desktop entry
 sudo cp linux-armoury.desktop /usr/share/applications/
 ```
+
+### Flatpak-Specific Notes
+
+**When to use Flatpak:**
+- ✅ Running Bazzite, Fedora Silverblue, uBlue, or other immutable systems
+- ✅ You want automatic updates and easy removal
+- ✅ System-wide `asusctl` is not available or you want isolation
+
+**Flatpak permissions:**
+The Flatpak manifest includes system D-Bus access to:
+- Read power supply information (`/sys/class/power_supply`)
+- Monitor CPU information (`/sys/devices/system/cpu`)
+- Access hardware monitoring (`/sys/class/hwmon`)
+- Communicate with PolicyKit for privilege elevation
+
+These permissions are necessary for hardware control and monitoring functionality. You can inspect the full manifest in `com.github.th3cavalry.linux-armoury.yml`.
 
 ## 📖 Usage
 
@@ -243,6 +290,8 @@ All distributions receive equal support:
 ### Power backend not found
 Ensure you have `asusctl` (recommended), `power-profiles-daemon`, or `pwrcfg` installed. Linux Armoury requires one of these to manage power profiles.
 
+If using **Flatpak on Bazzite or immutable systems**, the backend detection is automatic within the container. The Flatpak includes system D-Bus access to find available power management backends.
+
 ### Display refresh rate changes don't work
 We now auto-detect your primary display and current resolution. If issues persist:
 ```bash
@@ -255,11 +304,78 @@ Make sure the D-Bus activatable desktop file is installed so your desktop allows
 `/usr/share/applications/com.github.th3cavalry.linux-armoury.desktop` should include:
 DBusActivatable=true and X-GNOME-UsesNotifications=true
 
+### Flatpak on Bazzite/Silverblue not finding asusctl
+The Flatpak includes runtime permissions for `asusctl` via system D-Bus. If it still doesn't work:
+```bash
+# Check if Flatpak has system D-Bus access
+flatpak info com.github.th3cavalry.linux-armoury | grep system-bus
+
+# Grant/revoke permissions with Flatseal or manually
+flatpak override --user --socket=system-bus com.github.th3cavalry.linux-armoury
+```
+
 ### Application doesn't start
 Ensure all dependencies are installed:
 ```bash
 # Ubuntu/Debian
 sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
+
+# Arch
+sudo pacman -S python python-gobject gtk4 libadwaita
+
+# Fedora
+sudo dnf install python3 python3-gobject gtk4 libadwaita
+
+# Flatpak (self-contained, no external deps needed)
+flatpak run com.github.th3cavalry.linux-armoury
+```
+
+# Ubuntu/Debian
+sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
+
+# Arch
+sudo pacman -S python python-gobject gtk4 libadwaita
+
+# Fedora
+sudo dnf install python3 python3-gobject gtk4 libadwaita
+
+# Flatpak (self-contained, no external deps needed)
+flatpak run com.github.th3cavalry.linux-armoury
+```
+
+## 💬 Supported Devices & Community Feedback
+
+Linux Armoury is designed to work with a wide range of ASUS gaming laptops and devices. The project actively incorporates feedback from the community.
+
+### Known Compatibility
+
+**Tested and Verified:**
+- ASUS ROG Strix Scar (16/18 inch models)
+- ASUS ROG Zephyrus series (M15/G15/G16)
+- ASUS ROG Flow Z13
+- ROG Ally X (hardware control via system backends)
+
+**In Development/Community Testing:**
+- ASUS TUF Gaming series
+- ASUS VivoBook Pro gaming models
+- ROG Ally (original) — varying support by SoC
+
+### Community Contributions
+
+We welcome feedback and testing reports from users with different devices. If you have a device not listed above, please:
+
+1. **Test Linux Armoury** and report compatibility in [GitHub Issues](https://github.com/th3cavalry/Linux-Armoury/issues)
+2. **Share your hardware specs** (CPU, GPU, model number) to help us improve support
+3. **Use Flatpak** on Bazzite or immutable systems for the best experience
+
+**Example Issue Template:**
+```
+Device: ASUS ROG [Model Name]
+CPU: [e.g., AMD Ryzen 7 7840HS]
+GPU: [e.g., NVIDIA RTX 4070]
+OS: [e.g., Bazzite, Fedora 39, Ubuntu 24.04]
+Status: [Works / Partial / Doesn't Work]
+Notes: [Your feedback here]
 ```
 
 ## 🤝 Contributing
@@ -269,7 +385,8 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 - Feature requests
 - Documentation improvements
 - Code optimizations
-- Additional laptop model support
+- Testing on new device models
+- Hardware compatibility reports
 
 ## 📜 License
 

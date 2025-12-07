@@ -17,9 +17,13 @@ class TestConfig:
         assert Config.APP_ID == "com.github.th3cavalry.linux-armoury"
 
     def test_version_format(self):
-        """Test version is in semver format"""
+        """Test version is in semver format (with optional pre-release)"""
         assert hasattr(Config, "VERSION")
-        parts = Config.VERSION.split(".")
+        # Version can be "x.y.z" or "x.y.z-prerelease"
+        version_parts = Config.VERSION.split("-")[
+            0
+        ]  # Remove pre-release suffix if present
+        parts = version_parts.split(".")
         assert len(parts) == 3
         for part in parts:
             assert part.isdigit()
