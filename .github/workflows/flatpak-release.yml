@@ -19,10 +19,11 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends flatpak flatpak-builder jq
 
-      - name: Add flathub remote (if missing)
+      - name: Ensure Flathub remote exists (user-level)
         run: |
-          if ! flatpak remote-list | grep -q flathub; then
-            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          # Use the user-level remote to avoid requiring system permissions on the runner
+          if ! flatpak --user remote-list 2>/dev/null | grep -q flathub; then
+            flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
           fi
 
       - name: Set up build directories
