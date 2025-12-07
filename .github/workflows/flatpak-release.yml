@@ -34,8 +34,7 @@ jobs:
       - name: Build Flatpak repository
         continue-on-error: true
         run: |
-          touch build.log
-          flatpak-builder --repo=repo --force-clean build-dir com.github.th3cavalry.linux-armoury.yml 2>&1 | tee -a build.log
+          flatpak-builder --repo=repo --force-clean --install-deps-from=flathub --user --disable-rofiles-fuse build-dir com.github.th3cavalry.linux-armoury.yml
 
       - name: Create Flatpak bundle
         if: always()
@@ -61,7 +60,7 @@ jobs:
           if flatpak build-bundle \
               repo \
               "$BUNDLE" \
-              com.github.th3cavalry.linux-armoury 2>&1 | tee -a build.log; then
+              com.github.th3cavalry.linux-armoury 2>&1; then
             echo "✓ Bundle created successfully"
             if [ -f "$BUNDLE" ]; then
               echo "output_file=$BUNDLE" >> $GITHUB_OUTPUT
@@ -202,21 +201,4 @@ jobs:
           else
             echo "ERROR: Asset upload failed"
             exit 1
-          fi
-
-          # Upload build log
-          if [ -f "build.log" ]; then
-            echo "Uploading build log..."
-            # Delete existing log if exists
-            log_id=$(echo "$assets" | jq -r '.[] | select(.name == "build.log") | .id' 2>/dev/null | head -1)
-            if [ -n "$log_id" ]; then
-              echo "Deleting existing build log: $log_id"
-              curl -s -X DELETE -H "Authorization: token $GITHUB_TOKEN" "$API_URL/releases/assets/$log_id"
-            fi
-
-            curl -s -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Content-Type: text/plain" \
-              --data-binary "@build.log" \
-              "$upload_url?name=build.log"
           fi
