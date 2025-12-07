@@ -159,20 +159,20 @@ class SessionStatistics:
             "session_start": self.session_start.strftime("%H:%M:%S"),
             "total_samples": self.total_samples,
             "cpu": {
-                "max_temp": round(self.max_cpu_temp, 1)
-                if self.max_cpu_temp > 0
-                else None,
-                "avg_temp": round(self.avg_cpu_temp, 1)
-                if self.avg_cpu_temp > 0
-                else None,
+                "max_temp": (
+                    round(self.max_cpu_temp, 1) if self.max_cpu_temp > 0 else None
+                ),
+                "avg_temp": (
+                    round(self.avg_cpu_temp, 1) if self.avg_cpu_temp > 0 else None
+                ),
             },
             "gpu": {
-                "max_temp": round(self.max_gpu_temp, 1)
-                if self.max_gpu_temp > 0
-                else None,
-                "avg_temp": round(self.avg_gpu_temp, 1)
-                if self.avg_gpu_temp > 0
-                else None,
+                "max_temp": (
+                    round(self.max_gpu_temp, 1) if self.max_gpu_temp > 0 else None
+                ),
+                "avg_temp": (
+                    round(self.avg_gpu_temp, 1) if self.avg_gpu_temp > 0 else None
+                ),
             },
             "battery": {
                 "initial": self.initial_battery,

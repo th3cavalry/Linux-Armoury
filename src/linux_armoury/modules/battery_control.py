@@ -5,11 +5,10 @@ Battery Control Module for Linux Armoury
 Provides battery charge limit control for ASUS laptops.
 """
 
-import glob
 import os
 import subprocess
 from enum import IntEnum
-from typing import List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from ..system_utils import SystemUtils
 
@@ -91,6 +90,9 @@ class BatteryController:
         if not 60 <= limit <= 100:
             return False, "Charge limit must be between 60 and 100"
 
+        if not self._charge_limit_path:
+            return False, "Charge limit control not supported"
+
         try:
             # Try direct write first (if running as root)
             with open(self._charge_limit_path, "w") as f:
@@ -141,7 +143,7 @@ class BatteryController:
 
     def get_battery_info(self) -> dict:
         """Get comprehensive battery information"""
-        info = {
+        info: Dict[str, Any] = {
             "supported": self.is_supported(),
             "charge_limit": self.get_charge_limit(),
             "status": self.get_battery_status(),
@@ -165,11 +167,12 @@ class BatteryController:
                         pass
 
             # Calculate battery health
-            if "energy_full" in info and "energy_full_design" in info:
-                if info["energy_full_design"] > 0:
-                    info["health"] = round(
-                        info["energy_full"] / info["energy_full_design"] * 100, 1
-                    )
+            energy_full = info.get("energy_full")
+            energy_full_design = info.get("energy_full_design")
+
+            if isinstance(energy_full, int) and isinstance(energy_full_design, int):
+                if energy_full_design > 0:
+                    info["health"] = round(energy_full / energy_full_design * 100, 1)
 
         return info
 

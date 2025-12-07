@@ -55,12 +55,12 @@ Enhancement suggestions are welcome! Please provide:
 ### Pull Requests
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Test thoroughly
-5. Commit with clear messages
-6. Push to your fork
-7. Open a Pull Request
+1. Create a feature branch (`git checkout -b feature/amazing-feature`)
+1. Make your changes
+1. Test thoroughly
+1. Commit with clear messages
+1. Push to your fork
+1. Open a Pull Request
 
 ## Development Setup
 
@@ -132,10 +132,10 @@ def createPowerProfileSection(self):
 ### Key Principles
 
 1. **Readability** - Code should be self-documenting
-2. **Simplicity** - Prefer simple solutions
-3. **Consistency** - Match existing code style
-4. **Documentation** - Add docstrings to functions
-5. **Error Handling** - Always handle exceptions gracefully
+1. **Simplicity** - Prefer simple solutions
+1. **Consistency** - Match existing code style
+1. **Documentation** - Add docstrings to functions
+1. **Error Handling** - Always handle exceptions gracefully
 
 ### Naming Conventions
 
@@ -247,10 +247,10 @@ If applicable
 ### Review Process
 
 1. Automated checks must pass
-2. At least one maintainer review required
-3. All comments must be addressed
-4. Squash commits if requested
-5. Maintainer will merge when approved
+1. At least one maintainer review required
+1. All comments must be addressed
+1. Squash commits if requested
+1. Maintainer will merge when approved
 
 ## Testing
 
@@ -259,18 +259,19 @@ If applicable
 Test the following before submitting:
 
 1. **Launch** - Application starts without errors
-2. **Theme switching** - Light/dark/auto modes work
-3. **Power profiles** - Can apply different profiles
-4. **Refresh rates** - Display settings change correctly
-5. **Preferences** - Settings save and persist
-6. **Autostart** - Desktop file created correctly
-7. **Error handling** - Graceful failures with clear messages
+1. **Theme switching** - Light/dark/auto modes work
+1. **Power profiles** - Can apply different profiles
+1. **Refresh rates** - Display settings change correctly
+1. **Preferences** - Settings save and persist
+1. **Autostart** - Desktop file created correctly
+1. **Error handling** - Graceful failures with clear messages
 
 ### Platform Testing
 
 If possible, test on multiple distributions:
+
 - Arch-based (Arch, Manjaro, EndeavourOS)
-- Debian-based (Ubuntu, Pop!_OS, Mint)
+- Debian-based (Ubuntu, Pop!\_OS, Mint)
 - RPM-based (Fedora, Nobara)
 - OpenSUSE (Tumbleweed, Leap)
 
@@ -297,12 +298,12 @@ python3 linux-armoury-gui.py
 ### Feature Development Workflow
 
 1. **Create issue** - Discuss the feature first
-2. **Get feedback** - Wait for maintainer input
-3. **Design** - Plan the implementation
-4. **Implement** - Write the code
-5. **Test** - Verify it works
-6. **Document** - Update README/docs
-7. **Submit PR** - Follow PR template
+1. **Get feedback** - Wait for maintainer input
+1. **Design** - Plan the implementation
+1. **Implement** - Write the code
+1. **Test** - Verify it works
+1. **Document** - Update README/docs
+1. **Submit PR** - Follow PR template
 
 ### Adding a New Power Profile
 
@@ -318,10 +319,10 @@ profiles = [
 ### Adding a New Feature
 
 1. Update UI in `setup_ui()` or relevant method
-2. Add action handler
-3. Update settings schema if needed
-4. Add to preferences if user-configurable
-5. Document in README.md
+1. Add action handler
+1. Update settings schema if needed
+1. Add to preferences if user-configurable
+1. Document in README.md
 
 ## Questions?
 
@@ -332,6 +333,6 @@ profiles = [
 
 By contributing, you agree that your contributions will be licensed under the GPL-3.0 License.
 
----
+______________________________________________________________________
 
 Thank you for contributing to Linux Armoury! 🎉

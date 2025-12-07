@@ -42,15 +42,18 @@ git clone https://github.com/th3cavalry/Linux-Armoury.git && cd Linux-Armoury &&
 ### File Inventory
 
 #### Core Application
+
 - `linux-armoury-gui.py` - Main application (17.6 KB)
 - `tray_icon.py` - System tray module (3.2 KB)
 - `demo.py` - Demo/test mode (2.6 KB)
 
 #### Installation & Config
+
 - `install.sh` - Installation script (4.7 KB)
 - `linux-armoury.desktop` - Desktop entry (395 B)
 
 #### Documentation (46+ KB total)
+
 - `README.md` - Main documentation (7.2 KB)
 - `QUICKSTART.md` - Getting started guide (4.9 KB)
 - `BEAST_MODE.md` - Performance mode guide (6.6 KB)
@@ -64,6 +67,7 @@ git clone https://github.com/th3cavalry/Linux-Armoury.git && cd Linux-Armoury &&
 - `LICENSE` - GPL-3.0 license (968 B)
 
 #### Configuration
+
 - `.gitignore` - Git ignore rules (367 B)
 
 ### Power Profiles Summary
@@ -81,13 +85,14 @@ git clone https://github.com/th3cavalry/Linux-Armoury.git && cd Linux-Armoury &&
 ### Supported Distributions
 
 - Arch Linux, Manjaro, EndeavourOS
-- Ubuntu, Pop!_OS, Linux Mint, Debian
+- Ubuntu, Pop!\_OS, Linux Mint, Debian
 - Fedora, Nobara
 - OpenSUSE Tumbleweed, Leap
 
 ### Dependencies
 
 **Required:**
+
 - Python 3.8+
 - GTK 4
 - libadwaita 1.0+
@@ -96,8 +101,9 @@ git clone https://github.com/th3cavalry/Linux-Armoury.git && cd Linux-Armoury &&
 - xrandr
 
 **Optional:**
+
 - libayatana-appindicator (system tray)
-Model-specific hardware support scripts (community-maintained, varies by model)
+  Model-specific hardware support scripts (community-maintained, varies by model)
 
 ### Project Statistics
 
@@ -117,10 +123,10 @@ Model-specific hardware support scripts (community-maintained, varies by model)
 ### Key Technologies
 
 1. **GTK 4** - Modern GNOME UI toolkit
-2. **libadwaita** - GNOME design patterns
-3. **PyGObject** - Python bindings for GTK
-4. **PolicyKit** - Secure privilege escalation
-5. **JSON** - Configuration storage
+1. **libadwaita** - GNOME design patterns
+1. **PyGObject** - Python bindings for GTK
+1. **PolicyKit** - Secure privilege escalation
+1. **JSON** - Configuration storage
 
 ### Design Philosophy
 
@@ -139,18 +145,21 @@ Model-specific hardware support scripts (community-maintained, varies by model)
 ### Future Roadmap
 
 #### Version 1.1 (Planned)
+
 - Temperature monitoring
 - Custom power profiles
 - Fan curve control
 - Application-specific profiles
 
 #### Version 1.2 (Planned)
+
 - asusctl integration
 - Keyboard RGB control
 - Battery charge limiting
 - Multi-monitor support
 
 #### Version 2.0 (Future)
+
 - DBus service architecture
 - Plugin system
 - Game detection
@@ -192,13 +201,14 @@ GPL-3.0 License - See [LICENSE](LICENSE) file
 Thank you for using Linux Armoury! This project aims to provide ASUS laptop users on Linux with a powerful, user-friendly control center for managing their hardware.
 
 If you find it useful, please:
+
 - ⭐ Star the repository
 - 🐛 Report bugs
 - 💡 Suggest features
 - 🔧 Contribute code
 - 📢 Share with others
 
----
+______________________________________________________________________
 
 **Enjoy your optimized Linux experience! 🚀**
 

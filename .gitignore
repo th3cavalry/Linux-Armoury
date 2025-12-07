@@ -49,3 +49,10 @@ settings.json
 repo/
 .flatpak-builder/
 flatpak-build/
+.venv/
+
+# Logs
+*_log.txt
+job_logs.txt
+success_log.txt
+success_log_v2.txt

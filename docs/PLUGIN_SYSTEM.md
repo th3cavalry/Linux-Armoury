@@ -50,12 +50,15 @@ class Plugin(PluginBase):
 ### Available Callbacks
 
 #### `on_load()`
+
 Called when the plugin is first loaded. Use this for initialization.
 
 #### `on_status_update(status_data)`
+
 Called periodically (every 2 seconds) with current system status.
 
 **status_data dictionary contains:**
+
 - `cpu_temp`: float - CPU temperature in Celsius
 - `gpu_temp`: float - GPU temperature in Celsius
 - `battery`: int - Battery percentage (0-100)
@@ -64,13 +67,16 @@ Called periodically (every 2 seconds) with current system status.
 - `profile`: str - Current power profile name
 
 #### `on_profile_change(old_profile, new_profile)`
+
 Called when the power profile changes.
 
 **Parameters:**
+
 - `old_profile`: str - Previous profile name
 - `new_profile`: str - New profile name
 
 #### `get_info()`
+
 Returns a dictionary with plugin metadata.
 
 ## Example Plugins
@@ -78,6 +84,7 @@ Returns a dictionary with plugin metadata.
 ### Temperature Monitor
 
 See `examples/plugins/temperature_alert.py` for a complete example that:
+
 - Monitors CPU temperature
 - Alerts when temperature exceeds thresholds
 - Logs profile changes
@@ -113,19 +120,20 @@ Plugins are automatically loaded from `~/.config/linux-armoury/plugins/` when th
 ### Enabling/Disabling Plugins
 
 Currently, plugins can be disabled by:
+
 1. Renaming the file (add `.disabled` extension)
-2. Removing the file from the plugins directory
-3. Setting `self.enabled = False` in the plugin code
+1. Removing the file from the plugins directory
+1. Setting `self.enabled = False` in the plugin code
 
 Future versions will include GUI management.
 
 ## Best Practices
 
 1. **Keep it Simple**: Plugins should be lightweight and focused
-2. **Handle Errors**: Wrap your code in try/except to avoid crashes
-3. **Be Efficient**: Avoid heavy computations in `on_status_update()`
-4. **Test Standalone**: Use `if __name__ == "__main__":` for testing
-5. **Document**: Add docstrings and comments
+1. **Handle Errors**: Wrap your code in try/except to avoid crashes
+1. **Be Efficient**: Avoid heavy computations in `on_status_update()`
+1. **Test Standalone**: Use `if __name__ == "__main__":` for testing
+1. **Document**: Add docstrings and comments
 
 ## Debugging
 
@@ -140,6 +148,7 @@ Check application logs for plugin loading messages and errors.
 ## Limitations
 
 Current limitations (may be improved in future versions):
+
 - No GUI for plugin management
 - Limited API surface
 - No plugin dependencies
@@ -148,6 +157,7 @@ Current limitations (may be improved in future versions):
 ## Future Enhancements
 
 Planned features:
+
 - GUI plugin manager
 - Plugin marketplace/repository
 - Extended API (custom UI elements, notifications, etc.)
@@ -157,6 +167,7 @@ Planned features:
 ## Support
 
 For questions or issues:
+
 - GitHub Issues: https://github.com/th3cavalry/Linux-Armoury/issues
 - Discussions: https://github.com/th3cavalry/Linux-Armoury/discussions
 

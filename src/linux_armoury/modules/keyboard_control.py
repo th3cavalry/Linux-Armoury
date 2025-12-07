@@ -9,7 +9,7 @@ import os
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 
 class AuraEffect(Enum):
@@ -163,7 +163,7 @@ class KeyboardController:
 
     def get_rgb_color(self) -> Optional[RGB]:
         """Get current RGB color (if supported)"""
-        if not self._has_rgb:
+        if not self._has_rgb or not self._backlight_path:
             return None
 
         try:
@@ -180,7 +180,7 @@ class KeyboardController:
 
     def set_rgb_color(self, color: RGB) -> Tuple[bool, str]:
         """Set RGB color (if supported)"""
-        if not self._has_rgb:
+        if not self._has_rgb or not self._backlight_path:
             return False, "RGB control not supported"
 
         mi_path = os.path.join(self._backlight_path, "multi_intensity")
@@ -212,9 +212,9 @@ class KeyboardController:
             return False, f"Unknown color: {name}"
         return self.set_rgb_color(self.PRESET_COLORS[name.lower()])
 
-    def get_keyboard_info(self) -> Dict:
+    def get_keyboard_info(self) -> Dict[str, Any]:
         """Get comprehensive keyboard info"""
-        info = {
+        info: Dict[str, Any] = {
             "supported": self.is_supported(),
             "has_rgb": self.has_rgb(),
             "brightness": self.get_brightness(),

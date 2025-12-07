@@ -39,6 +39,7 @@ fi
 # Detect distribution
 detect_distro() {
     if [ -f /etc/os-release ]; then
+        # shellcheck disable=SC1091
         . /etc/os-release
         DISTRO_ID=$ID
         DISTRO_LIKE=${ID_LIKE:-}
@@ -53,23 +54,20 @@ detect_hardware() {
 
     # CPU Detection
     if grep -q "AuthenticAMD" /proc/cpuinfo; then
-        CPU_VENDOR="AMD"
         info "CPU: AMD detected"
     elif grep -q "GenuineIntel" /proc/cpuinfo; then
-        CPU_VENDOR="Intel"
         info "CPU: Intel detected"
     else
-        CPU_VENDOR="Unknown"
         info "CPU: Unknown vendor"
     fi
 
     # GPU Detection
     HAS_NVIDIA=false
-    HAS_AMD_GPU=false
     if lspci | grep -i "NVIDIA" > /dev/null; then
         HAS_NVIDIA=true
         info "GPU: NVIDIA detected"
     fi
+    HAS_AMD_GPU=false
     if lspci | grep -i "AMD" > /dev/null || lspci | grep -i "ATI" > /dev/null; then
         HAS_AMD_GPU=true
         info "GPU: AMD detected"
@@ -143,7 +141,7 @@ Server = https://arch.asus-linux.org" | sudo tee -a /etc/pacman.conf
 
     sudo pacman -S --noconfirm --needed asusctl
 
-    if [ "$HAS_NVIDIA" = true ]; then
+    if [ "$HAS_NVIDIA" = true ] || [ "$HAS_AMD_GPU" = true ]; then
         sudo pacman -S --noconfirm --needed supergfxctl
         sudo systemctl enable --now supergfxd
     fi
@@ -157,7 +155,7 @@ install_fedora_asus_tools() {
     sudo dnf copr enable -y lukenukem/asus-linux
     sudo dnf install -y asusctl
 
-    if [ "$HAS_NVIDIA" = true ]; then
+    if [ "$HAS_NVIDIA" = true ] || [ "$HAS_AMD_GPU" = true ]; then
         sudo dnf install -y supergfxctl
         sudo systemctl enable --now supergfxd
     fi
@@ -180,7 +178,7 @@ install_debian_asus_tools() {
 
         sudo apt install -y asusctl
 
-        if [ "$HAS_NVIDIA" = true ]; then
+        if [ "$HAS_NVIDIA" = true ] || [ "$HAS_AMD_GPU" = true ]; then
             sudo apt install -y supergfxctl
             sudo systemctl enable --now supergfxd
         fi
@@ -205,7 +203,7 @@ install_opensuse_asus_tools() {
     sudo zypper ref
     sudo zypper install -y asusctl
 
-    if [ "$HAS_NVIDIA" = true ]; then
+    if [ "$HAS_NVIDIA" = true ] || [ "$HAS_AMD_GPU" = true ]; then
         sudo zypper install -y supergfxctl
         sudo systemctl enable --now supergfxd
     fi
@@ -280,9 +278,9 @@ install_application() {
         sudo udevadm trigger
 
         # Ensure user is in video group
-        if ! groups | grep -q "video"; then
+        if ! groups "$USER" | grep -q video; then
             info "Adding user to 'video' group for backlight control..."
-            sudo usermod -aG video $USER
+            sudo usermod -aG video "$USER"
             warning "You may need to log out and back in for group changes to take effect."
         fi
     fi

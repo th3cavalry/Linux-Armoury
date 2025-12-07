@@ -11,7 +11,6 @@ Plugin API:
 
 import importlib.util
 import os
-import sys
 from typing import Any, Dict, List, Optional
 
 
@@ -24,7 +23,6 @@ class PluginBase:
 
     def on_load(self):
         """Called when plugin is loaded"""
-        pass
 
     def on_status_update(self, status_data: Dict[str, Any]):
         """Called when system status is updated
@@ -38,11 +36,9 @@ class PluginBase:
                 - refresh_rate: int (current refresh rate in Hz)
                 - profile: str (current power profile)
         """
-        pass
 
     def on_profile_change(self, old_profile: str, new_profile: str):
         """Called when power profile changes"""
-        pass
 
     def get_info(self) -> Dict[str, str]:
         """Return plugin information"""

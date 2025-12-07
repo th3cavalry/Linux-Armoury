@@ -19,6 +19,7 @@ chmod +x install.sh
 ```
 
 The installer will:
+
 - Detect your Linux distribution automatically
 - Install all required dependencies
 - Install Linux Armoury to your system
@@ -59,7 +60,7 @@ linux-armoury
 ### Applying a Profile
 
 1. Scroll to "Power Profiles" section
-2. Choose a profile based on your needs:
+1. Choose a profile based on your needs:
    - **Emergency** (10W): Critical battery situations
    - **Battery** (18W): Maximum battery life
    - **Efficient** (30W): Good performance with efficiency
@@ -67,13 +68,14 @@ linux-armoury
    - **Performance** (55W): Heavy workloads
    - **Gaming** (70W): Gaming sessions
    - **Maximum** (90W): Beast Mode - absolute maximum
-3. Click "Apply"
-4. Enter your password when prompted
-5. Settings apply immediately!
+1. Click "Apply"
+1. Enter your password when prompted
+1. Settings apply immediately!
 
 ### Understanding Power Profiles
 
 Each profile sets three parameters:
+
 - **TDP (Thermal Design Power)**: How much power the CPU/GPU can use
 - **Refresh Rate**: Display refresh rate for smoothness vs battery
 - **Fan Curves**: Cooling behavior (via asusctl if available)
@@ -85,19 +87,20 @@ Higher profiles = More performance + More heat + More battery drain
 ### Quick Change
 
 1. Go to "Refresh Rate Profiles"
-2. Select your desired rate:
+1. Select your desired rate:
    - **30 Hz**: Maximum battery savings
    - **60 Hz**: Standard smooth
    - **90 Hz**: Enhanced smoothness
    - **120 Hz**: High refresh
    - **180 Hz**: Maximum gaming
-3. Click "Apply"
+1. Click "Apply"
 
 **Tip**: Refresh rate is automatically set when applying a power profile, but can be manually overridden.
 
 ## Understanding Status Display
 
 The "System Status" section shows:
+
 - **Power Profile**: Currently active profile
 - **Refresh Rate**: Current display refresh rate
 - **TDP Settings**: Power limits in effect
@@ -109,29 +112,33 @@ This updates after each profile change.
 ### Battery Life
 
 For maximum battery life:
+
 1. Use "Battery" profile (18W @ 30Hz)
-2. Close unnecessary applications
-3. Lower screen brightness
-4. Disable Bluetooth if not needed
+1. Close unnecessary applications
+1. Lower screen brightness
+1. Disable Bluetooth if not needed
 
 ### Gaming Performance
 
 For best gaming experience:
+
 1. Plug in AC adapter (required for high power)
-2. Apply "Gaming" or "Maximum" profile
-3. Close background applications
-4. Ensure good ventilation
+1. Apply "Gaming" or "Maximum" profile
+1. Close background applications
+1. Ensure good ventilation
 
 ### Quick Access from Tray
 
 If system tray is enabled:
+
 1. Right-click the tray icon
-2. Select "Quick Profiles"
-3. Choose a profile without opening the main window
+1. Select "Quick Profiles"
+1. Choose a profile without opening the main window
 
 ### Switching on AC/Battery
 
 Recommended profiles:
+
 - **On Battery**: Battery or Efficient (18-30W)
 - **On AC Power**: Balanced to Maximum (40-90W)
 
@@ -142,6 +149,7 @@ Manual switching helps optimize for your current situation.
 ### Power Profile Issues
 
 If power profiles are not working, ensure you have a supported power management tool installed:
+
 - **asusctl**: Recommended for ASUS ROG laptops.
 - **power-profiles-daemon**: Standard for GNOME/KDE.
 - **pwrcfg**: Legacy/Model-specific scripts (e.g. GZ302).
@@ -166,15 +174,15 @@ sudo dnf install python3 python3-gobject gtk4 libadwaita
 ### Changes Don't Apply
 
 1. Ensure you entered the password correctly
-2. Check that pwrcfg is installed: `which pwrcfg`
-3. Try running manually: `sudo pwrcfg balanced`
-4. Check for error messages in the terminal
+1. Check that pwrcfg is installed: `which pwrcfg`
+1. Try running manually: `sudo pwrcfg balanced`
+1. Check for error messages in the terminal
 
 ### Refresh Rate Not Changing
 
 1. Check your display name: `xrandr | grep connected`
-2. If it's not `eDP-1`, the code needs updating
-3. Report this as an issue on GitHub
+1. If it's not `eDP-1`, the code needs updating
+1. Report this as an issue on GitHub
 
 ## Next Steps
 
@@ -191,6 +199,6 @@ sudo dnf install python3 python3-gobject gtk4 libadwaita
 - **Issues**: [GitHub Issues](https://github.com/th3cavalry/Linux-Armoury/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/th3cavalry/Linux-Armoury/discussions)
 
----
+______________________________________________________________________
 
 **Enjoy your optimized Linux experience! 🚀**

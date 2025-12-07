@@ -9,6 +9,8 @@ jobs:
   build-flatpak:
     name: Build Flatpak and upload release asset
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -22,7 +24,7 @@ jobs:
       - name: Ensure Flathub remote exists (user-level)
         run: |
           # Use the user-level remote to avoid requiring system permissions on the runner
-          if ! flatpak --user remote-list 2>/dev/null | grep -q flathub; then
+          if ! flatpak --user remote-list 2>/dev/null | grep -q flathub;
             flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
           fi
 
@@ -108,7 +110,7 @@ jobs:
       - name: Create GitHub Release and Upload Asset
         if: always()
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -uo pipefail
 

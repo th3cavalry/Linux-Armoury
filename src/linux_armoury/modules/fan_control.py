@@ -188,7 +188,7 @@ class FanController:
                         temp = int(f.read().strip())
                     # Convert millidegrees to degrees if needed
                     if temp > 1000:
-                        temp = temp / 1000
+                        temp = temp // 1000
                     return temp
                 except Exception:
                     continue
@@ -229,7 +229,7 @@ class FanController:
 
     def enable_custom_fan_curve(self, enable: bool = True) -> Tuple[bool, str]:
         """Enable or disable custom fan curve"""
-        if not self.has_fan_curves():
+        if not self.has_fan_curves() or not self._fan_curve_path:
             return False, "Custom fan curves not supported"
 
         value = "1" if enable else "0"

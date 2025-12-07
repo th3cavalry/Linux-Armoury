@@ -4,16 +4,16 @@ Visual Fan Curve Editor for Linux Armoury
 Allows users to create custom fan curves by dragging points on a graph.
 """
 
-import gi
-
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 import math
 from dataclasses import dataclass
 from typing import Callable, List, Optional, Tuple
 
 import cairo
-from gi.repository import Adw, Gdk, GLib, Gtk
+import gi
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Adw, Gdk, Gtk  # noqa: E402
 
 
 @dataclass

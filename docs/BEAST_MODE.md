@@ -11,18 +11,21 @@ ASUS laptops traditionally come with Armoury Crate software on Windows that prov
 ### Standard Performance Modes
 
 1. **Silent Mode**
+
    - Minimal fan noise
    - Conservative power limits
    - Ideal for basic tasks and quiet environments
    - Longer battery life
 
-2. **Performance Mode**
+1. **Performance Mode**
+
    - Balanced power and acoustics
    - Moderate fan curves
    - Good for everyday tasks
    - Balanced battery life
 
-3. **Turbo Mode (Beast Mode)**
+1. **Turbo Mode (Beast Mode)**
+
    - Maximum CPU/GPU performance
    - Aggressive fan curves
    - Highest power limits
@@ -36,21 +39,25 @@ ASUS laptops traditionally come with Armoury Crate software on Windows that prov
 ### Beast Mode Characteristics
 
 1. **Maximum TDP Allocation**
+
    - Pushes CPU and GPU to maximum thermal design power
    - Top-end models may be configured up to ~90W or more depending on vendor defaults
    - Removes conservative power limits
 
-2. **Aggressive Cooling**
+1. **Aggressive Cooling**
+
    - Fans run at maximum speeds
    - Prioritizes cooling over acoustics
    - Maintains sustained performance
 
-3. **GPU Boost**
+1. **GPU Boost**
+
    - Maximum GPU clock speeds
    - Enhanced memory bandwidth
    - Optimized for gaming workloads
 
-4. **CPU Optimization**
+1. **CPU Optimization**
+
    - All-core boost enabled
    - Higher sustained frequencies
    - Better multi-threaded performance
@@ -91,20 +98,24 @@ Power Configuration:
 Some models use AMD's power management system:
 
 1. **SPL (Stapm Power Limit)**
+
    - Long-term sustained power
    - Prevents thermal throttling
 
-2. **sPPT (Slow Package Power Tracking)**
+1. **sPPT (Slow Package Power Tracking)**
+
    - Medium-term power budget
    - Manages average power draw
 
-3. **fPPT (Fast Package Power Tracking)**
+1. **fPPT (Fast Package Power Tracking)**
+
    - Short-term burst power
    - Allows brief performance spikes
 
 ### Display Refresh Rate
 
 The integrated 2560x1600 display supports:
+
 - 30Hz (power saving)
 - 60Hz (standard)
 - 90Hz (smooth)
@@ -118,10 +129,10 @@ Higher refresh rates consume more power but provide smoother visuals.
 ### Via GUI
 
 1. Launch Linux Armoury
-2. Scroll to "Power Profiles"
-3. Click "Apply" on the "Maximum" profile
-4. Enter password when prompted
-5. System will apply maximum performance settings
+1. Scroll to "Power Profiles"
+1. Click "Apply" on the "Maximum" profile
+1. Enter password when prompted
+1. System will apply maximum performance settings
 
 ### Via Command Line
 
@@ -152,6 +163,7 @@ sudo pwrcfg balanced
 ### When to Use Beast Mode
 
 ✅ **Recommended for:**
+
 - Gaming sessions (plugged in)
 - Video rendering
 - 3D modeling
@@ -160,6 +172,7 @@ sudo pwrcfg balanced
 - When maximum performance is critical
 
 ❌ **Not recommended for:**
+
 - Battery operation (drains very quickly)
 - Quiet environments (fans are loud)
 - Basic tasks (web browsing, documents)
@@ -170,6 +183,7 @@ sudo pwrcfg balanced
 ### Automatic Profile Switching
 
 Linux Armoury can automatically switch profiles based on:
+
 - AC power state (plugged in vs battery)
 - Application launch (game detection)
 - Temperature thresholds
@@ -178,6 +192,7 @@ Linux Armoury can automatically switch profiles based on:
 ### Custom Fan Curves
 
 With asusctl integration, you can:
+
 - Define custom fan curves per profile
 - Set temperature triggers
 - Balance noise vs cooling
@@ -185,6 +200,7 @@ With asusctl integration, you can:
 ### Power Monitoring
 
 Real-time monitoring of:
+
 - Current TDP limits
 - Actual power consumption
 - CPU/GPU temperatures
@@ -196,6 +212,7 @@ Real-time monitoring of:
 ### Thermal Protection
 
 The system includes automatic protection:
+
 - Hardware thermal throttling at 95°C
 - Automatic shutdown at 105°C
 - Fan failure detection
@@ -204,6 +221,7 @@ The system includes automatic protection:
 ### Battery Health
 
 Using maximum performance mode frequently can:
+
 - Increase battery wear
 - Reduce overall battery lifespan
 - Generate excess heat
@@ -216,16 +234,19 @@ Using maximum performance mode frequently can:
 ### Beast Mode Not Working
 
 1. **Check kernel version**
+
    ```bash
    uname -r  # Should be 6.14+
    ```
 
-2. **Verify power management tools**
+1. **Verify power management tools**
+
    ```bash
    which pwrcfg
    ```
 
-3. **Check for conflicts**
+1. **Check for conflicts**
+
    ```bash
    # Ensure no other power management tools are active
    systemctl status power-profiles-daemon
@@ -234,16 +255,19 @@ Using maximum performance mode frequently can:
 ### Performance Not as Expected
 
 1. **Thermal throttling**
+
    - Check temperatures with `sensors`
    - Ensure proper ventilation
    - Consider laptop cooling pad
 
-2. **Power delivery**
+1. **Power delivery**
+
    - Use official 100W+ charger
    - Check cable quality
    - Verify AC adapter connection
 
-3. **Background processes**
+1. **Background processes**
+
    - Close unnecessary applications
    - Check CPU usage with `htop`
    - Disable unnecessary services
@@ -255,6 +279,6 @@ Using maximum performance mode frequently can:
 - [AMD Ryzen Power Management](https://www.kernel.org/doc/html/latest/admin-guide/pm/amd-pstate.html)
 - [Linux Power Management](https://www.kernel.org/doc/html/latest/power/index.html)
 
----
+______________________________________________________________________
 
 **Last Updated**: October 2025

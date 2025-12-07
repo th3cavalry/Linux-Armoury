@@ -4,7 +4,6 @@ Overclocking Control Module for Linux Armoury
 Provides CPU frequency scaling, TDP control via RyzenAdj, and AMD GPU overclocking
 """
 
-import os
 import re
 import subprocess
 from dataclasses import dataclass
@@ -23,7 +22,7 @@ class CPUInfo:
     max_freq_mhz: float = 0.0
     current_freq_mhz: float = 0.0
     governor: str = ""
-    available_governors: List[str] = None
+    available_governors: Optional[List[str]] = None
     turbo_enabled: bool = True
     energy_perf_preference: str = ""
 
@@ -44,7 +43,7 @@ class GPUInfo:
     gpu_temp_c: float = 0.0
     power_level: str = ""
     power_profile: str = ""
-    available_power_profiles: List[str] = None
+    available_power_profiles: Optional[List[str]] = None
 
     def __post_init__(self):
         if self.available_power_profiles is None:
@@ -278,7 +277,7 @@ class OverclockingController:
             if result.returncode != 0:
                 return None
 
-            info = {}
+            info: Dict[str, Any] = {}
             for line in result.stdout.split("\n"):
                 # Parse RyzenAdj output
                 if "|" in line:
@@ -411,7 +410,7 @@ class OverclockingController:
                 parts = line.split()
                 if len(parts) >= 2 and parts[0].isdigit():
                     profile_name = parts[1].replace("*", "").strip()
-                    if profile_name:
+                    if profile_name and info.available_power_profiles is not None:
                         info.available_power_profiles.append(profile_name)
 
         return info

@@ -11,6 +11,7 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 ## ✨ Features
 
 ### 🎨 Modern Interface
+
 - **Light & Dark Mode** - Automatic or manual theme switching with system integration
 - **System Tray Integration** - Minimize to tray and quick access from taskbar with quick profiles
 - **Autostart Support** - Launch automatically on system boot
@@ -18,7 +19,9 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 - **Real-time Dashboard** - Live monitoring with 2-second refresh intervals
 
 ### ⚡ Performance Control
+
 - **7 Power Profiles** - From emergency battery saver to maximum performance
+
   - Emergency: 10W @ 30Hz
   - Battery: 18W @ 30Hz
   - Efficient: 30W @ 60Hz
@@ -28,11 +31,15 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
   - Maximum: 90W @ 180Hz
 
 - **Flexible Refresh Rate Control** - 30Hz to 180Hz display management
+
 - **Auto Profile Switching** - Automatically switch profiles when AC/Battery state changes
+
 - **One-Click Profile Switching** - Apply settings with a single click
+
 - **Quick Actions** - Change profiles and refresh rates from system tray
 
 ### 📊 System Monitoring
+
 - **Real-time Temperature Monitoring** - CPU and GPU temperature tracking
 - **Battery Status** - Live battery percentage and charging state
 - **Power Source Detection** - AC or Battery mode with auto-switching support
@@ -40,7 +47,9 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 - **Refresh Rate Display** - Current display refresh rate
 
 ### 🔧 Integration
+
 -- Works with optional hardware support scripts (for some models)
+
 - Integrates with `asusctl`, `power-profiles-daemon`, or `pwrcfg` for power management
 - Uses `xrandr` for display control (auto-detects primary display and current resolution)
 - PolicyKit integration for secure privilege elevation
@@ -49,11 +58,14 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 ## 📋 Requirements
 
 ### Hardware
+
 **Primary Focus:**
+
 - Modern ASUS ROG and ASUS gaming laptop models (2019–present)
 - Broader ASUS laptop support including TUF, VivoBook Pro, and other gaming-focused lines
 
 **Example models supported (non-exhaustive):**
+
 - ROG Flow Z13 series (GZ302, GZ302VU, etc.)
 - ROG Zephyrus series (M15 / G15 / G16 and similar)
 - ROG Strix Scar series (16 / 18 and variants)
@@ -64,11 +76,13 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 **Note:** Not all features are available on all models. Hardware control capabilities depend on available ASUS-specific drivers (`asusctl`, `supergfxctl`) and standard Linux power management tools (`power-profiles-daemon`). The application gracefully falls back to available backends.
 
 **System Requirements:**
+
 - Linux kernel 6.14+ (6.17+ recommended for full stability)
 - Modern GNOME Stack (GTK4, libadwaita)
 - systemd-based init system
 
 ### Software Dependencies
+
 - Python 3.8+
 - GTK 4
 - libadwaita 1.0+
@@ -77,6 +91,7 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 - xrandr
 
 ### Optional but Recommended
+
 - Model-specific helper scripts may be required for full hardware integration on some laptops
 - asusctl for additional ASUS-specific features
 - libayatana-appindicator for system tray integration
@@ -121,11 +136,12 @@ chmod +x install.sh
 ```
 
 The installer will automatically:
+
 1. Detect your Linux distribution
-2. Install required dependencies
-3. Configure hardware-specific repositories (asusctl, power-profiles-daemon)
-4. Install the Linux Armoury application
-5. Create desktop entry for easy launching
+1. Install required dependencies
+1. Configure hardware-specific repositories (asusctl, power-profiles-daemon)
+1. Install the Linux Armoury application
+1. Create desktop entry for easy launching
 
 ### Manual Installation
 
@@ -148,12 +164,14 @@ sudo cp linux-armoury.desktop /usr/share/applications/
 ### Flatpak-Specific Notes
 
 **When to use Flatpak:**
+
 - ✅ Running Bazzite, Fedora Silverblue, uBlue, or other immutable systems
 - ✅ You want automatic updates and easy removal
 - ✅ System-wide `asusctl` is not available or you want isolation
 
 **Flatpak permissions:**
 The Flatpak manifest includes system D-Bus access to:
+
 - Read power supply information (`/sys/class/power_supply`)
 - Monitor CPU information (`/sys/devices/system/cpu`)
 - Access hardware monitoring (`/sys/class/hwmon`)
@@ -181,22 +199,22 @@ linux-armoury-cli --monitor
 ### Setting Power Profiles
 
 1. Open Linux Armoury
-2. Navigate to the "Power Profiles" section
-3. Click "Apply" on your desired profile
-4. Enter your password when prompted (via PolicyKit)
-5. The new profile will be applied immediately
+1. Navigate to the "Power Profiles" section
+1. Click "Apply" on your desired profile
+1. Enter your password when prompted (via PolicyKit)
+1. The new profile will be applied immediately
 
 ### Adjusting Refresh Rate
 
 1. Go to the "Refresh Rate Profiles" section
-2. Select your preferred refresh rate
-3. Click "Apply" to change the display settings
+1. Select your preferred refresh rate
+1. Click "Apply" to change the display settings
 
 ### Configuring Preferences
 
 1. Click the menu button (⋮) in the top-right corner
-2. Select "Preferences"
-3. Toggle options:
+1. Select "Preferences"
+1. Toggle options:
    - **Start on Boot**: Launch automatically when system starts
    - **Minimize to System Tray**: Keep running in background when closed
    - **Auto Profile Switching**: Automatically change profiles when switching between AC and Battery power
@@ -204,6 +222,7 @@ linux-armoury-cli --monitor
 ### Using Auto Profile Switching
 
 When enabled, the application will automatically:
+
 - Switch to "Performance" profile when AC adapter is connected
 - Switch to "Efficient" profile when running on battery
 - Notify you of automatic profile changes
@@ -214,6 +233,7 @@ This feature helps optimize battery life and performance without manual interven
 ### System Tray Quick Actions
 
 Right-click the system tray icon to:
+
 - Show/Hide the main window
 - Quickly apply any power profile (all 7 profiles available)
 - Quickly change refresh rate (30, 60, 90, 120, 180 Hz)
@@ -222,8 +242,8 @@ Right-click the system tray icon to:
 ### Changing Theme
 
 1. Click the menu button (⋮)
-2. Select "Theme" submenu
-3. Choose:
+1. Select "Theme" submenu
+1. Choose:
    - **Light Mode**: Force light theme
    - **Dark Mode**: Force dark theme
    - **Auto**: Follow system theme preference
@@ -231,12 +251,14 @@ Right-click the system tray icon to:
 ## 🏗️ Architecture
 
 ### Technology Stack
+
 - **Language**: Python 3
 - **UI Framework**: GTK 4 with libadwaita
 - **Configuration**: JSON-based settings storage
 - **Privilege Elevation**: PolicyKit (pkexec)
 
 ### File Structure
+
 ```
 Linux-Armoury/
 ├── linux-armoury-gui.py    # Main application
@@ -246,25 +268,30 @@ Linux-Armoury/
 ```
 
 ### Configuration Location
+
 Settings are stored in: `~/.config/linux-armoury/settings.json`
 
 ## 📚 Documentation
 
 ### Getting Started
+
 - **[Quick Start Guide](QUICKSTART.md)** - Get started in 5 minutes
 - **[Project Summary](PROJECT_SUMMARY.md)** - Overview and quick facts
 - **[FAQ](FAQ.md)** - Frequently asked questions
 
 ### Feature Documentation
+
 - **[Beast Mode Guide](BEAST_MODE.md)** - Understanding ASUS performance modes
 - **[UI Overview](UI_OVERVIEW.md)** - Interface layout and design
 
 ### Development
+
 - **[Architecture](ARCHITECTURE.md)** - Technical architecture and design
 - **[Testing Guide](TESTING.md)** - How to test the application
 - **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
 
 ### Reference
+
 - **[Changelog](CHANGELOG.md)** - Version history and updates
 - **[Screenshots](SCREENSHOTS.md)** - Visual overview of features
 - **[License](LICENSE)** - GPL-3.0 license
@@ -274,7 +301,7 @@ Settings are stored in: `~/.config/linux-armoury/settings.json`
 All distributions receive equal support:
 
 - **Arch-based**: Arch Linux, EndeavourOS, Manjaro
-- **Debian-based**: Ubuntu, Pop!_OS, Linux Mint, Debian
+- **Debian-based**: Ubuntu, Pop!\_OS, Linux Mint, Debian
 - **RPM-based**: Fedora, Nobara
 - **OpenSUSE**: Tumbleweed, Leap
 
@@ -288,24 +315,31 @@ All distributions receive equal support:
 ## 🐛 Troubleshooting
 
 ### Power backend not found
+
 Ensure you have `asusctl` (recommended), `power-profiles-daemon`, or `pwrcfg` installed. Linux Armoury requires one of these to manage power profiles.
 
 If using **Flatpak on Bazzite or immutable systems**, the backend detection is automatic within the container. The Flatpak includes system D-Bus access to find available power management backends.
 
 ### Display refresh rate changes don't work
+
 We now auto-detect your primary display and current resolution. If issues persist:
+
 ```bash
 xrandr --query
 ```
+
 Ensure the requested mode/rate is supported by your panel.
 
 ### Notifications don't show
+
 Make sure the D-Bus activatable desktop file is installed so your desktop allows app notifications:
 `/usr/share/applications/com.github.th3cavalry.linux-armoury.desktop` should include:
 DBusActivatable=true and X-GNOME-UsesNotifications=true
 
 ### Flatpak on Bazzite/Silverblue not finding asusctl
+
 The Flatpak includes runtime permissions for `asusctl` via system D-Bus. If it still doesn't work:
+
 ```bash
 # Check if Flatpak has system D-Bus access
 flatpak info com.github.th3cavalry.linux-armoury | grep system-bus
@@ -315,7 +349,9 @@ flatpak override --user --socket=system-bus com.github.th3cavalry.linux-armoury
 ```
 
 ### Application doesn't start
+
 Ensure all dependencies are installed:
+
 ```bash
 # Ubuntu/Debian
 sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
@@ -331,16 +367,21 @@ flatpak run com.github.th3cavalry.linux-armoury
 ```
 
 # Ubuntu/Debian
+
 sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
 
 # Arch
+
 sudo pacman -S python python-gobject gtk4 libadwaita
 
 # Fedora
+
 sudo dnf install python3 python3-gobject gtk4 libadwaita
 
 # Flatpak (self-contained, no external deps needed)
+
 flatpak run com.github.th3cavalry.linux-armoury
+
 ```
 
 ## 💬 Supported Devices & Community Feedback
@@ -370,12 +411,14 @@ We welcome feedback and testing reports from users with different devices. If yo
 
 **Example Issue Template:**
 ```
+
 Device: ASUS ROG [Model Name]
 CPU: [e.g., AMD Ryzen 7 7840HS]
 GPU: [e.g., NVIDIA RTX 4070]
 OS: [e.g., Bazzite, Fedora 39, Ubuntu 24.04]
 Status: [Works / Partial / Doesn't Work]
 Notes: [Your feedback here]
+
 ```
 
 ## 🤝 Contributing
@@ -414,3 +457,4 @@ This project is licensed under the GPL-3.0 License - see the LICENSE file for de
 ---
 
 **Note**: This is a community project and is not officially affiliated with or endorsed by ASUS.
+```

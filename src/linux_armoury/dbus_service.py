@@ -9,7 +9,6 @@ This service runs as root and handles:
 """
 
 import os
-import subprocess
 
 import dbus
 import dbus.mainloop.glib

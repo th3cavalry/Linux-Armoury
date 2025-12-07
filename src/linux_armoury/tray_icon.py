@@ -7,15 +7,14 @@ Provides system tray icon using multiple backends:
 3. Background service mode - When no tray is available
 """
 
+import os
+from typing import Any, Callable, Dict, List, Optional
+
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gio", "2.0")
-import os
-import subprocess
-from typing import Callable, Optional
-
-from gi.repository import Gio, GLib, Gtk
+from gi.repository import Gio, GLib  # noqa: E402
 
 # Try to import AppIndicator libraries
 APPINDICATOR_AVAILABLE = False
@@ -23,13 +22,17 @@ AppIndicator = None
 
 try:
     gi.require_version("AyatanaAppIndicator3", "0.1")
-    from gi.repository import AyatanaAppIndicator3 as AppIndicator
+    from gi.repository import (  # type: ignore  # noqa: E402
+        AyatanaAppIndicator3 as AppIndicator,
+    )
 
     APPINDICATOR_AVAILABLE = True
 except (ValueError, ImportError):
     try:
         gi.require_version("AppIndicator3", "0.1")
-        from gi.repository import AppIndicator3 as AppIndicator
+        from gi.repository import (  # type: ignore  # noqa: E402
+            AppIndicator3 as AppIndicator,
+        )
 
         APPINDICATOR_AVAILABLE = True
     except (ValueError, ImportError):
@@ -75,7 +78,7 @@ class StatusNotifierItem:
         self.connection: Optional[Gio.DBusConnection] = None
         self.registration_id = 0
         self.watcher_id = 0
-        self.menu_items = []
+        self.menu_items: List[Dict[str, Any]] = []
 
     def register(self):
         """Register the StatusNotifierItem with D-Bus"""
@@ -198,8 +201,8 @@ class SystemTrayIcon:
     def __init__(self, app_window=None, app_id: str = "linux-armoury"):
         self.window = app_window
         self.app_id = app_id
-        self.indicator = None
-        self.sni = None
+        self.indicator: Any = None
+        self.sni: Optional[StatusNotifierItem] = None
         self.is_active = False
 
         # Callbacks
@@ -235,7 +238,9 @@ class SystemTrayIcon:
             self.sni = StatusNotifierItem(
                 self.app_id, "applications-system", "Linux Armoury"
             )
-            return self.sni.register()
+            if self.sni:
+                return self.sni.register()
+            return False
         except Exception as e:
             print(f"SNI not available: {e}")
             return False
@@ -271,7 +276,7 @@ class SystemTrayIcon:
         import gi
 
         gi.require_version("Gtk", "3.0")
-        from gi.repository import Gtk as Gtk3
+        from gi.repository import Gtk as Gtk3  # noqa: E402
 
         menu = Gtk3.Menu()
 
@@ -405,7 +410,7 @@ class SystemTrayIcon:
             self.sni.set_status(
                 TrayIconStatus.ACTIVE if visible else TrayIconStatus.PASSIVE
             )
-        elif self.indicator:
+        elif self.indicator and AppIndicator:
             status = (
                 AppIndicator.IndicatorStatus.ACTIVE
                 if visible
@@ -417,7 +422,7 @@ class SystemTrayIcon:
         """Set tray icon status (active/attention/passive)"""
         if self.sni:
             self.sni.set_status(status)
-        elif self.indicator:
+        elif self.indicator and AppIndicator:
             if status == TrayIconStatus.ATTENTION:
                 self.indicator.set_status(AppIndicator.IndicatorStatus.ATTENTION)
             elif status == TrayIconStatus.PASSIVE:
@@ -433,7 +438,10 @@ class SystemTrayIcon:
             self.indicator.set_title(title)
 
     def update_status_text(
-        self, cpu_temp: float = None, battery: int = None, profile: str = None
+        self,
+        cpu_temp: Optional[float] = None,
+        battery: Optional[int] = None,
+        profile: Optional[str] = None,
     ):
         """Update tooltip with current status"""
         parts = ["Linux Armoury"]

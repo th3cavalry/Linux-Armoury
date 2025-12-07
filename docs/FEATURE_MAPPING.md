@@ -19,20 +19,24 @@ This document maps features from Windows Armoury Crate to the Linux ecosystem an
 ## Supported ASUS Laptop Families
 
 ### ROG (Republic of Gamers)
+
 - ROG Zephyrus (G14, G15, G16, M16, Duo)
 - ROG Strix (G15, G17, Scar series)
 - ROG Flow (X13, Z13, X16)
 
 ### TUF Gaming
+
 - TUF Gaming (A15, A17, F15, F17)
 - TUF Dash (F15)
 
 ### ProArt
+
 - ProArt Studiobook (16, Pro 16)
 
 ## Implementation Phases
 
 ### Phase 1: Core Infrastructure (Current)
+
 - [x] Basic TDP control
 - [x] Refresh rate management
 - [x] Settings persistence
@@ -40,18 +44,21 @@ This document maps features from Windows Armoury Crate to the Linux ecosystem an
 - [x] GTK4/libadwaita GUI
 
 ### Phase 2: ASUS Integration
+
 - [ ] asusd D-Bus client
 - [ ] supergfxctl D-Bus client
 - [ ] Hardware detection module
 - [ ] Fallback to direct sysfs access
 
 ### Phase 3: Feature Expansion
+
 - [ ] Full Aura keyboard support
 - [ ] Fan curve editor
 - [ ] Battery charge limit
 - [ ] Anime Matrix support
 
 ### Phase 4: Polish
+
 - [ ] Tray icon enhancements
 - [ ] Profile import/export
 - [ ] Keyboard shortcut customization
@@ -59,9 +66,10 @@ This document maps features from Windows Armoury Crate to the Linux ecosystem an
 ## Hardware Detection Paths
 
 Key sysfs paths for ASUS hardware:
+
 - /sys/devices/platform/asus-nb-wmi
 - /sys/firmware/acpi/platform_profile
-- /sys/class/power_supply/BAT*/charge_control_end_threshold
+- /sys/class/power_supply/BAT\*/charge_control_end_threshold
 - /sys/class/leds/asus::kbd_backlight
 
 ## D-Bus Interfaces

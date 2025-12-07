@@ -127,7 +127,7 @@ class GpuController:
                 text=True,
                 timeout=5,
             )
-            return result.returncode == 0 and result.stdout.strip()
+            return result.returncode == 0 and bool(result.stdout.strip())
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
 
@@ -135,7 +135,7 @@ class GpuController:
         """Find AMD GPU sysfs path"""
         try:
             for card in os.listdir("/sys/class/drm"):
-                if card.startswith("card") and not "-" in card:
+                if card.startswith("card") and "-" not in card:
                     device_path = f"/sys/class/drm/{card}/device"
                     if os.path.exists(device_path):
                         vendor_path = f"{device_path}/vendor"
@@ -152,7 +152,7 @@ class GpuController:
         """Find Intel GPU sysfs path"""
         try:
             for card in os.listdir("/sys/class/drm"):
-                if card.startswith("card") and not "-" in card:
+                if card.startswith("card") and "-" not in card:
                     device_path = f"/sys/class/drm/{card}/device"
                     if os.path.exists(device_path):
                         vendor_path = f"{device_path}/vendor"
@@ -626,7 +626,7 @@ class GpuController:
         if power:
             try:
                 stats.power_draw_w = int(power) / 1_000_000
-            except:
+            except Exception:
                 pass
 
         stats.driver = "i915"
@@ -663,7 +663,7 @@ class GpuController:
         # Check for AMD GPUs
         try:
             for card in os.listdir("/sys/class/drm"):
-                if card.startswith("card") and not "-" in card:
+                if card.startswith("card") and "-" not in card:
                     device_path = f"/sys/class/drm/{card}/device"
                     vendor_path = f"{device_path}/vendor"
                     if os.path.exists(vendor_path):
@@ -715,7 +715,7 @@ class GpuController:
         # Check for Intel GPUs
         try:
             for card in os.listdir("/sys/class/drm"):
-                if card.startswith("card") and not "-" in card:
+                if card.startswith("card") and "-" not in card:
                     device_path = f"/sys/class/drm/{card}/device"
                     vendor_path = f"{device_path}/vendor"
                     if os.path.exists(vendor_path):

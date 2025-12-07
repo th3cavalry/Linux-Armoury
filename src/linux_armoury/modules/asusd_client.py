@@ -6,9 +6,8 @@ Provides integration with asusd daemon for ASUS laptop control.
 Falls back to direct sysfs access when asusd is not available.
 """
 
-import subprocess
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 
 class ThrottlePolicy(Enum):

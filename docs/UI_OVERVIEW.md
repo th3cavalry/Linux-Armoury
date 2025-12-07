@@ -127,12 +127,14 @@
 ## Color Schemes
 
 ### Light Mode
+
 - Background: Light gray/white
 - Text: Dark gray/black
 - Accent: Blue (Adwaita blue)
 - Buttons: Light gray with blue hover
 
 ### Dark Mode
+
 - Background: Dark gray/charcoal
 - Text: Light gray/white
 - Accent: Blue (Adwaita blue)
@@ -141,16 +143,19 @@
 ## UI Components
 
 ### Header Bar
+
 - Application title on left
 - Theme selector (optional)
 - Menu button (hamburger) on right
 
 ### Status Section
+
 - Read-only display of current settings
 - Updates automatically after profile changes
 - Shows: Power Profile, Refresh Rate, TDP info
 
 ### Power Profiles Section
+
 - List of 7 pre-configured profiles
 - Each row shows:
   - Profile name (bold)
@@ -158,6 +163,7 @@
   - Apply button (right-aligned)
 
 ### Refresh Rate Section
+
 - List of 5 refresh rate options
 - Each row shows:
   - Refresh rate (bold)
@@ -165,6 +171,7 @@
   - Apply button (right-aligned)
 
 ### Dialogs
+
 - Success dialog: Green checkmark, message, OK button
 - Error dialog: Red warning, message, OK button
 - Preferences: Modal dialog with switches
@@ -206,6 +213,7 @@ Theme persists on restart
 ## Responsive Design
 
 The UI adapts to different window sizes:
+
 - Minimum width: 600px
 - Minimum height: 400px
 - Default size: 800x600
@@ -223,10 +231,10 @@ The UI adapts to different window sizes:
 ## Visual Hierarchy
 
 1. **Header** - Application identity
-2. **Status** - Current state (most important info)
-3. **Power Profiles** - Primary controls
-4. **Refresh Rates** - Secondary controls
-5. **Menu/Preferences** - Settings and options
+1. **Status** - Current state (most important info)
+1. **Power Profiles** - Primary controls
+1. **Refresh Rates** - Secondary controls
+1. **Menu/Preferences** - Settings and options
 
 ## Design Principles
 
@@ -236,6 +244,6 @@ The UI adapts to different window sizes:
 - **Feedback** - Immediate visual confirmation
 - **Safety** - Confirmation for critical actions
 
----
+______________________________________________________________________
 
 This layout provides a clean, modern interface for laptop performance management while maintaining the familiar GNOME/Adwaita aesthetic.

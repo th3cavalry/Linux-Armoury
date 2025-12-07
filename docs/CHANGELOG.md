@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2025-12-06
 
 ### Added
+
 - Native support for `asusctl` and `power-profiles-daemon`
 - Dynamic power profile detection
 - Dynamic refresh rate detection (X11 and Wayland)
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-10-15
 
 ### Added
+
 - Initial release of Linux Armoury GUI
 - GTK4/libadwaita-based modern interface
 - Light and dark theme support with auto-detection
@@ -42,13 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CONTRIBUTING.md with development guidelines
 - Multi-distribution support:
   - Arch-based (Arch, Manjaro, EndeavourOS)
-  - Debian-based (Ubuntu, Pop!_OS, Mint)
+  - Debian-based (Ubuntu, Pop!\_OS, Mint)
   - RPM-based (Fedora, Nobara)
   - OpenSUSE (Tumbleweed, Leap)
 - Automated installation script
 - Desktop entry for application launcher
 
 ### Technical Details
+
 - Written in Python 3 with PyGObject
 - Uses GTK 4 and libadwaita for modern UI
 - Follows GNOME HIG (Human Interface Guidelines)
@@ -56,10 +59,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop file for autostart in ~/.config/autostart/
 
 ### Target Hardware
+
 - Modern ASUS ROG and ASUS gaming laptops (2019+)
   - (variant information removed — project supports a wide range of ASUS gaming laptop variants)
 
 ### Dependencies
+
 - Python 3.8+
 - GTK 4
 - libadwaita 1.0+
@@ -69,11 +74,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional: libayatana-appindicator for system tray
 
 ### Known Issues
+
 - System tray requires libayatana-appindicator (not all distros have it by default)
 - pwrcfg integration may require model-specific helper scripts to be installed
 - Display output name hardcoded as eDP-1 (may vary on some systems)
 
 ### Future Enhancements
+
 - Auto-detect display output name
 - Application-specific profile switching
 - Temperature monitoring
@@ -86,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0b1] - 2025-12-06
 
 ### Added
+
 - Package refactor: source moved to src/linux_armoury and proper Python package layout
 - CI workflow for linting, formatting and tests (GitHub Actions)
 - Pre-commit configuration with black, isort and flake8
@@ -94,13 +102,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests updated and hardened to be more robust across different platform permutations
 
 ### Changed
+
 - Formatting applied (black/isort) and flake8 relaxations for a smooth migration
 - Documentation moved into docs/ and updated
 
 ## [Unreleased]
 
 ### Added
+
 - **Real-Time System Monitoring Dashboard**
+
   - CPU and GPU temperature monitoring with live updates
   - Battery status with percentage and charging state
   - AC/Battery power source detection
@@ -108,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Visual indicators in GUI status section
 
 - **Expanded Hardware Support**
+
   - Support for multiple ASUS laptop models:
     - ROG Flow Z13 series
     - ROG Zephyrus series (M15 / G15)
@@ -117,18 +129,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hardware detection CLI command (`--detect`)
 
 - **Auto Profile Switching**
+
   - Automatic profile changes when AC/Battery state changes
   - Configurable via preferences dialog
   - Default: Performance on AC, Efficient on Battery
   - Desktop notifications for automatic switches
 
 - **Enhanced System Tray**
+
   - Quick access to all 7 power profiles (not just 4)
   - Quick refresh rate menu (30, 60, 90, 120, 180 Hz)
   - Graceful fallback when libayatana-appindicator unavailable
   - Better notification integration
 
 - **Plugin System Foundation**
+
   - PluginBase class for creating extensions
   - PluginManager for loading and managing plugins
   - Plugin callbacks: on_load, on_status_update, on_profile_change
@@ -137,6 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive plugin documentation (PLUGIN_SYSTEM.md)
 
 - **Enhanced CLI**
+
   - Improved monitoring with visual indicators (emojis)
   - Gaming app detection in monitor mode
   - Periodic timestamps in monitoring output
@@ -144,6 +160,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better status display formatting
 
 - **Documentation**
+
   - Updated README with hardware support list
   - Auto-profile switching usage guide
   - System tray quick actions documentation
@@ -151,17 +168,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Extended feature documentation
 
 ### Changed
+
 - Status section now shows 5 rows (added temperature and power source)
 - CLI monitoring output more informative and visually appealing
 - System tray icon setup more robust with error handling
 
 ### Technical Details
+
 - Added `plugin_system.py` for extensibility
 - Enhanced `system_utils.py` with laptop detection
 - Model configurations in `config.py`
 - Custom profile storage infrastructure
 
 ### Planned Features
+
 - Custom power profile editor
 - Integration with asusctl for additional ASUS features
 - Keyboard backlight control
@@ -169,6 +189,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Power consumption history graphs
 - Wayland native support improvements
 
----
+______________________________________________________________________
 
 For more details about each version, see the [releases page](https://github.com/th3cavalry/Linux-Armoury/releases).

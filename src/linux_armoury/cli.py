@@ -212,9 +212,11 @@ https://github.com/th3cavalry/Linux-Armoury
         parser.add_argument(
             "--tdp",
             type=str,
-            choices=list(TDP_PRESETS.keys())
-            if HAS_OVERCLOCKING
-            else ["silent", "balanced", "performance", "turbo"],
+            choices=(
+                list(TDP_PRESETS.keys())
+                if HAS_OVERCLOCKING
+                else ["silent", "balanced", "performance", "turbo"]
+            ),
             metavar="PRESET",
             help="Apply TDP preset (requires RyzenAdj)",
         )
@@ -283,11 +285,11 @@ https://github.com/th3cavalry/Linux-Armoury
                     and "refresh" in profile_info
                     and not SystemUtils.check_command_exists("pwrcfg")
                 ):
-                    rate = profile_info["refresh"]
+                    rate = int(str(profile_info["refresh"]))
                     print(f"  Setting refresh rate to {rate}Hz...")
                     r_success, r_msg = SystemUtils.set_refresh_rate(rate)
                     if r_success:
-                        print(f"  ✓ Refresh rate set")
+                        print("  ✓ Refresh rate set")
                     else:
                         print(f"  ! Could not set refresh rate: {r_msg}")
 

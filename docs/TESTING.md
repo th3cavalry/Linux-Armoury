@@ -13,6 +13,7 @@ Test the UI without system integration:
 ```
 
 **Demo mode allows you to:**
+
 - Test the GUI appearance and layout
 - Try theme switching
 - Click power profiles (simulated)
@@ -21,6 +22,7 @@ Test the UI without system integration:
 - Verify autostart configuration
 
 **Limitations:**
+
 - Actual system commands are not executed
 - No root/sudo required
 - Changes are simulated only
@@ -38,6 +40,7 @@ linux-armoury
 ```
 
 **This tests:**
+
 - Real power profile changes (via asusctl/ppd/pwrcfg)
 - Actual refresh rate changes (via xrandr)
 - PolicyKit privilege elevation
@@ -105,6 +108,7 @@ which pwrcfg
 ### Phase 3: Power Profile Testing
 
 For each power profile:
+
 - [ ] Emergency (10W @ 30Hz)
 - [ ] Battery (18W @ 30Hz)
 - [ ] Efficient (30W @ 60Hz)
@@ -114,15 +118,17 @@ For each power profile:
 - [ ] Maximum/Beast Mode (90W @ 180Hz)
 
 Test:
+
 1. Click "Apply" button
-2. Enter password when prompted (PolicyKit)
-3. Verify success dialog appears
-4. Check status display updates
-5. Verify command executed (check terminal output or system logs)
+1. Enter password when prompted (PolicyKit)
+1. Verify success dialog appears
+1. Check status display updates
+1. Verify command executed (check terminal output or system logs)
 
 ### Phase 4: Refresh Rate Testing
 
 For each refresh rate:
+
 - [ ] 30 Hz
 - [ ] 60 Hz
 - [ ] 90 Hz
@@ -130,15 +136,17 @@ For each refresh rate:
 - [ ] 180 Hz
 
 Test:
+
 1. Click "Apply" button
-2. Enter password when prompted
-3. Verify success dialog appears
-4. Check status display updates
-5. Verify actual refresh rate changed (use `xrandr` to check)
+1. Enter password when prompted
+1. Verify success dialog appears
+1. Check status display updates
+1. Verify actual refresh rate changed (use `xrandr` to check)
 
 ### Phase 5: Preferences Testing
 
 **Autostart:**
+
 - [ ] Enable "Start on Boot"
 - [ ] Check desktop file created: `~/.config/autostart/linux-armoury.desktop`
 - [ ] Verify file contents are correct
@@ -146,6 +154,7 @@ Test:
 - [ ] Check desktop file removed
 
 **Minimize to Tray:**
+
 - [ ] Enable "Minimize to System Tray"
 - [ ] Close window - app should stay in tray
 - [ ] Click tray icon to restore window
@@ -155,6 +164,7 @@ Test:
 ### Phase 6: System Tray Testing
 
 If libayatana-appindicator is installed:
+
 - [ ] Tray icon appears in system tray
 - [ ] Right-click shows menu
 - [ ] "Show Window" restores window
@@ -176,6 +186,7 @@ If libayatana-appindicator is installed:
 ### Phase 8: Error Handling
 
 **Missing pwrcfg:**
+
 - [ ] Temporarily rename pwrcfg (if installed)
 - [ ] Try to apply a power profile
 - [ ] Should show error: "pwrcfg not found"
@@ -183,11 +194,13 @@ If libayatana-appindicator is installed:
 - [ ] Restore pwrcfg
 
 **Invalid refresh rate:**
+
 - [ ] Try to apply a refresh rate not supported by display
 - [ ] Should show error message
 - [ ] Should not crash
 
 **No password entered:**
+
 - [ ] Click "Apply" on a profile
 - [ ] Cancel the password prompt
 - [ ] Should handle gracefully
@@ -196,6 +209,7 @@ If libayatana-appindicator is installed:
 ## Platform-Specific Testing
 
 ### Arch Linux
+
 ```bash
 # Install dependencies
 sudo pacman -S python python-gobject gtk4 libadwaita
@@ -208,6 +222,7 @@ linux-armoury
 ```
 
 ### Ubuntu/Debian
+
 ```bash
 # Install dependencies
 sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
@@ -220,6 +235,7 @@ linux-armoury
 ```
 
 ### Fedora
+
 ```bash
 # Install dependencies
 sudo dnf install python3 python3-gobject gtk4 libadwaita
@@ -232,6 +248,7 @@ linux-armoury
 ```
 
 ### OpenSUSE
+
 ```bash
 # Install dependencies
 sudo zypper install python3 python3-gobject gtk4 libadwaita-1-0
@@ -248,6 +265,7 @@ linux-armoury
 ### Resource Usage
 
 Check resource consumption:
+
 ```bash
 # Memory usage
 ps aux | grep linux-armoury
@@ -257,6 +275,7 @@ top -p $(pgrep -f linux-armoury)
 ```
 
 Expected:
+
 - Memory: 40-80 MB
 - CPU: < 1% when idle
 - CPU: 2-5% when animating
@@ -292,6 +311,7 @@ shellcheck install.sh  # if shellcheck is installed
 When reporting bugs, include:
 
 1. **System Information:**
+
    ```bash
    uname -a
    cat /etc/os-release
@@ -300,16 +320,19 @@ When reporting bugs, include:
    pkg-config --modversion libadwaita-1
    ```
 
-2. **Error Messages:**
+1. **Error Messages:**
+
    - Terminal output
    - Error dialogs (screenshots)
    - System logs if relevant
 
-3. **Steps to Reproduce:**
+1. **Steps to Reproduce:**
+
    - Exact sequence of actions
    - Expected vs actual behavior
 
-4. **Configuration:**
+1. **Configuration:**
+
    ```bash
    cat ~/.config/linux-armoury/settings.json
    ```
@@ -317,6 +340,7 @@ When reporting bugs, include:
 ## Success Criteria
 
 The application passes testing if:
+
 - ✅ All UI elements render correctly
 - ✅ All themes work properly
 - ✅ Power profiles apply successfully (with supported backend)
@@ -330,6 +354,7 @@ The application passes testing if:
 ## Known Limitations
 
 Current known limitations:
+
 - System tray requires libayatana-appindicator
 - Display output hardcoded as eDP-1 (may vary)
 - May require model-specific helper scripts (e.g., asusctl) for full hardware integration
@@ -339,11 +364,11 @@ Current known limitations:
 ## Next Steps After Testing
 
 1. Report any bugs found
-2. Suggest improvements
-3. Contribute patches
-4. Share screenshots
-5. Write documentation improvements
+1. Suggest improvements
+1. Contribute patches
+1. Share screenshots
+1. Write documentation improvements
 
----
+______________________________________________________________________
 
 **Happy Testing! 🧪**

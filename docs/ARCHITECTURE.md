@@ -207,12 +207,12 @@ System Space (Root Privileges)
 ### PolicyKit Flow
 
 1. User clicks "Apply"
-2. Application invokes `pkexec`
-3. PolicyKit shows authentication dialog
-4. User enters password
-5. PolicyKit validates credentials
-6. If valid, executes command as root
-7. Result returned to application
+1. Application invokes `pkexec`
+1. PolicyKit shows authentication dialog
+1. User enters password
+1. PolicyKit validates credentials
+1. If valid, executes command as root
+1. Result returned to application
 
 ### Security Features
 
@@ -291,17 +291,20 @@ Created when "Start on Boot" is enabled in preferences.
 ### Error Categories
 
 1. **Missing Dependencies**
+
    - GTK4/libadwaita not installed
    - Python missing required modules
    - PolicyKit not available
 
-2. **Command Execution Errors**
+1. **Command Execution Errors**
+
    - pwrcfg not found
    - xrandr fails
    - Permission denied
    - Timeout
 
-3. **Configuration Errors**
+1. **Configuration Errors**
+
    - Cannot read/write settings
    - Invalid JSON
    - Corrupt config file
@@ -334,16 +337,16 @@ except Exception as e:
 ### Resource Usage
 
 - **Memory**: 40-80 MB typical
-- **CPU**: <1% idle, 2-5% during animations
-- **Disk**: <1 MB (settings only)
+- **CPU**: \<1% idle, 2-5% during animations
+- **Disk**: \<1 MB (settings only)
 - **Network**: None (fully offline)
 
 ### Optimization Strategies
 
 1. **Lazy Loading** - Load UI components on demand
-2. **Efficient Updates** - Only refresh changed UI elements
-3. **Async Operations** - Use timeouts for commands
-4. **Minimal Polling** - No background polling, event-driven
+1. **Efficient Updates** - Only refresh changed UI elements
+1. **Async Operations** - Use timeouts for commands
+1. **Minimal Polling** - No background polling, event-driven
 
 ## Extension Points
 
@@ -402,6 +405,7 @@ See [TESTING.md](TESTING.md) for manual testing procedures.
 ### Demo Mode
 
 `demo.py` provides non-privileged testing:
+
 - Patches system calls
 - Simulates command execution
 - Allows UI testing without root
@@ -411,8 +415,8 @@ See [TESTING.md](TESTING.md) for manual testing procedures.
 ### Installation Methods
 
 1. **Automated** - `install.sh` script
-2. **Manual** - Copy files to system directories
-3. **Package** - Future: .deb, .rpm, AUR packages
+1. **Manual** - Copy files to system directories
+1. **Package** - Future: .deb, .rpm, AUR packages
 
 ### System Integration
 
@@ -426,21 +430,25 @@ See [TESTING.md](TESTING.md) for manual testing procedures.
 ### Planned Improvements
 
 1. **DBus Service**
+
    - Background daemon for system integration
    - GUI as client to daemon
    - Better privilege separation
 
-2. **Plugin System**
+1. **Plugin System**
+
    - External modules for extended features
    - Community-contributed profiles
    - Hardware-specific optimizations
 
-3. **Wayland Native**
+1. **Wayland Native**
+
    - Layer shell for better tray integration
    - Native Wayland protocols
    - Compositor-specific features
 
-4. **Multi-Device Support**
+1. **Multi-Device Support**
+
    - Profile per laptop model
    - Auto-detection of hardware
    - Model-specific optimizations
@@ -472,12 +480,13 @@ linux-armoury
 ## Conclusion
 
 Linux Armoury follows a clean, modular architecture that:
+
 - Separates concerns (UI, logic, system)
 - Provides secure privilege escalation
 - Maintains user privacy and security
 - Allows for future extensions
 - Follows GNOME/GTK best practices
 
----
+______________________________________________________________________
 
 For implementation details, see the source code comments in `linux-armoury-gui.py`.

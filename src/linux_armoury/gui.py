@@ -5,35 +5,34 @@ A modern GTK4/libadwaita control center inspired by ROG Control Center
 Features: Power profiles, display control, fan curves, RGB keyboard, battery management
 """
 
+import json
+import os
+import sys
+
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-import json
-import os
-import shlex
-import subprocess
-import sys
-from typing import Optional
-
-from gi.repository import Adw, Gdk, Gio, GLib, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 # New modules for configuration and system utilities
 try:
     from .config import Config
 except Exception:
 
-    class Config:  # minimal fallback if config.py not installed
+    class ConfigFallback:  # minimal fallback if config.py not installed
         APP_ID = "com.github.th3cavalry.linux-armoury"
         DEFAULT_RESOLUTION = "2560x1600"
         VERSION = "1.0.0"
+
+    Config = ConfigFallback  # type: ignore
 
 
 try:
     from .system_utils import SystemUtils
 except Exception:
 
-    class SystemUtils:  # minimal fallbacks
+    class SystemUtilsFallback:  # minimal fallbacks
         @staticmethod
         def get_primary_display():
             return "eDP-1"
@@ -54,10 +53,12 @@ except Exception:
         def get_current_tdp():
             return None
 
+    SystemUtils = SystemUtilsFallback  # type: ignore
+
 
 # New feature modules (optional - gracefully handle if not present)
 try:
-    from .modules.battery_control import ChargeLimitPreset, get_battery_controller
+    from .modules.battery_control import get_battery_controller
 
     HAS_BATTERY_CONTROL = True
 except ImportError:
@@ -78,53 +79,42 @@ except ImportError:
     HAS_KEYBOARD_CONTROL = False
 
 try:
-    from .modules.hardware_detection import HardwareFeature, detect_hardware
+    pass
 
     HAS_HARDWARE_DETECTION = True
 except ImportError:
     HAS_HARDWARE_DETECTION = False
 
 try:
-    from .fan_curve_editor import FanCurveEditorDialog, FanCurveWidget, get_preset_curve
+    from .fan_curve_editor import FanCurveEditorDialog, FanCurveWidget
 
     HAS_FAN_CURVE_EDITOR = True
 except ImportError:
     HAS_FAN_CURVE_EDITOR = False
 
 try:
-    from .modules.session_stats import SessionStatistics, get_session_stats
+    from .modules.session_stats import get_session_stats
 
     HAS_SESSION_STATS = True
 except ImportError:
     HAS_SESSION_STATS = False
 
 try:
-    from .tray_icon import SystemTrayIcon, create_tray_icon
+    from .tray_icon import create_tray_icon
 
     HAS_TRAY_ICON = True
 except ImportError:
     HAS_TRAY_ICON = False
 
 try:
-    from .modules.overclocking_control import (
-        TDP_PRESETS,
-        CPUInfo,
-        GPUInfo,
-        OverclockingController,
-    )
+    from .modules.overclocking_control import TDP_PRESETS, OverclockingController
 
     HAS_OVERCLOCKING = True
 except ImportError:
     HAS_OVERCLOCKING = False
 
 try:
-    from .modules.gpu_control import (
-        GpuController,
-        GpuLiveStats,
-        GpuMode,
-        GpuPowerStatus,
-        GpuSwitchingStatus,
-    )
+    from .modules.gpu_control import GpuPowerStatus
     from .modules.gpu_control import get_controller as get_gpu_controller
 
     HAS_GPU_CONTROL = True
@@ -132,16 +122,7 @@ except ImportError:
     HAS_GPU_CONTROL = False
 
 try:
-    from .modules.system_monitor import (
-        CpuStats,
-        DiskStats,
-        MemoryStats,
-        NetworkStats,
-        ProcessInfo,
-        SystemMonitor,
-        SystemOverview,
-        get_monitor,
-    )
+    from .modules.system_monitor import get_monitor
 
     HAS_SYSTEM_MONITOR = True
 except ImportError:
@@ -175,8 +156,10 @@ window.background {
     background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0a0a0f 100%);
     background-image:
         linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0a0a0f 100%),
-        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 249, 0.03) 2px, rgba(0, 255, 249, 0.03) 4px),
-        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 0, 255, 0.03) 2px, rgba(255, 0, 255, 0.03) 4px);
+        repeating-linear-gradient(90deg, transparent, transparent 2px,
+            rgba(0, 255, 249, 0.03) 2px, rgba(0, 255, 249, 0.03) 4px),
+        repeating-linear-gradient(0deg, transparent, transparent 2px,
+            rgba(255, 0, 255, 0.03) 2px, rgba(255, 0, 255, 0.03) 4px);
 }
 
 /* === CYBER STATUS CARDS === */
@@ -4941,7 +4924,8 @@ class MainWindow(Adw.ApplicationWindow):
                 if hasattr(self, "mon_swap_row"):
                     if mem_stats.swap_total_mb > 0:
                         self.mon_swap_row.set_subtitle(
-                            f"{mem_stats.swap_used_mb:,} / {mem_stats.swap_total_mb:,} MB ({mem_stats.swap_usage_percent:.1f}%)"
+                            f"{mem_stats.swap_used_mb:,} / {mem_stats.swap_total_mb:,} MB "
+                            f"({mem_stats.swap_usage_percent:.1f}%)"
                         )
                         self.mon_swap_bar.set_value(mem_stats.swap_usage_percent)
                     else:
@@ -5138,7 +5122,8 @@ class MainWindow(Adw.ApplicationWindow):
             website="https://github.com/th3cavalry/Linux-Armoury",
             issue_url="https://github.com/th3cavalry/Linux-Armoury/issues",
             license_type=Gtk.License.GPL_3_0,
-            comments="A modern control center for ASUS ROG laptops on Linux.\n\nInspired by ROG Control Center and G-Helper.",
+            comments="A modern control center for ASUS ROG laptops on Linux.\n\n"
+            "Inspired by ROG Control Center and G-Helper.",
         )
         # Add credits
         about.add_credit_section(

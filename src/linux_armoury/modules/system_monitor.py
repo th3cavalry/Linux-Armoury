@@ -558,7 +558,7 @@ class SystemMonitor:
         self, count: int = 10, sort_by: str = "cpu"
     ) -> List[ProcessInfo]:
         """Get top processes by CPU or memory usage"""
-        processes = []
+        processes: List[ProcessInfo] = []
 
         try:
             # Use ps command for process info
@@ -739,7 +739,8 @@ if __name__ == "__main__":
     print("\n=== Disk Stats ===")
     for disk in monitor.get_disk_stats():
         print(
-            f"  {disk.mountpoint}: {disk.used_gb:.1f}/{disk.total_gb:.1f} GB ({disk.usage_percent:.1f}%) [{disk.filesystem}]"
+            f"  {disk.mountpoint}: {disk.used_gb:.1f}/{disk.total_gb:.1f} GB "
+            f"({disk.usage_percent:.1f}%) [{disk.filesystem}]"
         )
 
     print("\n=== Network Stats ===")
