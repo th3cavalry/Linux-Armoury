@@ -58,8 +58,8 @@ jobs:
           # Attempt to create bundle
           echo "=== Attempting to create bundle: $BUNDLE ==="
           if flatpak build-bundle \
-              --repo=repo \
               --force \
+              repo \
               "$BUNDLE" \
               com.github.th3cavalry.linux-armoury 2>&1; then
             echo "✓ Bundle created successfully"
