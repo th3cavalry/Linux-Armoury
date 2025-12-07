@@ -36,34 +36,39 @@ jobs:
         run: |
           flatpak-builder --repo=repo --force-clean build-dir com.github.th3cavalry.linux-armoury.yml
 
-      - name: Create Flatpak bundle (verbose)
+      - name: Create Flatpak bundle
         if: always()
         id: create_bundle
         continue-on-error: true
         run: |
-          set -euo pipefail
           TAG_NAME=${GITHUB_REF#refs/tags/}
           BUNDLE=linux-armoury-${TAG_NAME}.flatpak
-          echo "Bundle target: $BUNDLE"
-          if [ -d repo ]; then
-            echo "--- repo contents ---"
-            ls -la repo || true
-            echo "--- refs ---"
-            flatpak refs --repo=repo || true
-            echo "--- attempting build-bundle (verbose output) ---"
-            flatpak build-bundle repo "$BUNDLE" com.github.th3cavalry.linux-armoury --force 2>&1 | tee /tmp/bundle.log || true
-            echo "--- bundle logs ---"
-            cat /tmp/bundle.log || true
-            if [ -f "$BUNDLE" ]; then
-              echo "bundle=$BUNDLE" >> $GITHUB_OUTPUT
-            else
-              echo "bundle=" >> $GITHUB_OUTPUT
-            fi
+
+          if [ ! -d repo ]; then
+            echo "ERROR: repo directory not found"
+            echo "bundle=" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Debug: Check repo structure
+          echo "=== Repo structure ==="
+          ls -la repo/ | head -20
+          echo "=== Flatpak refs in repo ==="
+          flatpak refs --repo=repo || echo "No refs found"
+
+          # Attempt to create bundle
+          echo "=== Attempting to create bundle: $BUNDLE ==="
+          if flatpak build-bundle \
+              --repo=repo \
+              --force \
+              "$BUNDLE" \
+              com.github.th3cavalry.linux-armoury 2>&1; then
+            echo "✓ Bundle created successfully"
+            echo "bundle=$BUNDLE" >> $GITHUB_OUTPUT
           else
-            echo "repo directory missing, cannot build bundle"
+            echo "✗ Bundle creation failed, will use fallback"
             echo "bundle=" >> $GITHUB_OUTPUT
           fi
-          echo "bundle=$BUNDLE" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release (best-effort)
         if: always()
@@ -103,23 +108,38 @@ jobs:
 
       - name: Upload built Flatpak (or fallback) to Release
         if: always()
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || github.token }}
         run: |
-          set -euo pipefail
           BUNDLE_PATH="${{ steps.create_bundle.outputs.bundle }}"
+          FALLBACK_FILE="linux-armoury-0.5.0b0.flatpak"
+          RELEASE_ID="${{ steps.release_info.outputs.release_id }}"
+          UPLOAD_URL="${{ steps.release_info.outputs.upload_url }}"
+
+          # Determine which file to upload
           if [ -n "$BUNDLE_PATH" ] && [ -f "$BUNDLE_PATH" ]; then
             file_to_upload="$BUNDLE_PATH"
+            echo "Using built bundle: $file_to_upload"
+          elif [ -f "$FALLBACK_FILE" ]; then
+            file_to_upload="$FALLBACK_FILE"
+            echo "Using fallback: $file_to_upload"
           else
-            file_to_upload="linux-armoury-0.5.0b0.flatpak"
-          fi
-          if [ ! -f "$file_to_upload" ]; then
-            echo "File not found: $file_to_upload" >&2
+            echo "ERROR: No flatpak file available to upload"
             exit 1
           fi
-          UPLOAD_URL="${{ steps.release_info.outputs.upload_url }}"
-          echo "Uploading $file_to_upload to $UPLOAD_URL"
-          curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$file_to_upload" "$UPLOAD_URL?name=$(basename "$file_to_upload")" | jq -r '.browser_download_url'
+
+          if [ -z "$UPLOAD_URL" ] || [ "$UPLOAD_URL" = "null" ]; then
+            echo "ERROR: No upload URL available"
+            exit 1
+          fi
+
+          echo "Uploading to: $UPLOAD_URL"
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@$file_to_upload" \
+            "$UPLOAD_URL?name=$(basename "$file_to_upload")" | jq -r '.browser_download_url // .id'
 
       # Fallback: if the built artifact is not available, attach the repo-provided
       # pre-built flatpak as an asset to the release so the tag has a usable artifact.
