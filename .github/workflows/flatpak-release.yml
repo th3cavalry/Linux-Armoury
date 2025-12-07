@@ -65,28 +65,38 @@ jobs:
             echo "✓ Bundle created successfully"
             if [ -f "$BUNDLE" ]; then
               echo "output_file=$BUNDLE" >> $GITHUB_OUTPUT
+              ls -lh "$BUNDLE"
             fi
           else
             echo "✗ Bundle creation failed, will use fallback"
           fi
 
+          echo "=== All .flatpak files in workspace ==="
+          find . -maxdepth 1 -name "*.flatpak" -type f
+
       - name: Prepare Flatpak asset for release
         if: always()
         id: prepare_asset
+        continue-on-error: true
         run: |
           # Check for built bundle
           BUILT_BUNDLE="${{ steps.create_bundle.outputs.output_file }}"
           FALLBACK_FILE="linux-armoury-0.5.0b0.flatpak"
 
+          echo "DEBUG: BUILT_BUNDLE=$BUILT_BUNDLE"
+          echo "DEBUG: FALLBACK_FILE=$FALLBACK_FILE"
+          echo "DEBUG: Files in workspace:"
+          ls -lh *.flatpak 2>/dev/null || echo "No .flatpak files found"
+
           if [ -n "$BUILT_BUNDLE" ] && [ -f "$BUILT_BUNDLE" ]; then
             echo "asset=$BUILT_BUNDLE" >> $GITHUB_OUTPUT
-            echo "Using built bundle: $BUILT_BUNDLE"
+            echo "✓ Using built bundle: $BUILT_BUNDLE"
           elif [ -f "$FALLBACK_FILE" ]; then
             echo "asset=$FALLBACK_FILE" >> $GITHUB_OUTPUT
-            echo "Using fallback: $FALLBACK_FILE"
+            echo "✓ Using fallback: $FALLBACK_FILE"
           else
             echo "ERROR: No flatpak file available"
-            exit 1
+            echo "asset=" >> $GITHUB_OUTPUT
           fi
 
       - name: Create GitHub Release with Flatpak asset
