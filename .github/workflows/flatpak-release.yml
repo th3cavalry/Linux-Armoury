@@ -83,10 +83,14 @@ jobs:
           BUILT_BUNDLE="${{ steps.create_bundle.outputs.output_file }}"
           FALLBACK_FILE="linux-armoury-0.5.0b0.flatpak"
 
-          echo "DEBUG: BUILT_BUNDLE=$BUILT_BUNDLE"
-          echo "DEBUG: FALLBACK_FILE=$FALLBACK_FILE"
-          echo "DEBUG: Files in workspace:"
-          ls -lh *.flatpak 2>/dev/null || echo "No .flatpak files found"
+          echo "DEBUG: BUILT_BUNDLE='$BUILT_BUNDLE'"
+          echo "DEBUG: FALLBACK_FILE='$FALLBACK_FILE'"
+          echo "DEBUG: Current directory:"
+          pwd
+          echo "DEBUG: All files in workspace:"
+          find . -maxdepth 1 -type f -name "*flatpak*" -o -type f -name "*.flatpak"
+          echo "DEBUG: Files matching pattern:"
+          ls -lh *.flatpak 2>/dev/null || echo "No .flatpak files found with glob"
 
           if [ -n "$BUILT_BUNDLE" ] && [ -f "$BUILT_BUNDLE" ]; then
             echo "asset=$BUILT_BUNDLE" >> $GITHUB_OUTPUT
@@ -98,6 +102,9 @@ jobs:
             echo "ERROR: No flatpak file available"
             echo "asset=" >> $GITHUB_OUTPUT
           fi
+
+          echo "DEBUG: Output variables:"
+          cat $GITHUB_OUTPUT 2>/dev/null || echo "No GITHUB_OUTPUT set"
 
       - name: Create GitHub Release and Upload Asset
         if: always()
