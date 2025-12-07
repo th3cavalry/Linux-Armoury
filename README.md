@@ -275,25 +275,25 @@ Settings are stored in: `~/.config/linux-armoury/settings.json`
 
 ### Getting Started
 
-- **[Quick Start Guide](QUICKSTART.md)** - Get started in 5 minutes
-- **[Project Summary](PROJECT_SUMMARY.md)** - Overview and quick facts
-- **[FAQ](FAQ.md)** - Frequently asked questions
+- **[Quick Start Guide](docs/QUICKSTART.md)** - Get started in 5 minutes
+- **[Project Summary](docs/PROJECT_SUMMARY.md)** - Overview and quick facts
+- **[FAQ](docs/FAQ.md)** - Frequently asked questions
 
 ### Feature Documentation
 
-- **[Beast Mode Guide](BEAST_MODE.md)** - Understanding ASUS performance modes
-- **[UI Overview](UI_OVERVIEW.md)** - Interface layout and design
+- **[Beast Mode Guide](docs/BEAST_MODE.md)** - Understanding ASUS performance modes
+- **[UI Overview](docs/UI_OVERVIEW.md)** - Interface layout and design
 
 ### Development
 
-- **[Architecture](ARCHITECTURE.md)** - Technical architecture and design
-- **[Testing Guide](TESTING.md)** - How to test the application
-- **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
+- **[Architecture](docs/ARCHITECTURE.md)** - Technical architecture and design
+- **[Testing Guide](docs/TESTING.md)** - How to test the application
+- **[Contributing](docs/CONTRIBUTING.md)** - How to contribute to the project
 
 ### Reference
 
-- **[Changelog](CHANGELOG.md)** - Version history and updates
-- **[Screenshots](SCREENSHOTS.md)** - Visual overview of features
+- **[Changelog](docs/CHANGELOG.md)** - Version history and updates
+- **[Screenshots](docs/SCREENSHOTS.md)** - Visual overview of features
 - **[License](LICENSE)** - GPL-3.0 license
 
 ## 🎯 Supported Distributions

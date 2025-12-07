@@ -538,17 +538,38 @@ class SystemUtils:
             Optional[float]: Temperature in Celsius
         """
         try:
-            # For AMD integrated graphics
-            result = subprocess.run(
-                ["sensors"], capture_output=True, text=True, timeout=2
-            )
+            # Method 1: Try reading from sysfs (amdgpu)
+            base_path = "/sys/class/hwmon"
+            if os.path.exists(base_path):
+                for item in os.listdir(base_path):
+                    path = os.path.join(base_path, item)
+                    name_file = os.path.join(path, "name")
+                    if os.path.exists(name_file):
+                        try:
+                            with open(name_file, "r") as f:
+                                name = f.read().strip()
 
-            if result.returncode == 0:
-                for line in result.stdout.split("\n"):
-                    if "edge" in line.lower() or "gpu" in line.lower():
-                        match = re.search(r"(\d+\.\d+)°C", line)
-                        if match:
-                            return float(match.group(1))
+                            if name == "amdgpu":
+                                # Try temp1_input (usually edge)
+                                temp_path = os.path.join(path, "temp1_input")
+                                if os.path.exists(temp_path):
+                                    with open(temp_path, "r") as f:
+                                        return int(f.read().strip()) / 1000.0
+                        except Exception:
+                            continue
+
+            # Method 2: Fallback to sensors command
+            if SystemUtils.check_command_exists("sensors"):
+                result = subprocess.run(
+                    ["sensors"], capture_output=True, text=True, timeout=2
+                )
+
+                if result.returncode == 0:
+                    for line in result.stdout.split("\n"):
+                        if "edge" in line.lower() or "gpu" in line.lower():
+                            match = re.search(r"(\d+\.\d+)°C", line)
+                            if match:
+                                return float(match.group(1))
 
         except Exception as e:
             print(f"Error reading GPU temperature: {e}")
