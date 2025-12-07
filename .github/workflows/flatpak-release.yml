@@ -142,8 +142,10 @@ jobs:
           echo "Response: $release_data"
 
           release_id=""
+          upload_url=""
           if [ "$http_code" = "200" ]; then
             release_id=$(echo "$release_data" | jq -r '.id' 2>/dev/null)
+            upload_url=$(echo "$release_data" | jq -r '.upload_url' 2>/dev/null | sed -e 's/{?name,label}//')
             echo "Release already exists: $release_id"
           else
             # Create release
@@ -160,6 +162,7 @@ jobs:
 
             if [ "$create_http_code" = "201" ]; then
               release_id=$(echo "$create_data" | jq -r '.id' 2>/dev/null)
+              upload_url=$(echo "$create_data" | jq -r '.upload_url' 2>/dev/null | sed -e 's/{?name,label}//')
               echo "Created release: $release_id"
             else
               echo "ERROR: Failed to create release"
@@ -167,19 +170,28 @@ jobs:
             fi
           fi
 
-          if [ -z "$release_id" ]; then
-            echo "ERROR: release_id is empty"
+          if [ -z "$release_id" ] || [ -z "$upload_url" ]; then
+            echo "ERROR: release_id or upload_url is empty"
             exit 1
+          fi
+
+          # Delete existing asset if it exists
+          echo "Checking for existing assets..."
+          assets=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$API_URL/releases/$release_id/assets")
+          asset_id=$(echo "$assets" | jq -r '.[] | select(.name | endswith(".flatpak")) | .id' 2>/dev/null | head -1)
+          if [ -n "$asset_id" ]; then
+            echo "Deleting existing asset: $asset_id"
+            curl -s -X DELETE -H "Authorization: token $GITHUB_TOKEN" "$API_URL/releases/assets/$asset_id"
           fi
 
           # Upload asset
           ASSET_NAME=$(basename "$ASSET_FILE")
-          echo "Uploading asset: $ASSET_NAME from $ASSET_FILE"
+          echo "Uploading asset: $ASSET_NAME from $ASSET_FILE to $upload_url"
           upload_response=$(curl -s -w "\n%{http_code}" -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/octet-stream" \
             --data-binary "@$ASSET_FILE" \
-            "$API_URL/releases/$release_id/assets?name=$ASSET_NAME")
+            "$upload_url?name=$ASSET_NAME")
           upload_http_code=$(echo "$upload_response" | tail -1)
           upload_data=$(echo "$upload_response" | head -n-1)
           echo "Upload HTTP Code: $upload_http_code"
