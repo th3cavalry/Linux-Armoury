@@ -32,15 +32,22 @@ jobs:
           mkdir -p build-dir repo
 
       - name: Build Flatpak repository
+        continue-on-error: true
         run: |
           flatpak-builder --repo=repo --force-clean build-dir com.github.th3cavalry.linux-armoury.yml
 
       - name: Create Flatpak bundle
+        if: always()
         id: create_bundle
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
           BUNDLE=linux-armoury-${TAG_NAME}.flatpak
-          flatpak build-bundle repo "$BUNDLE" com.github.th3cavalry.linux-armoury --force
+          if [ -d repo ]; then
+            flatpak build-bundle repo "$BUNDLE" com.github.th3cavalry.linux-armoury --force
+            echo "bundle=$BUNDLE" >> $GITHUB_OUTPUT
+          else
+            echo "bundle=" >> $GITHUB_OUTPUT
+          fi
           echo "bundle=$BUNDLE" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
