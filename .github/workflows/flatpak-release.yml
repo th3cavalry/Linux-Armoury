@@ -51,6 +51,7 @@ jobs:
           echo "bundle=$BUNDLE" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
+        if: always()
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
