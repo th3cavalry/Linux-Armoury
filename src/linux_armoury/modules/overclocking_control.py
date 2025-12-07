@@ -416,7 +416,9 @@ class OverclockingController:
         return info
 
     def set_gpu_performance_level(self, level: str) -> bool:
-        """Set GPU performance level (auto, low, high, manual, profile_standard, etc.)"""
+        """
+        Set GPU performance level (auto, low, high, manual, profile_standard, etc.)
+        """
         if not self.amd_gpu_path:
             return False
 
@@ -461,12 +463,17 @@ class OverclockingController:
 
     def get_energy_performance_preference(self) -> Optional[str]:
         """Get current energy performance preference"""
-        epp_path = f"{self.SYSFS_CPU_BASE}/cpu0/cpufreq/energy_performance_preference"
+        epp_path = (
+            f"{self.SYSFS_CPU_BASE}/cpu0/cpufreq/" "energy_performance_preference"
+        )
         return self._read_sysfs(epp_path)
 
     def get_available_energy_preferences(self) -> List[str]:
         """Get available energy performance preferences"""
-        epp_path = f"{self.SYSFS_CPU_BASE}/cpu0/cpufreq/energy_performance_available_preferences"
+        epp_path = (
+            f"{self.SYSFS_CPU_BASE}/cpu0/cpufreq/"
+            "energy_performance_available_preferences"
+        )
         content = self._read_sysfs(epp_path)
         if content:
             return content.split()
@@ -503,7 +510,8 @@ if __name__ == "__main__":
     print(f"Model: {cpu_info.model}")
     print(f"Cores/Threads: {cpu_info.cores}/{cpu_info.threads}")
     print(
-        f"Frequency: {cpu_info.current_freq_mhz:.0f} MHz (max: {cpu_info.max_freq_mhz:.0f} MHz)"
+        f"Frequency: {cpu_info.current_freq_mhz:.0f} MHz "
+        f"(max: {cpu_info.max_freq_mhz:.0f} MHz)"
     )
     print(f"Governor: {cpu_info.governor}")
     print(f"Turbo: {'Enabled' if cpu_info.turbo_enabled else 'Disabled'}")

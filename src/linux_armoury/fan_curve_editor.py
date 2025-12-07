@@ -457,7 +457,10 @@ class FanCurveEditorDialog(Adw.Dialog):
 
         # Help text
         help_label = Gtk.Label(
-            label="💡 Drag points to adjust. Double-click to add a point. Select and press Delete to remove."
+            label=(
+                "💡 Drag points to adjust. Double-click to add a point. "
+                "Select and press Delete to remove."
+            )
         )
         help_label.add_css_class("dim-label")
         help_label.set_wrap(True)

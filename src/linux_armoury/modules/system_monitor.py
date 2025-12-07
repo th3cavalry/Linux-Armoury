@@ -723,7 +723,8 @@ if __name__ == "__main__":
     print(f"  Cores: {cpu.core_count} ({cpu.thread_count} threads)")
     print(f"  Usage: {cpu.usage_percent:.1f}%")
     print(
-        f"  Freq: {cpu.current_freq_mhz:.0f} MHz ({cpu.min_freq_mhz:.0f}-{cpu.max_freq_mhz:.0f})"
+        f"  Freq: {cpu.current_freq_mhz:.0f} MHz "
+        f"({cpu.min_freq_mhz:.0f}-{cpu.max_freq_mhz:.0f})"
     )
     print(f"  Load: {cpu.load_1min:.2f}, {cpu.load_5min:.2f}, {cpu.load_15min:.2f}")
 
@@ -733,7 +734,8 @@ if __name__ == "__main__":
     print(f"  Available: {mem.available_mb} MB")
     print(f"  Cached: {mem.cached_mb} MB, Buffers: {mem.buffers_mb} MB")
     print(
-        f"  Swap: {mem.swap_used_mb}/{mem.swap_total_mb} MB ({mem.swap_usage_percent:.1f}%)"
+        f"  Swap: {mem.swap_used_mb}/{mem.swap_total_mb} MB "
+        f"({mem.swap_usage_percent:.1f}%)"
     )
 
     print("\n=== Disk Stats ===")
@@ -752,14 +754,17 @@ if __name__ == "__main__":
         status = "UP" if n.is_up else "DOWN"
         print(f"  {n.interface} ({status}): {n.ip_address or 'No IP'}")
         print(
-            f"    TX: {monitor.format_bytes(n.bytes_sent)} ({monitor.format_bytes_rate(n.send_rate)})"
+            f"    TX: {monitor.format_bytes(n.bytes_sent)} "
+            f"({monitor.format_bytes_rate(n.send_rate)})"
         )
         print(
-            f"    RX: {monitor.format_bytes(n.bytes_recv)} ({monitor.format_bytes_rate(n.recv_rate)})"
+            f"    RX: {monitor.format_bytes(n.bytes_recv)} "
+            f"({monitor.format_bytes_rate(n.recv_rate)})"
         )
 
     print("\n=== Top Processes (by CPU) ===")
     for proc in monitor.get_top_processes(5, "cpu"):
         print(
-            f"  {proc.pid:6d} {proc.name:20s} CPU: {proc.cpu_percent:5.1f}% MEM: {proc.mem_percent:5.1f}%"
+            f"  {proc.pid:6d} {proc.name:20s} "
+            f"CPU: {proc.cpu_percent:5.1f}% MEM: {proc.mem_percent:5.1f}%"
         )

@@ -442,7 +442,8 @@ class SystemUtils:
         if not tool:
             return (
                 False,
-                "No Wayland display configuration tool found. Install wlr-randr or use GNOME Settings.",
+                "No Wayland display configuration tool found. "
+                "Install wlr-randr or use GNOME Settings.",
             )
 
         display = SystemUtils._get_primary_display_wayland()
@@ -904,7 +905,7 @@ class SystemUtils:
         Detect laptop model information.
 
         Returns:
-            Optional[Dict[str, str]]: Model information including vendor, product, version
+            Optional[Dict[str, str]]: Model info (vendor, product, version)
         """
         model_info = {}
 

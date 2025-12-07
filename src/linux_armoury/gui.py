@@ -363,7 +363,10 @@ window.background {
         opacity: 1;
     }
     50% {
-        text-shadow: 0 0 15px @neon_cyan, 0 0 30px @neon_cyan, 0 0 40px alpha(@neon_cyan, 0.5);
+        text-shadow:
+            0 0 15px @neon_cyan,
+            0 0 30px @neon_cyan,
+            0 0 40px alpha(@neon_cyan, 0.5);
         opacity: 0.8;
     }
 }
@@ -493,7 +496,9 @@ window.background {
 }
 
 .quick-toggle.active {
-    background: linear-gradient(135deg, alpha(@neon_cyan, 0.3), alpha(@neon_magenta, 0.2));
+    background: linear-gradient(135deg,
+        alpha(@neon_cyan, 0.3),
+        alpha(@neon_magenta, 0.2));
     color: @neon_cyan;
     border: 2px solid @neon_cyan;
     box-shadow:
@@ -528,7 +533,9 @@ window.background {
 }
 
 .pill.suggested-action {
-    background: linear-gradient(135deg, alpha(@neon_red, 0.3), alpha(@neon_orange, 0.2));
+    background: linear-gradient(135deg,
+        alpha(@neon_red, 0.3),
+        alpha(@neon_orange, 0.2));
     color: @neon_red;
     border: 2px solid @neon_red;
     box-shadow:
@@ -538,7 +545,9 @@ window.background {
 }
 
 .pill.suggested-action:hover {
-    background: linear-gradient(135deg, alpha(@neon_red, 0.4), alpha(@neon_orange, 0.3));
+    background: linear-gradient(135deg,
+        alpha(@neon_red, 0.4),
+        alpha(@neon_orange, 0.3));
     box-shadow:
         0 0 30px @neon_red,
         inset 0 0 25px alpha(@neon_red, 0.3);
@@ -753,7 +762,9 @@ levelbar.high block.filled {
         box-shadow: 0 0 10px alpha(@neon_red, 0.3), inset 0 0 5px alpha(@neon_red, 0.1);
     }
     50% {
-        box-shadow: 0 0 20px alpha(@neon_red, 0.6), inset 0 0 10px alpha(@neon_red, 0.2);
+        box-shadow:
+            0 0 20px alpha(@neon_red, 0.6),
+            inset 0 0 10px alpha(@neon_red, 0.2);
     }
 }
 
@@ -974,7 +985,9 @@ button:active {
 }
 
 button.suggested-action {
-    background: linear-gradient(135deg, alpha(@neon_cyan, 0.3), alpha(@neon_magenta, 0.2));
+    background: linear-gradient(135deg,
+        alpha(@neon_cyan, 0.3),
+        alpha(@neon_magenta, 0.2));
     border: 2px solid @neon_cyan;
     color: @neon_cyan;
     box-shadow:
@@ -1910,7 +1923,8 @@ class MainWindow(Adw.ApplicationWindow):
             row = Adw.ActionRow()
             row.set_title(disk.mountpoint)
             row.set_subtitle(
-                f"{disk.used_gb:.1f} / {disk.total_gb:.1f} GB ({disk.usage_percent:.1f}%)"
+                f"{disk.used_gb:.1f} / {disk.total_gb:.1f} GB "
+                f"({disk.usage_percent:.1f}%)"
             )
 
             disk_icon = Gtk.Image.new_from_icon_name("drive-harddisk-symbolic")
@@ -2722,7 +2736,8 @@ class MainWindow(Adw.ApplicationWindow):
             except Exception as e:
                 print(f"Fan control setup failed: {e}")
 
-        # Even without fan control, show a basic visual fan curve preview if editor is available
+        # Even without fan control, show a basic visual fan curve preview
+        # if editor is available
         if HAS_FAN_CURVE_EDITOR and not HAS_FAN_CONTROL:
             curve_preview_group = Adw.PreferencesGroup()
             curve_preview_group.set_title("Fan Curve Preview")
@@ -2814,7 +2829,8 @@ class MainWindow(Adw.ApplicationWindow):
         self.oc_cpu_freq_row = Adw.ActionRow()
         self.oc_cpu_freq_row.set_title("Current Frequency")
         self.oc_cpu_freq_row.set_subtitle(
-            f"{cpu_info.current_freq_mhz:.0f} MHz (max: {cpu_info.max_freq_mhz:.0f} MHz)"
+            f"{cpu_info.current_freq_mhz:.0f} MHz "
+            f"(max: {cpu_info.max_freq_mhz:.0f} MHz)"
         )
         freq_icon = Gtk.Image.new_from_icon_name("speedometer-symbolic")
         self.oc_cpu_freq_row.add_prefix(freq_icon)
@@ -2910,7 +2926,9 @@ class MainWindow(Adw.ApplicationWindow):
                 btn.set_child(btn_box)
                 btn.add_css_class("pill")
                 btn.set_tooltip_text(
-                    f"STAPM: {preset_values['stapm']}W, Fast: {preset_values['fast']}W, Slow: {preset_values['slow']}W"
+                    f"STAPM: {preset_values['stapm']}W, "
+                    f"Fast: {preset_values['fast']}W, "
+                    f"Slow: {preset_values['slow']}W"
                 )
                 btn.connect("clicked", self.on_tdp_preset_clicked, preset_name)
                 preset_box.append(btn)
@@ -3034,7 +3052,8 @@ class MainWindow(Adw.ApplicationWindow):
                 self.oc_gpu_status_row = Adw.ActionRow()
                 self.oc_gpu_status_row.set_title("GPU Status")
                 self.oc_gpu_status_row.set_subtitle(
-                    f"Clock: {gpu_info.current_gpu_clock_mhz} MHz | Temp: {gpu_info.gpu_temp_c}°C"
+                    f"Clock: {gpu_info.current_gpu_clock_mhz} MHz | "
+                    f"Temp: {gpu_info.gpu_temp_c}°C"
                 )
                 gpu_status_icon = Gtk.Image.new_from_icon_name("speedometer-symbolic")
                 self.oc_gpu_status_row.add_prefix(gpu_status_icon)
@@ -3194,7 +3213,8 @@ class MainWindow(Adw.ApplicationWindow):
 
         if success:
             self.show_toast(
-                f"Applied TDP: STAPM={stapm}W, Fast={fast}W, Slow={slow}W, Temp={temp}°C"
+                f"Applied TDP: STAPM={stapm}W, Fast={fast}W, "
+                f"Slow={slow}W, Temp={temp}°C"
             )
         else:
             self.show_toast("Failed to apply some TDP settings")
@@ -4799,7 +4819,8 @@ class MainWindow(Adw.ApplicationWindow):
                 if hasattr(self, "gpu_vram_row"):
                     if stats.vram_total_mb > 0:
                         self.gpu_vram_row.set_subtitle(
-                            f"{stats.vram_used_mb} / {stats.vram_total_mb} MB ({stats.mem_usage_percent}%)"
+                            f"{stats.vram_used_mb} / {stats.vram_total_mb} MB "
+                            f"({stats.mem_usage_percent}%)"
                         )
                         self.gpu_vram_bar.set_value(stats.mem_usage_percent)
                     else:
@@ -4891,7 +4912,8 @@ class MainWindow(Adw.ApplicationWindow):
 
                 if hasattr(self, "mon_load_row"):
                     self.mon_load_row.set_subtitle(
-                        f"{cpu_stats.load_1min:.2f}, {cpu_stats.load_5min:.2f}, {cpu_stats.load_15min:.2f}"
+                        f"{cpu_stats.load_1min:.2f}, {cpu_stats.load_5min:.2f}, "
+                        f"{cpu_stats.load_15min:.2f}"
                     )
 
                 # Per-core usage
@@ -4907,7 +4929,8 @@ class MainWindow(Adw.ApplicationWindow):
 
                 if hasattr(self, "mon_ram_row"):
                     self.mon_ram_row.set_subtitle(
-                        f"{mem_stats.used_mb:,} / {mem_stats.total_mb:,} MB ({mem_stats.usage_percent:.1f}%)"
+                        f"{mem_stats.used_mb:,} / {mem_stats.total_mb:,} MB "
+                        f"({mem_stats.usage_percent:.1f}%)"
                     )
                     self.mon_ram_bar.set_value(mem_stats.usage_percent)
 
@@ -4924,7 +4947,8 @@ class MainWindow(Adw.ApplicationWindow):
                 if hasattr(self, "mon_swap_row"):
                     if mem_stats.swap_total_mb > 0:
                         self.mon_swap_row.set_subtitle(
-                            f"{mem_stats.swap_used_mb:,} / {mem_stats.swap_total_mb:,} MB "
+                            f"{mem_stats.swap_used_mb:,} / "
+                            f"{mem_stats.swap_total_mb:,} MB "
                             f"({mem_stats.swap_usage_percent:.1f}%)"
                         )
                         self.mon_swap_bar.set_value(mem_stats.swap_usage_percent)

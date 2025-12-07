@@ -792,7 +792,8 @@ if __name__ == "__main__":
     print(f"  Memory Clock: {stats.mem_clock_mhz}/{stats.mem_clock_max_mhz} MHz")
     print(f"  Usage: {stats.gpu_usage_percent}%")
     print(
-        f"  VRAM: {stats.vram_used_mb}/{stats.vram_total_mb} MB ({stats.mem_usage_percent}%)"
+        f"  VRAM: {stats.vram_used_mb}/{stats.vram_total_mb} MB "
+        f"({stats.mem_usage_percent}%)"
     )
     print(f"  Temp: {stats.gpu_temp_c}°C")
     print(f"  Power: {stats.power_draw_w:.1f}/{stats.power_limit_w:.1f}W")

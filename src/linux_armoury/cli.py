@@ -69,7 +69,10 @@ class LinuxArmouryCLI:
     def create_parser(self) -> argparse.ArgumentParser:
         """Create argument parser"""
         parser = argparse.ArgumentParser(
-            description="Linux Armoury - Command-Line Control for ASUS ROG / ASUS gaming laptops",
+            description=(
+                "Linux Armoury - Command-Line Control for "
+                "ASUS ROG / ASUS gaming laptops"
+            ),
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog="""
 Examples:
@@ -215,7 +218,12 @@ https://github.com/th3cavalry/Linux-Armoury
             choices=(
                 list(TDP_PRESETS.keys())
                 if HAS_OVERCLOCKING
-                else ["silent", "balanced", "performance", "turbo"]
+                else [
+                    "silent",
+                    "balanced",
+                    "performance",
+                    "turbo",
+                ]
             ),
             metavar="PRESET",
             help="Apply TDP preset (requires RyzenAdj)",
@@ -278,8 +286,8 @@ https://github.com/th3cavalry/Linux-Armoury
             if success:
                 print(f"✓ {message}")
 
-                # Optional: Set refresh rate if defined in profile and we are not using pwrcfg
-                # (pwrcfg handles it internally usually)
+                # Optional: Set refresh rate if defined in profile
+                # and we are not using pwrcfg
                 if (
                     profile_info
                     and "refresh" in profile_info
