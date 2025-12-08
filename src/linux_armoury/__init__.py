@@ -1,6 +1,6 @@
 """Linux Armoury - GTK4/libadwaita control center for ASUS ROG laptops."""
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 __author__ = "th3cavalry"
 
 from .config import Config

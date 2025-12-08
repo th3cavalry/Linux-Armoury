@@ -10,7 +10,7 @@ class Config:
     # Application Info
     APP_ID = "com.github.th3cavalry.linux-armoury"
     APP_NAME = "Linux Armoury"
-    VERSION = "0.6.0"
+    VERSION = "0.6.1"
     AUTHOR = "th3cavalry"
     WEBSITE = "https://github.com/th3cavalry/Linux-Armoury"
 
