@@ -57,3 +57,8 @@ flatpak-build/
 job_logs.txt
 success_log.txt
 success_log_v2.txt
+
+# Cache directories
+/.mypy_cache
+/.pytest_cache
+/.ruff_cache

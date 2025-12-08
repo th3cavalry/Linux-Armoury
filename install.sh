@@ -296,7 +296,7 @@ install_application() {
     AUTOSTART_DIR="$HOME/.config/autostart"
     mkdir -p "$AUTOSTART_DIR"
     if [ -f linux-armoury-autostart.desktop ]; then
-        install -m 644 linux-armoury-autostart.desktop "$AUTOSTART_DIR/linux-armoury.desktop"
+        install -m 644 linux-armoury-autostart.desktop "$AUTOSTART_DIR/linux-armoury-autostart.desktop"
         success "Autostart entry installed - Linux Armoury will start on boot"
     fi
 
