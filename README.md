@@ -15,7 +15,7 @@ Linux Armoury is inspired by G-Helper and ROG Control Center, providing an intui
 - **Light & Dark Mode** - Automatic or manual theme switching with system integration
 - **System Tray Integration** - Minimize to tray and quick access from taskbar with quick profiles
 - **Autostart Support** - Launch automatically on system boot
-- **Clean & Intuitive UI** - Built with GTK4 and libadwaita for native GNOME look
+- **Clean & Intuitive UI** - Built with Flet and CustomTkinter for a modern dark gray aesthetic
 - **Real-time Dashboard** - Live monitoring with 2-second refresh intervals
 
 ### ⚡ Performance Control

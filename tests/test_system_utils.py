@@ -133,9 +133,9 @@ class TestBattery:
 
         monkeypatch.setattr(
             "builtins.open",
-            lambda p, *a, **k: _FakeTypeFile()
-            if p.endswith("type")
-            else open(p, *a, **k),
+            lambda p, *a, **k: (
+                _FakeTypeFile() if p.endswith("type") else open(p, *a, **k)
+            ),
         )
         # For the simulated path, find_ac_path should return a path ending with ADP1
         p = SystemUtils.find_ac_path()
