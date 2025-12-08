@@ -19,9 +19,17 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends flatpak flatpak-builder
 
+      - name: Add Flathub repository
+        run: |
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install GNOME SDK and Platform
+        run: |
+          flatpak install --user -y flathub org.gnome.Platform//46 org.gnome.Sdk//46
+
       - name: Validate build (stop at linux-armoury)
         run: |
           rm -rf build-dir repo || true
           mkdir -p build-dir repo
           set -eo pipefail
-          flatpak-builder --force-clean --repo=repo --stop-at=linux-armoury build-dir com.github.th3cavalry.linux-armoury.yml
+          flatpak-builder --user --force-clean --repo=repo --stop-at=linux-armoury build-dir com.github.th3cavalry.linux-armoury.yml
