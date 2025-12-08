@@ -1,0 +1,59 @@
+name: Publish flatpak to remote (Flathub/host)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.FLATHUB_SSH_PRIVATE_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flatpak tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends flatpak rsync sshpass
+
+      - name: Download built flatpak artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-armoury-flatpak
+          path: ./artifacts || true
+
+      - name: Find flatpak bundle
+        id: find
+        run: |
+          echo "Searching for .flatpak files..."
+          MATCH=$(ls -1 *.flatpak 2>/dev/null || ls -1 artifacts/*.flatpak 2>/dev/null || true)
+          echo "found=$MATCH" >> $GITHUB_OUTPUT
+
+      - name: Upload to remote host (via scp / rsync)
+        env:
+          SSH_KEY: ${{ secrets.FLATHUB_SSH_PRIVATE_KEY }}
+          SSH_USER: ${{ secrets.FLATHUB_SSH_USER }}
+          SSH_HOST: ${{ secrets.FLATHUB_SSH_HOST }}
+          SSH_PATH: ${{ secrets.FLATHUB_REPO_PATH }}
+        run: |
+          set -eo pipefail
+          if [ -z "$SSH_KEY" ] || [ -z "$SSH_USER" ] || [ -z "$SSH_HOST" ] || [ -z "$SSH_PATH" ]; then
+            echo "Missing required Flathub/host credentials (set secrets.FLATHUB_SSH_PRIVATE_KEY, FLATHUB_SSH_USER, FLATHUB_SSH_HOST, FLATHUB_REPO_PATH).";
+            exit 1
+          fi
+
+          echo "$SSH_KEY" > /tmp/deploy_key
+          chmod 0600 /tmp/deploy_key
+
+          FILE=$(echo "${{ steps.find.outputs.found }}" | tr '\n' ' ')
+          if [ -z "$FILE" ]; then
+            # try looking in artifacts
+            FILE=$(ls -1 artifacts/*.flatpak 2>/dev/null | head -n1 || true)
+          fi
+          if [ -z "$FILE" ]; then
+            echo "No .flatpak artifact found to upload"; exit 1
+          fi
+
+          echo "Uploading $FILE to $SSH_USER@$SSH_HOST:$SSH_PATH"
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key" "$FILE" "$SSH_USER@$SSH_HOST:$SSH_PATH/"

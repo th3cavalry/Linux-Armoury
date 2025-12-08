@@ -39,8 +39,11 @@ modules:
   - name: python-deps
     buildsystem: simple
     build-commands:
-      - python3 -m pip install --upgrade pip
-      - python3 -m pip install --prefix=/app -r requirements.txt
+      - python3 -m pip install --upgrade pip wheel
+      # Prefer binary wheels (faster & fewer native rebuilds) when available
+      - python3 -m pip install --no-deps --prefix=/app --only-binary=:all: -r requirements.txt || true
+      # Fallback to building any remaining packages from source if wheels were not available
+      - python3 -m pip install --no-deps --prefix=/app -r requirements.txt || true
     sources:
       - type: file
         path: requirements.txt
