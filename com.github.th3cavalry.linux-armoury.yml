@@ -36,6 +36,15 @@ cleanup:
   - '*.la'
 
 modules:
+  - name: python-deps
+    buildsystem: simple
+    build-commands:
+      - python3 -m pip install --upgrade pip
+      - python3 -m pip install --prefix=/app -r requirements.txt
+    sources:
+      - type: file
+        path: requirements.txt
+
   - name: linux-armoury
     buildsystem: simple
     build-options:

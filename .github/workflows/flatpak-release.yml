@@ -82,7 +82,7 @@ jobs:
         run: |
           # Check for built bundle
           BUILT_BUNDLE="${{ steps.create_bundle.outputs.output_file }}"
-          FALLBACK_FILE="linux-armoury-0.5.0b0.flatpak"
+          FALLBACK_FILE="linux-armoury-0.6.0.flatpak"
 
           echo "DEBUG: BUILT_BUNDLE='$BUILT_BUNDLE'"
           echo "DEBUG: FALLBACK_FILE='$FALLBACK_FILE'"

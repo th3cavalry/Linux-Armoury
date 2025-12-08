@@ -25,7 +25,7 @@ A clear and concise description of what you expected to happen.
  - Laptop Model: [e.g. ASUS ROG Zephyrus G14 2022]
  - CPU: [e.g. AMD Ryzen 9 6900HS]
  - GPU: [e.g. AMD Radeon RX 6700S]
- - Linux Armoury Version: [e.g. 0.5.0-beta]
+ - Linux Armoury Version: [e.g. 0.6.0]
  - Desktop Environment: [e.g. GNOME 45, KDE Plasma 6]
 
 **Logs**

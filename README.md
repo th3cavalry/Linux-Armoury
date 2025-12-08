@@ -115,7 +115,7 @@ flatpak run com.github.th3cavalry.linux-armoury
 Or install the pre-built `.flatpak` file:
 
 ```bash
-flatpak install linux-armoury-0.5.0b0.flatpak
+flatpak install linux-armoury-0.6.0.flatpak
 flatpak run com.github.th3cavalry.linux-armoury
 ```
 
