@@ -36,6 +36,15 @@ cleanup:
   - '*.la'
 
 modules:
+  - name: vendored-wheels
+    buildsystem: simple
+    build-commands:
+      # Install any wheel files included in the repo into /app
+      - python3 -m pip install --no-deps --prefix=/app flatpak-wheels/*.whl || true
+    sources:
+      - type: dir
+        path: flatpak-wheels
+
   - name: python-deps
     buildsystem: simple
     build-commands:

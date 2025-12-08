@@ -6,6 +6,8 @@ customtkinter>=5.2.0
 packaging
 Pillow
 PyGObject>=3.42.0
+numpy
+matplotlib
 
 # Note: GTK4 and libadwaita must be installed via system package manager:
 # Arch: sudo pacman -S gtk4 libadwaita python-gobject
