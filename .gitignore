@@ -51,6 +51,9 @@ flatpak-repo/
 .flatpak-builder/
 flatpak-build/
 .venv/
+flathub-submission/
+flathub-submission.tar.gz
+build-dir/
 
 # Logs
 *_log.txt
