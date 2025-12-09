@@ -215,7 +215,7 @@ install_opensuse_asus_tools() {
 install_hardware_tools() {
     if [ "$IS_ASUS" = true ]; then
         case "$DISTRO_ID" in
-            arch|manjaro|endeavouros)
+            arch|manjaro|endeavouros|cachyos)
                 install_arch_asus_tools
                 ;;
             fedora|nobara)
@@ -327,7 +327,7 @@ main() {
 
     # Install dependencies based on distribution
     case "$DISTRO_ID" in
-        arch|manjaro|endeavouros)
+        arch|manjaro|endeavouros|cachyos)
             install_arch_deps
             ;;
         ubuntu|debian|pop|linuxmint)
