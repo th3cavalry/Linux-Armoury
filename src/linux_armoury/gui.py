@@ -429,6 +429,9 @@ class App(ctk.CTk):
         self.settings = self.config_manager.load_settings()
         self.logger.info(f"Settings loaded: {self.settings}")
 
+        # Provide config property for profile manager compatibility
+        self.config = self.config_manager
+
         # Apply window size from settings if available
         if self.settings.get("window_size"):
             width, height = self.settings["window_size"]
@@ -468,6 +471,35 @@ class App(ctk.CTk):
         # Initialize auto profile switching
         self.auto_profile_switching = False
         self.last_ac_status = None  # Track AC adapter state
+
+        # Initialize controllers for profile management
+        self.gpu_controller = None
+        self.fan_controller = None
+        self.keyboard_controller = None
+        self.battery_controller = None
+
+        if HAS_MODULES:
+            try:
+                from .modules.gpu_control import GpuController
+
+                self.gpu_controller = GpuController()
+            except Exception:
+                pass
+
+            try:
+                self.fan_controller = get_fan_controller()
+            except Exception:
+                pass
+
+            try:
+                self.keyboard_controller = KeyboardController()
+            except Exception:
+                pass
+
+            try:
+                self.battery_controller = get_battery_controller()
+            except Exception:
+                pass
 
         # Sidebar
         self.create_sidebar()
@@ -1843,6 +1875,26 @@ class App(ctk.CTk):
             except Exception as e:
                 print(f"Monitoring error: {e}")
                 time.sleep(2)
+
+    def set_tdp(self, watts: int) -> bool:
+        """Set TDP using RyzenAdj if available"""
+        if hasattr(self, "perf_card") and self.perf_card.oc_controller:
+            try:
+                success = self.perf_card.oc_controller.set_ryzenadj_tdp(
+                    stapm_limit=watts, fast_limit=watts + 5, slow_limit=watts
+                )
+                if success:
+                    self.show_toast(f"TDP set to {watts}W", "success")
+                else:
+                    self.show_toast("Failed to set TDP", "warning")
+                return success
+            except Exception as e:
+                self.logger.error(f"Failed to set TDP: {e}")
+                self.show_toast(f"Error setting TDP: {e}", "error")
+                return False
+        else:
+            self.show_toast("RyzenAdj not available", "warning")
+            return False
 
     def destroy(self):
         self.monitoring = False
