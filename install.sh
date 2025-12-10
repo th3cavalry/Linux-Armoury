@@ -242,6 +242,7 @@ install_application() {
     ICON_DIR="/usr/share/icons/hicolor/scalable/apps"
     DBUS_CONF_DIR="/etc/dbus-1/system.d"
     SYSTEMD_DIR="/etc/systemd/system"
+    POLKIT_DIR="/usr/share/polkit-1/actions"
 
     # Install Python package
     info "Installing Python package..."
@@ -283,6 +284,14 @@ install_application() {
             sudo usermod -aG video "$USER"
             warning "You may need to log out and back in for group changes to take effect."
         fi
+    fi
+
+    # Install polkit policy for passwordless privilege escalation
+    if [ -f data/polkit/com.github.th3cavalry.linux-armoury.policy ]; then
+        info "Installing polkit policy for passwordless hardware control..."
+        sudo mkdir -p "$POLKIT_DIR"
+        sudo install -m 644 data/polkit/com.github.th3cavalry.linux-armoury.policy "$POLKIT_DIR/"
+        info "Polkit policy installed - hardware settings can be changed without password prompts"
     fi
 
     # Install desktop entries (legacy and DBus activatable)

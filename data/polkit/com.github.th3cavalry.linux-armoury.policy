@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+
+<policyconfig>
+  <vendor>Linux Armoury</vendor>
+  <vendor_url>https://github.com/th3cavalry/Linux-Armoury</vendor_url>
+
+  <action id="com.github.th3cavalry.linux-armoury.ryzenadj">
+    <description>Run ryzenadj for TDP control</description>
+    <message>Authentication is required to change TDP settings</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/ryzenadj</annotate>
+  </action>
+
+  <action id="com.github.th3cavalry.linux-armoury.supergfxctl">
+    <description>Run supergfxctl for GPU switching</description>
+    <message>Authentication is required to switch GPU modes</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/supergfxctl</annotate>
+  </action>
+
+  <action id="com.github.th3cavalry.linux-armoury.tee">
+    <description>Write to system files for hardware control</description>
+    <message>Authentication is required to modify system hardware settings</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/tee</annotate>
+  </action>
+
+  <action id="com.github.th3cavalry.linux-armoury.pwrcfg">
+    <description>Run power profile configuration</description>
+    <message>Authentication is required to change power profiles</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/pwrcfg</annotate>
+  </action>
+
+  <action id="com.github.th3cavalry.linux-armoury.sh">
+    <description>Execute shell commands for hardware control</description>
+    <message>Authentication is required to modify hardware settings</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/sh</annotate>
+  </action>
+</policyconfig>
