@@ -29,6 +29,17 @@
     <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/supergfxctl</annotate>
   </action>
 
+  <action id="com.github.th3cavalry.linux-armoury.asusctl">
+    <description>Run asusctl for keyboard RGB effects</description>
+    <message>Authentication is required to change keyboard lighting</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/asusctl</annotate>
+  </action>
+
   <action id="com.github.th3cavalry.linux-armoury.tee">
     <description>Write to system files for hardware control</description>
     <message>Authentication is required to modify system hardware settings</message>

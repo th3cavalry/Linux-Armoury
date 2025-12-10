@@ -888,7 +888,7 @@ class App(ctk.CTk):
 
             ctk.CTkLabel(color_frame, text=" ", font=("Segoe UI", 5)).pack(pady=5)
 
-        # Effects (placeholder for asusctl integration)
+        # Effects with asusctl integration
         effects_frame = ctk.CTkFrame(
             self.main_frame, fg_color=COLOR_BG_CARD, corner_radius=CORNER_RADIUS
         )
@@ -901,12 +901,65 @@ class App(ctk.CTk):
             text_color=COLOR_TEXT_PRIMARY,
         ).pack(pady=(15, 5), padx=20, anchor="w")
 
-        ctk.CTkLabel(
+        # Status label for effects
+        effects_status = ctk.CTkLabel(
             effects_frame,
-            text="Effects require asusctl integration (coming soon)",
+            text="",
             font=("Segoe UI", 10),
             text_color=COLOR_TEXT_SECONDARY,
-        ).pack(pady=(0, 10), padx=20, anchor="w")
+        )
+        effects_status.pack(pady=(0, 10), padx=20, anchor="w")
+
+        # Import AuraEffect for the effects
+        try:
+            from .modules.keyboard_control import AuraEffect
+
+            aura_effects_available = True
+        except ImportError:
+            aura_effects_available = False
+
+        def set_keyboard_effect(effect_name: str):
+            """Set keyboard effect using asusctl"""
+            if not kbd or not aura_effects_available:
+                effects_status.configure(
+                    text="Keyboard effects not available", text_color=COLOR_WARNING
+                )
+                return
+
+            try:
+                # Map display names to enum values
+                effect_map = {
+                    "Static": AuraEffect.STATIC,
+                    "Breathe": AuraEffect.BREATHE,
+                    "Color Cycle": AuraEffect.COLOR_CYCLE,
+                    "Rainbow": AuraEffect.RAINBOW,
+                    "Star": AuraEffect.STAR,
+                    "Rain": AuraEffect.RAIN,
+                    "Highlight": AuraEffect.HIGHLIGHT,
+                    "Laser": AuraEffect.LASER,
+                    "Ripple": AuraEffect.RIPPLE,
+                    "Strobe": AuraEffect.STROBE,
+                    "Comet": AuraEffect.COMET,
+                    "Flash": AuraEffect.FLASH,
+                    "Multi Static": AuraEffect.MULTI_STATIC,
+                }
+
+                if effect_name not in effect_map:
+                    effects_status.configure(
+                        text=f"Unknown effect: {effect_name}", text_color=COLOR_WARNING
+                    )
+                    return
+
+                effect = effect_map[effect_name]
+                success, msg = kbd.set_effect(effect)
+                if success:
+                    effects_status.configure(text=f"✓ {msg}", text_color=COLOR_SUCCESS)
+                else:
+                    effects_status.configure(text=f"✗ {msg}", text_color=COLOR_WARNING)
+            except Exception as e:
+                effects_status.configure(
+                    text=f"Error: {str(e)}", text_color=COLOR_WARNING
+                )
 
         # All 13 effects from AuraEffect enum
         effect_names = [
@@ -939,7 +992,7 @@ class App(ctk.CTk):
                 hover_color=COLOR_ACCENT,
                 corner_radius=6,
                 height=35,
-                state="disabled",  # Disabled until asusctl integration
+                command=lambda e=effect: set_keyboard_effect(e),
             )
             btn.grid(row=row, column=col, padx=5, pady=5, sticky="ew")
 

@@ -212,6 +212,58 @@ class KeyboardController:
             return False, f"Unknown color: {name}"
         return self.set_rgb_color(self.PRESET_COLORS[name.lower()])
 
+    def set_effect(self, effect: AuraEffect) -> Tuple[bool, str]:
+        """Set keyboard lighting effect using asusctl"""
+        try:
+            # Map AuraEffect enum to asusctl command arguments
+            effect_map = {
+                AuraEffect.STATIC: ["asusctl", "aura", "static"],
+                AuraEffect.BREATHE: ["asusctl", "aura", "breathe"],
+                AuraEffect.COLOR_CYCLE: ["asusctl", "aura", "colorcycle"],
+                AuraEffect.RAINBOW: ["asusctl", "aura", "rainbow"],
+                AuraEffect.STAR: ["asusctl", "aura", "star"],
+                AuraEffect.RAIN: ["asusctl", "aura", "rain"],
+                AuraEffect.HIGHLIGHT: ["asusctl", "aura", "highlight"],
+                AuraEffect.LASER: ["asusctl", "aura", "laser"],
+                AuraEffect.RIPPLE: ["asusctl", "aura", "ripple"],
+                AuraEffect.STROBE: ["asusctl", "aura", "strobe"],
+                AuraEffect.COMET: ["asusctl", "aura", "comet"],
+                AuraEffect.FLASH: ["asusctl", "aura", "flash"],
+                AuraEffect.MULTI_STATIC: ["asusctl", "aura", "multistatic"],
+            }
+
+            if effect not in effect_map:
+                return False, f"Unsupported effect: {effect.value}"
+
+            cmd = effect_map[effect]
+
+            # Try direct execution first
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    return True, f"Effect set to {effect.value}"
+                else:
+                    # Fall back to pkexec
+                    pass
+            except FileNotFoundError:
+                # asusctl not found, try pkexec
+                pass
+
+            # Try with pkexec
+            pkexec_cmd = ["pkexec"] + cmd
+            result = subprocess.run(
+                pkexec_cmd, capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                return True, f"Effect set to {effect.value} (via pkexec)"
+            else:
+                return False, f"Failed to set effect: {result.stderr.strip()}"
+
+        except subprocess.TimeoutExpired:
+            return False, "Command timed out"
+        except Exception as e:
+            return False, f"Error setting effect: {e}"
+
     def get_keyboard_info(self) -> Dict[str, Any]:
         """Get comprehensive keyboard info"""
         info: Dict[str, Any] = {
