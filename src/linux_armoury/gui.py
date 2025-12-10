@@ -432,6 +432,16 @@ class App(ctk.CTk):
         # Provide config property for profile manager compatibility
         self.config = self.config_manager
 
+        # Initialize profile manager
+        try:
+            from .profile_manager import ProfileManager
+
+            self.profile_manager = ProfileManager()
+            self.logger.info("Profile manager initialized successfully")
+        except Exception as e:
+            self.logger.error(f"Failed to initialize profile manager: {e}")
+            self.profile_manager = None
+
         # Apply window size from settings if available
         if self.settings.get("window_size"):
             width, height = self.settings["window_size"]
@@ -517,6 +527,96 @@ class App(ctk.CTk):
 
         # Setup keyboard shortcuts
         self.setup_keybindings()
+
+        # Initialize tray icon
+        self.setup_tray_icon()
+
+        # Setup window close behavior (minimize to tray)
+        self.protocol("WM_DELETE_WINDOW", self.on_window_close)
+
+    def setup_tray_icon(self):
+        """Initialize system tray icon"""
+        try:
+            from .tray_icon import create_tray_icon
+
+            self.tray_icon = create_tray_icon(self)
+            if self.tray_icon.is_active:
+                self.logger.info("System tray icon initialized successfully")
+                # Connect tray callbacks
+                self.tray_icon.on_show_window = self.show_window_from_tray
+                self.tray_icon.on_quit = self.quit_from_tray
+                self.tray_icon.on_profile_change = self.apply_profile_from_tray
+            else:
+                self.logger.warning("System tray icon not available")
+                self.tray_icon = None
+        except Exception as e:
+            self.logger.error(f"Failed to initialize tray icon: {e}")
+            self.tray_icon = None
+
+    def show_window_from_tray(self):
+        """Show window when tray icon is clicked"""
+        self.deiconify()
+        self.lift()
+        self.focus_force()
+
+    def quit_from_tray(self):
+        """Quit application from tray menu"""
+        self.quit()
+
+    def apply_profile_from_tray(self, profile_name: str):
+        """Apply power profile from tray menu"""
+        try:
+            # Map tray profile names to SystemProfile names
+            profile_map = {
+                "emergency": "Emergency",
+                "battery": "Battery Saver",
+                "efficient": "Efficient",
+                "balanced": "Balanced",
+                "performance": "Performance",
+                "gaming": "Gaming",
+                "maximum": "Maximum",
+            }
+
+            if profile_name in profile_map:
+                profile_name = profile_map[profile_name]
+
+            # Apply the profile using profile manager
+            if hasattr(self, "profile_manager") and self.profile_manager:
+                profile = self.profile_manager.get_profile(profile_name)
+                if profile:
+                    success = self.profile_manager.apply_profile(profile, self)
+                    if success:
+                        self.show_toast(f"Applied {profile_name} profile", "success")
+                    else:
+                        self.show_toast(
+                            f"Failed to apply {profile_name} profile", "warning"
+                        )
+                else:
+                    self.show_toast(f"Profile {profile_name} not found", "warning")
+            else:
+                self.show_toast("Profile manager not available", "warning")
+        except Exception as e:
+            self.logger.error(f"Error applying profile from tray: {e}")
+            self.show_toast(f"Error applying profile: {e}", "error")
+
+    def on_window_close(self):
+        """Handle window close event - minimize to tray if available"""
+        if self.tray_icon and self.tray_icon.is_active:
+            # Check if minimize to tray is enabled in settings
+            minimize_to_tray = self.settings.get("minimize_to_tray", True)
+            if minimize_to_tray:
+                self.withdraw()  # Hide window
+                self.show_toast("Minimized to system tray", "info")
+                return
+
+        # If no tray or minimize to tray disabled, quit
+        self.quit()
+
+    def toggle_minimize_to_tray(self, enabled: bool):
+        """Toggle minimize to tray setting"""
+        self.settings["minimize_to_tray"] = enabled
+        self.config_manager.save_settings(self.settings)
+        self.logger.info(f"Minimize to tray set to: {enabled}")
 
     def setup_keybindings(self):
         """Setup keyboard shortcuts for the application"""
@@ -1674,19 +1774,29 @@ class App(ctk.CTk):
             text_color=COLOR_TEXT_PRIMARY,
         ).pack(pady=(15, 10), padx=20, anchor="w")
 
-        ctk.CTkSwitch(
+        # Start with system switch
+        start_with_system_switch = ctk.CTkSwitch(
             general_frame,
             text="Start with System",
             font=("Segoe UI", 12),
             text_color=COLOR_TEXT_PRIMARY,
-        ).pack(pady=5, padx=20, anchor="w")
+        )
+        start_with_system_switch.pack(pady=5, padx=20, anchor="w")
 
-        ctk.CTkSwitch(
+        # Minimize to tray switch
+        minimize_to_tray_switch = ctk.CTkSwitch(
             general_frame,
             text="Minimize to Tray",
             font=("Segoe UI", 12),
             text_color=COLOR_TEXT_PRIMARY,
-        ).pack(pady=(5, 15), padx=20, anchor="w")
+            command=lambda: self.toggle_minimize_to_tray(minimize_to_tray_switch.get()),
+        )
+        minimize_to_tray_switch.pack(pady=(5, 15), padx=20, anchor="w")
+
+        # Set initial state from settings
+        minimize_to_tray = self.settings.get("minimize_to_tray", True)
+        if minimize_to_tray:
+            minimize_to_tray_switch.select()
 
         # Power Management Settings
         power_frame = ctk.CTkFrame(
