@@ -5,12 +5,35 @@ A G-Helper/Armoury Crate inspired control center for Linux
 """
 
 import glob
+import logging
 
 # typing.Optional not used in this module
 import threading
 import time
+from pathlib import Path
 
 import customtkinter as ctk
+
+from .config_manager import ConfigManager
+from .widgets.toast import ToastNotification
+
+
+def setup_logging():
+    """Configure logging for the application"""
+    log_dir = Path.home() / ".config" / "linux-armoury"
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_dir / "linux-armoury.log"),
+            logging.StreamHandler(),
+        ],
+    )
+
+    return logging.getLogger("LinuxArmoury")
+
 
 # Try to import system modules
 try:
@@ -23,7 +46,8 @@ try:
     HAS_MODULES = True
 except ImportError:
     HAS_MODULES = False
-    print("Warning: System modules not available, running in demo mode")
+    logger = logging.getLogger("LinuxArmoury")
+    logger.warning("System modules not available, running in demo mode")
 
 
 def get_cpu_temperature() -> float:
@@ -221,17 +245,19 @@ class PerformanceCard(ctk.CTkFrame):
         # Also set asusd throttle policy for appropriate profiles
         if self.asusd_client:
             try:
+                logger = logging.getLogger("LinuxArmoury")
                 if name in ["Emergency", "Battery Saver", "Efficient"]:
                     self.asusd_client.set_throttle_policy(ThrottlePolicy.QUIET)
-                    print(f"Set throttle policy to QUIET for {name}")
+                    logger.info(f"Set throttle policy to QUIET for {name}")
                 elif name in ["Gaming", "Maximum"]:
                     self.asusd_client.set_throttle_policy(ThrottlePolicy.PERFORMANCE)
-                    print(f"Set throttle policy to PERFORMANCE for {name}")
+                    logger.info(f"Set throttle policy to PERFORMANCE for {name}")
                 else:
                     self.asusd_client.set_throttle_policy(ThrottlePolicy.BALANCED)
-                    print(f"Set throttle policy to BALANCED for {name}")
+                    logger.info(f"Set throttle policy to BALANCED for {name}")
             except Exception as e:
-                print(f"Failed to set throttle policy: {e}")
+                logger = logging.getLogger("LinuxArmoury")
+                logger.error(f"Failed to set throttle policy: {e}")
 
     def update_selection(self):
         """Update button appearance based on current profile"""
@@ -394,6 +420,21 @@ class App(ctk.CTk):
         self.geometry("1000x650")
         self.configure(fg_color=COLOR_BG_MAIN)
 
+        # Initialize logging
+        self.logger = setup_logging()
+        self.logger.info("Linux Armoury started")
+
+        # Initialize config manager
+        self.config_manager = ConfigManager()
+        self.settings = self.config_manager.load_settings()
+        self.logger.info(f"Settings loaded: {self.settings}")
+
+        # Apply window size from settings if available
+        if self.settings.get("window_size"):
+            width, height = self.settings["window_size"]
+            self.geometry(f"{width}x{height}")
+            self.logger.info(f"Window size restored: {width}x{height}")
+
         # Configure grid
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -402,9 +443,9 @@ class App(ctk.CTk):
         if HAS_MODULES:
             try:
                 self.system_monitor = SystemMonitor()
-                print("System monitor initialized successfully")
+                self.logger.info("System monitor initialized successfully")
             except Exception as e:
-                print(f"Failed to initialize system monitor: {e}")
+                self.logger.error(f"Failed to initialize system monitor: {e}")
                 self.system_monitor = None
         else:
             self.system_monitor = None
@@ -414,12 +455,12 @@ class App(ctk.CTk):
             try:
                 self.asusd_client = AsusdClient()
                 if self.asusd_client.is_available():
-                    print("Asusd client connected successfully")
+                    self.logger.info("Asusd client connected successfully")
                 else:
-                    print("Asusd daemon not available")
+                    self.logger.info("Asusd daemon not available")
                     self.asusd_client = None
             except Exception as e:
-                print(f"Failed to initialize asusd client: {e}")
+                self.logger.error(f"Failed to initialize asusd client: {e}")
                 self.asusd_client = None
         else:
             self.asusd_client = None
@@ -441,6 +482,25 @@ class App(ctk.CTk):
         self.monitoring = True
         self.monitor_thread = threading.Thread(target=self.update_loop, daemon=True)
         self.monitor_thread.start()
+
+        # Setup keyboard shortcuts
+        self.setup_keybindings()
+
+    def setup_keybindings(self):
+        """Setup keyboard shortcuts for the application"""
+        # Navigation shortcuts (Ctrl+number)
+        self.bind("<Control-1>", lambda e: self.show_dashboard())
+        self.bind("<Control-2>", lambda e: self.show_aura())
+        self.bind("<Control-3>", lambda e: self.show_performance())
+        self.bind("<Control-4>", lambda e: self.show_battery())
+        self.bind("<Control-5>", lambda e: self.show_fans())
+        self.bind("<Control-6>", lambda e: self.show_settings())
+
+        # Quick actions
+        self.bind("<Control-q>", lambda e: self.quit())
+        self.bind("<F5>", lambda e: self.logger.info("Refresh triggered"))
+
+        self.logger.info("Keyboard shortcuts initialized")
 
     def create_sidebar(self):
         self.sidebar = ctk.CTkFrame(
@@ -495,6 +555,16 @@ class App(ctk.CTk):
     def create_main_content(self):
         self.main_frame = ctk.CTkFrame(self, corner_radius=0, fg_color=COLOR_BG_MAIN)
         self.main_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
+
+    def show_toast(
+        self, message: str, notification_type: str = "info", duration: int = 3000
+    ):
+        """Display a toast notification"""
+        try:
+            ToastNotification(self, message, notification_type, duration)
+            self.logger.info(f"Toast shown: [{notification_type}] {message}")
+        except Exception as e:
+            self.logger.error(f"Failed to show toast: {e}")
 
     def clear_main_frame(self):
         for widget in self.main_frame.winfo_children():
@@ -557,26 +627,31 @@ class App(ctk.CTk):
                             gpu_ctrl.set_gpu_mode(GpuMode.INTEGRATED)
                             print("Switched to iGPU mode")
                     else:
-                        print("GPU switching not available")
+                        logger = logging.getLogger("LinuxArmoury")
+                        logger.info("GPU switching not available")
                 except Exception as e:
-                    print(f"GPU toggle error: {e}")
+                    logger = logging.getLogger("LinuxArmoury")
+                    logger.error(f"GPU toggle error: {e}")
 
         def cycle_keyboard_brightness():
             """Cycle keyboard brightness"""
             if HAS_MODULES:
                 try:
+                    logger = logging.getLogger("LinuxArmoury")
                     kbd = KeyboardController()
                     if kbd.is_supported():
                         success, msg = kbd.cycle_brightness()
-                        print(f"Keyboard brightness: {msg}")
+                        logger.info(f"Keyboard brightness: {msg}")
                     else:
-                        print("Keyboard backlight not supported")
+                        logger.info("Keyboard backlight not supported")
                 except Exception as e:
-                    print(f"Keyboard brightness error: {e}")
+                    logger = logging.getLogger("LinuxArmoury")
+                    logger.error(f"Keyboard brightness error: {e}")
 
         def open_system_monitor():
             """Open system monitor application"""
             try:
+                logger = logging.getLogger("LinuxArmoury")
                 import subprocess
 
                 # Try common system monitors
@@ -584,12 +659,13 @@ class App(ctk.CTk):
                 for monitor in monitors:
                     try:
                         subprocess.Popen([monitor])
-                        print(f"Opened {monitor}")
+                        logger.info(f"Opened {monitor}")
                         break
                     except FileNotFoundError:
                         continue
             except Exception as e:
-                print(f"System monitor error: {e}")
+                logger = logging.getLogger("LinuxArmoury")
+                logger.error(f"System monitor error: {e}")
 
         # Quick action buttons with actual functionality
         ctk.CTkButton(
@@ -1770,6 +1846,9 @@ class App(ctk.CTk):
 
     def destroy(self):
         self.monitoring = False
+        # Save current window size to settings
+        self.settings["window_size"] = [self.winfo_width(), self.winfo_height()]
+        self.config_manager.save_settings(self.settings)
         super().destroy()
 
 
