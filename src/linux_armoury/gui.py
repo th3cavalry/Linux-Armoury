@@ -15,6 +15,7 @@ from pathlib import Path
 import customtkinter as ctk
 
 from .config_manager import ConfigManager
+from .widgets.monitoring_graph import LiveMonitoringGraph
 from .widgets.toast import ToastNotification
 
 
@@ -726,6 +727,44 @@ class App(ctk.CTk):
         self.perf_card = PerformanceCard(left_col, asusd_client=self.asusd_client)
         self.perf_card.pack(fill="x", pady=(0, 10))
 
+        # Quick Profiles card
+        if self.profile_manager:
+            profiles_card = ctk.CTkFrame(
+                left_col, fg_color=COLOR_BG_CARD, corner_radius=CORNER_RADIUS
+            )
+            profiles_card.pack(fill="x", pady=(0, 10))
+
+            ctk.CTkLabel(
+                profiles_card,
+                text="🎮 Quick Profiles",
+                font=("Segoe UI", 16, "bold"),
+                text_color=COLOR_TEXT_PRIMARY,
+            ).pack(pady=(15, 10), padx=20, anchor="w")
+
+            # Profile buttons grid
+            btn_frame = ctk.CTkFrame(profiles_card, fg_color="transparent")
+            btn_frame.pack(fill="x", padx=20, pady=(0, 15))
+
+            # Create buttons for builtin profiles
+            for i, (name, profile) in enumerate(
+                self.profile_manager.BUILTIN_PROFILES.items()
+            ):
+                btn = ctk.CTkButton(
+                    btn_frame,
+                    text=f"{name}\n{profile.tdp_watts}W",
+                    fg_color=COLOR_BG_HOVER,
+                    hover_color=COLOR_ACCENT,
+                    corner_radius=6,
+                    height=50,
+                    font=("Segoe UI", 11),
+                    command=lambda p=profile: self.apply_profile_from_dashboard(p),
+                )
+                btn.grid(row=i // 2, column=i % 2, padx=3, pady=3, sticky="ew")
+
+            # Configure grid columns to expand
+            btn_frame.grid_columnconfigure(0, weight=1)
+            btn_frame.grid_columnconfigure(1, weight=1)
+
         # Quick actions card
         quick_card = ctk.CTkFrame(
             left_col, fg_color=COLOR_BG_CARD, corner_radius=CORNER_RADIUS
@@ -830,9 +869,24 @@ class App(ctk.CTk):
             command=open_system_monitor,
         ).pack(pady=(5, 15), padx=20, fill="x")
 
-        # Right column - System Monitor
-        self.monitor_card = SystemMonitorCard(cards_frame)
-        self.monitor_card.pack(side="right", fill="both", expand=True)
+        # Right column - Real-time graphs and system monitor
+        right_col = ctk.CTkFrame(cards_frame, fg_color="transparent")
+        right_col.pack(side="right", fill="both", expand=True)
+
+        # Real-time monitoring graphs
+        graphs_frame = ctk.CTkFrame(right_col, fg_color="transparent")
+        graphs_frame.pack(fill="x", pady=(0, 10))
+
+        # CPU and GPU graphs side by side
+        self.cpu_graph = LiveMonitoringGraph(graphs_frame, "CPU Usage", color="#ff0066")
+        self.cpu_graph.pack(side="left", fill="both", expand=True, padx=(0, 5))
+
+        self.gpu_graph = LiveMonitoringGraph(graphs_frame, "GPU Usage", color="#00ff88")
+        self.gpu_graph.pack(side="right", fill="both", expand=True, padx=(5, 0))
+
+        # System Monitor card below graphs
+        self.monitor_card = SystemMonitorCard(right_col)
+        self.monitor_card.pack(fill="both", expand=True)
 
     def show_aura(self):
         self.clear_main_frame()
@@ -1964,6 +2018,12 @@ class App(ctk.CTk):
                             disk_total_gb,
                         )
 
+                        # Update real-time graphs
+                        if hasattr(self, "cpu_graph"):
+                            self.cpu_graph.update_data(cpu_usage)
+                        if hasattr(self, "gpu_graph"):
+                            self.gpu_graph.update_data(gpu_usage)
+
                     self.after(0, _update_monitor)
 
                 # Auto profile switching based on AC adapter
@@ -2038,6 +2098,29 @@ class App(ctk.CTk):
             except Exception as e:
                 print(f"Monitoring error: {e}")
                 time.sleep(2)
+
+    def apply_profile_from_dashboard(self, profile):
+        """Apply a system profile from the dashboard"""
+        if self.profile_manager:
+            try:
+                success = self.profile_manager.apply_profile(profile, self)
+                if success:
+                    self.show_toast(
+                        f"Profile '{profile.name}' applied successfully", "success"
+                    )
+                    # Update performance card to show current profile
+                    if hasattr(self, "perf_card"):
+                        self.perf_card.current_profile = profile.name
+                        self.perf_card.update_selection()
+                else:
+                    self.show_toast(
+                        f"Failed to apply profile '{profile.name}'", "warning"
+                    )
+            except Exception as e:
+                self.logger.error(f"Error applying profile from dashboard: {e}")
+                self.show_toast(f"Error applying profile: {e}", "error")
+        else:
+            self.show_toast("Profile manager not available", "warning")
 
     def set_tdp(self, watts: int) -> bool:
         """Set TDP using RyzenAdj if available"""
