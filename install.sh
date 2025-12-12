@@ -108,12 +108,16 @@ install_debian_deps() {
 install_fedora_deps() {
     info "Installing dependencies for Fedora-based system..."
     
-    # Base package list
-    local packages=(
+    # Essential packages that must be installed for the app to work
+    local essential_packages=(
         python3
         python3-gobject
         gtk4
         libadwaita
+    )
+    
+    # Additional packages (nice to have but not critical)
+    local additional_packages=(
         polkit
         xrandr
         pciutils
@@ -122,6 +126,9 @@ install_fedora_deps() {
         libayatana-appindicator-gtk3
         git
     )
+    
+    # Combine all packages
+    local packages=("${essential_packages[@]}" "${additional_packages[@]}")
     
     # Check if tuned-ppd is installed (common on Fedora KDE)
     # tuned-ppd and power-profiles-daemon both provide ppd-service and conflict
@@ -132,23 +139,20 @@ install_fedora_deps() {
     fi
     
     # Install with --skip-broken to handle any remaining conflicts gracefully
-    if ! sudo dnf install -y --skip-broken "${packages[@]}"; then
-        warning "Some packages may have been skipped due to conflicts"
-        info "Verifying essential dependencies..."
-        
-        # Check if critical dependencies are installed
-        local essential_packages=(python3 python3-gobject gtk4 libadwaita)
-        local missing_packages=()
-        
-        for pkg in "${essential_packages[@]}"; do
-            if ! rpm -q --quiet "$pkg"; then
-                missing_packages+=("$pkg")
-            fi
-        done
-        
-        if [ ${#missing_packages[@]} -gt 0 ]; then
-            error "Critical dependencies missing: ${missing_packages[*]}. Installation cannot continue."
+    sudo dnf install -y --skip-broken "${packages[@]}"
+    
+    # Always verify essential dependencies are installed
+    info "Verifying essential dependencies..."
+    local missing_packages=()
+    
+    for pkg in "${essential_packages[@]}"; do
+        if ! rpm -q --quiet "$pkg"; then
+            missing_packages+=("$pkg")
         fi
+    done
+    
+    if [ ${#missing_packages[@]} -gt 0 ]; then
+        error "Critical dependencies missing: ${missing_packages[*]}. Installation cannot continue."
     fi
     
     success "Dependencies installed"
