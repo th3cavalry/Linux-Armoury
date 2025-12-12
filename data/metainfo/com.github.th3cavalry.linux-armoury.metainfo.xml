@@ -40,6 +40,15 @@
     <control>touch</control>
   </supports>
   <releases>
+    <release version="0.6.2" date="2025-12-09">
+      <description>
+        <p>Bug fix release for Flathub deployment:</p>
+        <ul>
+          <li>Version increment for new Flatpak build</li>
+          <li>Preparation for official Flathub submission</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.6.1" date="2025-12-08">
       <description>
         <p>Beta release with standardized ASUS support:</p>
