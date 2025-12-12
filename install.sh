@@ -125,14 +125,32 @@ install_fedora_deps() {
     
     # Check if tuned-ppd is installed (common on Fedora KDE)
     # tuned-ppd and power-profiles-daemon both provide ppd-service and conflict
-    if rpm -q tuned-ppd &>/dev/null; then
+    if rpm -q --quiet tuned-ppd; then
         info "tuned-ppd is already installed (provides same service as power-profiles-daemon)"
     else
         packages+=(power-profiles-daemon)
     fi
     
     # Install with --skip-broken to handle any remaining conflicts gracefully
-    sudo dnf install -y --skip-broken "${packages[@]}"
+    if ! sudo dnf install -y --skip-broken "${packages[@]}"; then
+        warning "Some packages may have been skipped due to conflicts"
+        info "Verifying essential dependencies..."
+        
+        # Check if critical dependencies are installed
+        local essential_packages=(python3 python3-gobject gtk4 libadwaita)
+        local missing_packages=()
+        
+        for pkg in "${essential_packages[@]}"; do
+            if ! rpm -q --quiet "$pkg"; then
+                missing_packages+=("$pkg")
+            fi
+        done
+        
+        if [ ${#missing_packages[@]} -gt 0 ]; then
+            error "Critical dependencies missing: ${missing_packages[*]}. Installation cannot continue."
+        fi
+    fi
+    
     success "Dependencies installed"
 }
 
