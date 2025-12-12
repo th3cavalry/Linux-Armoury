@@ -107,10 +107,32 @@ install_debian_deps() {
 # Install dependencies for Fedora-based systems
 install_fedora_deps() {
     info "Installing dependencies for Fedora-based system..."
-    sudo dnf install -y \
-        python3 python3-gobject gtk4 libadwaita \
-        polkit xrandr pciutils power-profiles-daemon \
-        python3-pip lm_sensors libayatana-appindicator-gtk3 git
+    
+    # Base package list
+    local packages=(
+        python3
+        python3-gobject
+        gtk4
+        libadwaita
+        polkit
+        xrandr
+        pciutils
+        python3-pip
+        lm_sensors
+        libayatana-appindicator-gtk3
+        git
+    )
+    
+    # Check if tuned-ppd is installed (common on Fedora KDE)
+    # tuned-ppd and power-profiles-daemon both provide ppd-service and conflict
+    if rpm -q tuned-ppd &>/dev/null; then
+        info "tuned-ppd is already installed (provides same service as power-profiles-daemon)"
+    else
+        packages+=(power-profiles-daemon)
+    fi
+    
+    # Install with --skip-broken to handle any remaining conflicts gracefully
+    sudo dnf install -y --skip-broken "${packages[@]}"
     success "Dependencies installed"
 }
 
