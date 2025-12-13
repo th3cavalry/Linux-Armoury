@@ -79,6 +79,8 @@ class KeyboardController:
         self._backlight_path: Optional[str] = None
         self._max_brightness: int = 3
         self._has_rgb: bool = False
+        self._has_aura: bool = False
+        self._has_gz302_rgb: bool = False
         self._detect_hardware()
 
     def _detect_hardware(self):
@@ -100,6 +102,58 @@ class KeyboardController:
             if os.path.exists(multi_intensity):
                 self._has_rgb = True
 
+        # Check for Aura support (asusctl)
+        self._detect_aura_support()
+
+        # Check for gz302-rgb support (for ROG Flow Z13)
+        self._detect_gz302_rgb_support()
+
+    def _detect_aura_support(self):
+        """Check if Aura effects are supported via asusctl"""
+        try:
+            # Try a simple asusctl aura command to check if the interface is available
+            test_result = subprocess.run(
+                ["asusctl", "aura", "static"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            # Check if Aura interface is available
+            error_output = test_result.stderr + test_result.stdout
+            if "Did not find xyz.ljones.Aura" in error_output:
+                self._has_aura = False
+            elif test_result.returncode == 0:
+                self._has_aura = True
+            else:
+                # Command failed but not due to missing Aura interface
+                # Consider it available (may work with proper arguments)
+                self._has_aura = True
+        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.CalledProcessError):
+            # asusctl not available or timed out - no Aura support
+            self._has_aura = False
+
+    def _detect_gz302_rgb_support(self):
+        """Check if gz302-rgb tool is available for ROG Flow Z13"""
+        try:
+            # Try a simple gz302-rgb command to check if the tool is available
+            # gz302-rgb doesn't support --help, so we try an invalid command to see if it exists
+            test_result = subprocess.run(
+                ["gz302-rgb", "--help"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            # gz302-rgb returns 1 and shows usage for invalid commands, which means it's available
+            if test_result.returncode == 1 and "GZ302 RGB Keyboard Control" in test_result.stdout:
+                self._has_gz302_rgb = True
+            else:
+                self._has_gz302_rgb = False
+        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.CalledProcessError):
+            # gz302-rgb not available
+            self._has_gz302_rgb = False
+
     def is_supported(self) -> bool:
         """Check if keyboard backlight is supported"""
         return self._backlight_path is not None
@@ -107,6 +161,14 @@ class KeyboardController:
     def has_rgb(self) -> bool:
         """Check if RGB control is supported"""
         return self._has_rgb
+
+    def has_aura(self) -> bool:
+        """Check if Aura effects are supported"""
+        return self._has_aura
+
+    def has_gz302_rgb(self) -> bool:
+        """Check if gz302-rgb effects are supported"""
+        return self._has_gz302_rgb
 
     def get_brightness(self) -> Optional[int]:
         """Get current backlight brightness (0 to max)"""
@@ -213,6 +275,60 @@ class KeyboardController:
         return self.set_rgb_color(self.PRESET_COLORS[name.lower()])
 
     def set_effect(self, effect: AuraEffect) -> Tuple[bool, str]:
+        """Set keyboard lighting effect using gz302-rgb or asusctl"""
+        try:
+            # First try gz302-rgb if available (for ROG Flow Z13)
+            if self._has_gz302_rgb:
+                return self._set_gz302_effect(effect)
+
+            # Fall back to asusctl Aura effects
+            if self._has_aura:
+                return self._set_aura_effect(effect)
+
+            return False, "No keyboard effect support available"
+
+        except Exception as e:
+            return False, f"Error setting effect: {e}"
+
+    def _set_gz302_effect(self, effect: AuraEffect) -> Tuple[bool, str]:
+        """Set keyboard lighting effect using gz302-rgb"""
+        try:
+            # Map AuraEffect enum to gz302-rgb command arguments
+            # gz302-rgb commands: single_static <HEX_COLOR>, single_breathing <HEX_COLOR1> <HEX_COLOR2> <SPEED>, etc.
+            effect_map = {
+                AuraEffect.STATIC: ["gz302-rgb", "single_static", "FF0066"],  # ROG pink default
+                AuraEffect.BREATHE: ["gz302-rgb", "single_breathing", "FF0066", "000000", "2"],  # ROG pink breathing
+                AuraEffect.COLOR_CYCLE: ["gz302-rgb", "single_colorcycle", "2"],  # Color cycling
+                AuraEffect.RAINBOW: ["gz302-rgb", "rainbow_cycle", "2"],  # Rainbow animation
+                AuraEffect.STAR: ["gz302-rgb", "single_static", "FFFFFF"],  # White fallback
+                AuraEffect.RAIN: ["gz302-rgb", "rainbow_cycle", "2"],  # Rainbow as closest match
+                AuraEffect.HIGHLIGHT: ["gz302-rgb", "single_static", "00FF00"],  # Green fallback
+                AuraEffect.LASER: ["gz302-rgb", "single_breathing", "FF0000", "000000", "1"],  # Red breathing
+                AuraEffect.RIPPLE: ["gz302-rgb", "single_breathing", "0000FF", "000000", "2"],  # Blue breathing
+                AuraEffect.STROBE: ["gz302-rgb", "single_breathing", "FFFFFF", "000000", "3"],  # White fast breathing
+                AuraEffect.COMET: ["gz302-rgb", "rainbow_cycle", "3"],  # Fast rainbow
+                AuraEffect.FLASH: ["gz302-rgb", "single_breathing", "FFFF00", "000000", "3"],  # Yellow fast breathing
+                AuraEffect.MULTI_STATIC: ["gz302-rgb", "single_static", "FF0066"],  # ROG pink fallback
+            }
+
+            if effect not in effect_map:
+                return False, f"Unsupported effect: {effect.value}"
+
+            cmd = effect_map[effect]
+
+            # Try direct execution
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                return True, f"Effect set to {effect.value} (gz302-rgb)"
+            else:
+                return False, f"Failed to set effect: {result.stderr.strip()}"
+
+        except subprocess.TimeoutExpired:
+            return False, "Command timed out"
+        except Exception as e:
+            return False, f"Error setting gz302-rgb effect: {e}"
+
+    def _set_aura_effect(self, effect: AuraEffect) -> Tuple[bool, str]:
         """Set keyboard lighting effect using asusctl"""
         try:
             # Map AuraEffect enum to asusctl command arguments
@@ -262,13 +378,15 @@ class KeyboardController:
         except subprocess.TimeoutExpired:
             return False, "Command timed out"
         except Exception as e:
-            return False, f"Error setting effect: {e}"
+            return False, f"Error setting Aura effect: {e}"
 
     def get_keyboard_info(self) -> Dict[str, Any]:
         """Get comprehensive keyboard info"""
         info: Dict[str, Any] = {
             "supported": self.is_supported(),
             "has_rgb": self.has_rgb(),
+            "has_aura": self.has_aura(),
+            "has_gz302_rgb": self.has_gz302_rgb(),
             "brightness": self.get_brightness(),
             "max_brightness": self._max_brightness,
         }

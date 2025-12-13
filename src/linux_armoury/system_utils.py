@@ -102,7 +102,7 @@ class SystemUtils:
                 if " connected" in line and "disconnected" not in line:
                     return line.split()[0]
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error detecting X11 display: {e}")
 
         # Fallback to common default
@@ -123,7 +123,7 @@ class SystemUtils:
                     if line and not line.startswith(" "):
                         # Output name is the first word
                         return line.split()[0]
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 print(f"Error detecting Wayland display with wlr-randr: {e}")
 
         elif tool == "kscreen-doctor":
@@ -137,7 +137,7 @@ class SystemUtils:
                         match = re.search(r"Output:\s+(\d+)\s+(\S+)", line)
                         if match:
                             return match.group(2)
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 print(f"Error detecting Wayland display with kscreen-doctor: {e}")
 
         # Fallback - try to detect from GNOME settings
@@ -156,7 +156,7 @@ class SystemUtils:
             # If gsettings works, we're probably on GNOME
             # GNOME Wayland uses display IDs like 'eDP-1'
             return "eDP-1"
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
             pass
 
         return "eDP-1"
@@ -190,7 +190,7 @@ class SystemUtils:
                     if match:
                         return (int(match.group(1)), int(match.group(2)))
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error getting X11 resolution: {e}")
 
         return (1920, 1080)  # Fallback default resolution
@@ -212,7 +212,7 @@ class SystemUtils:
                         match = re.search(r"(\d+)x(\d+)", line)
                         if match:
                             return (int(match.group(1)), int(match.group(2)))
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 print(f"Error getting Wayland resolution with wlr-randr: {e}")
 
         elif tool == "kscreen-doctor":
@@ -224,7 +224,7 @@ class SystemUtils:
                     match = re.search(r"(\d+)x(\d+)@", line)
                     if match:
                         return (int(match.group(1)), int(match.group(2)))
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 print(f"Error getting Wayland resolution with kscreen-doctor: {e}")
 
         return (1920, 1080)  # Fallback default resolution
@@ -287,7 +287,7 @@ class SystemUtils:
                                 rates.add(int(round(rate)))
                             except ValueError:
                                 pass
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error getting X11 rates: {e}")
 
         return sorted(list(rates))
@@ -313,7 +313,7 @@ class SystemUtils:
                         match = re.search(r"(\d+\.?\d*)\s*Hz", line)
                         if match:
                             rates.add(int(round(float(match.group(1)))))
-            except Exception:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
                 pass
 
         elif tool == "kscreen-doctor":
@@ -332,7 +332,7 @@ class SystemUtils:
                         match = re.search(r"@(\d+)", line)
                         if match:
                             rates.add(int(match.group(1)))
-            except Exception:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
                 pass
 
         return sorted(list(rates))
@@ -351,7 +351,7 @@ class SystemUtils:
                     if match:
                         return int(float(match.group(1)))
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error getting refresh rate: {e}")
 
         return None
@@ -373,7 +373,7 @@ class SystemUtils:
                         match = re.search(r"(\d+\.?\d*)\s*Hz", line)
                         if match:
                             return int(float(match.group(1)))
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 print(f"Error getting Wayland refresh rate with wlr-randr: {e}")
 
         elif tool == "kscreen-doctor":
@@ -385,7 +385,7 @@ class SystemUtils:
                     match = re.search(r"@(\d+)", line)
                     if match:
                         return int(match.group(1))
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 print(f"Error getting Wayland refresh rate with kscreen-doctor: {e}")
 
         return None
@@ -431,7 +431,7 @@ class SystemUtils:
                 return (True, f"Refresh rate set to {rate} Hz")
             else:
                 return (False, f"Failed to set refresh rate: {result.stderr}")
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             return (False, f"Error: {str(e)}")
 
     @staticmethod
@@ -464,7 +464,7 @@ class SystemUtils:
                     return (True, f"Refresh rate set to {rate} Hz (Wayland)")
                 else:
                     return (False, f"Failed to set refresh rate: {result.stderr}")
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 return (False, f"Error: {str(e)}")
 
         elif tool == "kscreen-doctor":
@@ -482,7 +482,7 @@ class SystemUtils:
                     return (True, f"Refresh rate set to {rate} Hz (Wayland/KDE)")
                 else:
                     return (False, f"Failed to set refresh rate: {result.stderr}")
-            except Exception as e:
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
                 return (False, f"Error: {str(e)}")
 
         return (False, "No supported Wayland tool available")
@@ -524,7 +524,7 @@ class SystemUtils:
                         if match:
                             return float(match.group(1))
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error reading temperature: {e}")
 
         return None
@@ -571,7 +571,7 @@ class SystemUtils:
                             if match:
                                 return float(match.group(1))
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error reading GPU temperature: {e}")
 
         return None
@@ -598,7 +598,7 @@ class SystemUtils:
                     with open(path, "r") as f:
                         return f.read().strip() == "1"
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error checking AC power: {e}")
 
         return True  # Assume AC as safe default
@@ -619,7 +619,7 @@ class SystemUtils:
                         with open(capacity_path, "r") as f:
                             return int(f.read().strip())
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
             print(f"Error reading battery: {e}")
 
         return None
@@ -1340,3 +1340,198 @@ class SystemUtils:
             return False, "asusctl not found"
         except Exception as e:
             return False, str(e)
+
+    @staticmethod
+    def get_srgb_clamp_status() -> Optional[bool]:
+        """
+        Get sRGB gamut clamp status.
+
+        Returns:
+            Optional[bool]: True if enabled, False if disabled, None if not supported
+        """
+        try:
+            result = subprocess.run(
+                ["asusctl", "bios", "display-srgb", "-g"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                output = result.stdout.lower()
+                return "on" in output or "true" in output or "enabled" in output
+        except FileNotFoundError:
+            pass
+
+        return None
+
+    @staticmethod
+    def set_srgb_clamp(enabled: bool) -> Tuple[bool, str]:
+        """
+        Enable or disable sRGB gamut clamp.
+
+        Args:
+            enabled: True to enable, False to disable
+
+        Returns:
+            Tuple[bool, str]: Success status and message
+        """
+        try:
+            state = "on" if enabled else "off"
+            result = subprocess.run(
+                ["asusctl", "bios", "display-srgb", state],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                status = "enabled" if enabled else "disabled"
+                return True, f"sRGB gamut clamp {status}"
+            return False, result.stderr.strip() or "Command failed"
+        except FileNotFoundError:
+            return False, "asusctl not found"
+        except Exception as e:
+            return False, str(e)
+
+    @staticmethod
+    def toggle_srgb_clamp() -> Tuple[bool, str]:
+        """
+        Toggle sRGB gamut clamp on/off.
+
+        Returns:
+            Tuple[bool, str]: Success status and message
+        """
+        current_status = SystemUtils.get_srgb_clamp_status()
+        if current_status is None:
+            return False, "sRGB gamut clamp not supported"
+
+        return SystemUtils.set_srgb_clamp(not current_status)
+
+    @staticmethod
+    def get_color_profile() -> Optional[str]:
+        """
+        Get current color profile (sRGB, Adobe RGB, DCI-P3).
+
+        Returns:
+            Optional[str]: Current color profile or None if not supported
+        """
+        try:
+            result = subprocess.run(
+                ["asusctl", "bios", "display-color", "-g"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                output = result.stdout.strip().lower()
+                # Parse output for color profile
+                if "srgb" in output:
+                    return "sRGB"
+                elif "adobe" in output or "adobe-rgb" in output:
+                    return "Adobe RGB"
+                elif "dci" in output or "dci-p3" in output:
+                    return "DCI-P3"
+                # Return raw output if recognizable
+                return output
+        except FileNotFoundError:
+            pass
+
+        return None
+
+    @staticmethod
+    def set_color_profile(profile: str) -> Tuple[bool, str]:
+        """
+        Set color profile (sRGB, Adobe RGB, DCI-P3).
+
+        Args:
+            profile: Color profile name (sRGB, adobe-rgb, dci-p3)
+
+        Returns:
+            Tuple[bool, str]: Success status and message
+        """
+        valid_profiles = {
+            "srgb": "sRGB",
+            "adobe-rgb": "Adobe RGB",
+            "dci-p3": "DCI-P3",
+        }
+
+        profile_lower = profile.lower()
+        if profile_lower not in valid_profiles:
+            return False, f"Invalid profile. Supported: {', '.join(valid_profiles.keys())}"
+
+        try:
+            result = subprocess.run(
+                ["asusctl", "bios", "display-color", profile_lower],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                return True, f"Color profile set to {valid_profiles[profile_lower]}"
+            return False, result.stderr.strip() or "Command failed"
+        except FileNotFoundError:
+            return False, "asusctl not found"
+        except Exception as e:
+            return False, str(e)
+
+    @staticmethod
+    def get_available_color_profiles() -> List[str]:
+        """
+        Get list of available color profiles.
+
+        Returns:
+            List[str]: List of supported color profiles
+        """
+        # Default profiles supported by most ASUS laptops
+        profiles = ["sRGB", "Adobe RGB", "DCI-P3"]
+
+        try:
+            result = subprocess.run(
+                ["asusctl", "bios", "display-color", "-l"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                # Parse available profiles from output
+                output = result.stdout.lower()
+                available = []
+                if "srgb" in output:
+                    available.append("sRGB")
+                if "adobe" in output or "adobe-rgb" in output:
+                    available.append("Adobe RGB")
+                if "dci" in output or "dci-p3" in output:
+                    available.append("DCI-P3")
+                if available:
+                    return available
+        except FileNotFoundError:
+            pass
+
+        return profiles
+
+    @staticmethod
+    def get_display_color_settings() -> Dict[str, str]:
+        """
+        Get comprehensive display color settings.
+
+        Returns:
+            Dict[str, str]: Display color configuration
+        """
+        settings = {
+            "srgb_clamp": "Not supported",
+            "color_profile": "Not supported",
+            "available_profiles": "Not available",
+        }
+
+        srgb_status = SystemUtils.get_srgb_clamp_status()
+        if srgb_status is not None:
+            settings["srgb_clamp"] = "Enabled" if srgb_status else "Disabled"
+
+        profile = SystemUtils.get_color_profile()
+        if profile:
+            settings["color_profile"] = profile
+
+        profiles = SystemUtils.get_available_color_profiles()
+        if profiles:
+            settings["available_profiles"] = ", ".join(profiles)
+
+        return settings

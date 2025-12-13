@@ -24,7 +24,7 @@ finish-args:
   - --filesystem=/sys/class/hwmon:ro
   - --filesystem=/sys/class/leds
   - --filesystem=/sys/class/dmi/id:ro
-  - --filesystem=/sys/firmware/acpi
+  - --filesystem=/sys/firmware/acpi/platform_profile
   # Allow executing pkexec for privileged operations
   - --talk-name=org.freedesktop.PolicyKit1
 

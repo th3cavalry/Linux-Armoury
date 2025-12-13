@@ -49,15 +49,18 @@ class LinuxArmouryService(dbus.service.Object):
     def SetPowerProfile(self, profile):
         """Set the power profile"""
         # Basic validation (case-insensitive)
+        if not isinstance(profile, str) or not profile:
+            return (False, "Invalid profile name")
+
+        # Basic validation (case-insensitive)
         if profile.lower() not in [p.lower() for p in self.VALID_PROFILES]:
-            # We might want to allow it anyway if SystemUtils supports it
-            pass
+            return (False, f"Unknown or unsupported profile: {profile}")
 
         try:
             success, message = SystemUtils.set_power_profile(profile)
             return (success, message)
         except Exception as e:
-            return (False, str(e))
+            return (False, f"An unexpected error occurred: {e!s}")
 
     @dbus.service.method(DBUS_INTERFACE, in_signature="", out_signature="a{sv}")
     def GetStatus(self):

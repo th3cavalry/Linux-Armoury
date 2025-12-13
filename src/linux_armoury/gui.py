@@ -15,6 +15,19 @@ from pathlib import Path
 import customtkinter as ctk
 
 from .config_manager import ConfigManager
+from .theme import (
+    COLOR_ACCENT,
+    COLOR_ACCENT_HOVER,
+    COLOR_BG_CARD,
+    COLOR_BG_DARK,
+    COLOR_BG_HOVER,
+    COLOR_BG_MAIN,
+    COLOR_SUCCESS,
+    COLOR_TEXT_PRIMARY,
+    COLOR_TEXT_SECONDARY,
+    COLOR_WARNING,
+    CORNER_RADIUS,
+)
 from .widgets.monitoring_graph import LiveMonitoringGraph
 from .widgets.toast import ToastNotification
 
@@ -111,19 +124,6 @@ def get_gpu_temperature() -> float:
 
     return 0.0
 
-
-# Color scheme inspired by G-Helper
-COLOR_BG_DARK = "#0d0d0d"
-COLOR_BG_MAIN = "#1a1a1a"
-COLOR_BG_CARD = "#242424"
-COLOR_BG_HOVER = "#2d2d2d"
-COLOR_ACCENT = "#ff0066"  # ROG pink accent
-COLOR_ACCENT_HOVER = "#cc0052"
-COLOR_TEXT_PRIMARY = "#ffffff"
-COLOR_TEXT_SECONDARY = "#b3b3b3"
-COLOR_SUCCESS = "#00ff88"
-COLOR_WARNING = "#ffaa00"
-CORNER_RADIUS = 8
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -1042,124 +1042,154 @@ class App(ctk.CTk):
 
             ctk.CTkLabel(color_frame, text=" ", font=("Segoe UI", 5)).pack(pady=5)
 
-        # Effects with asusctl integration
-        effects_frame = ctk.CTkFrame(
-            self.main_frame, fg_color=COLOR_BG_CARD, corner_radius=CORNER_RADIUS
-        )
-        effects_frame.pack(fill="x", pady=(0, 10))
+        # Effects with asusctl or gz302-rgb integration (show if either is supported)
+        if kbd and (kbd.has_aura() or kbd.has_gz302_rgb()):
+            effects_frame = ctk.CTkFrame(
+                self.main_frame, fg_color=COLOR_BG_CARD, corner_radius=CORNER_RADIUS
+            )
+            effects_frame.pack(fill="x", pady=(0, 10))
 
-        ctk.CTkLabel(
-            effects_frame,
-            text="✨ Keyboard Effects",
-            font=("Segoe UI", 14, "bold"),
-            text_color=COLOR_TEXT_PRIMARY,
-        ).pack(pady=(15, 5), padx=20, anchor="w")
+            ctk.CTkLabel(
+                effects_frame,
+                text="✨ Keyboard Effects",
+                font=("Segoe UI", 14, "bold"),
+                text_color=COLOR_TEXT_PRIMARY,
+            ).pack(pady=(15, 5), padx=20, anchor="w")
 
-        # Status label for effects
-        effects_status = ctk.CTkLabel(
-            effects_frame,
-            text="",
-            font=("Segoe UI", 10),
-            text_color=COLOR_TEXT_SECONDARY,
-        )
-        effects_status.pack(pady=(0, 10), padx=20, anchor="w")
+            # Status label for effects
+            effects_status = ctk.CTkLabel(
+                effects_frame,
+                text="",
+                font=("Segoe UI", 10),
+                text_color=COLOR_TEXT_SECONDARY,
+            )
+            effects_status.pack(pady=(0, 10), padx=20, anchor="w")
 
-        # Import AuraEffect for the effects
-        try:
-            from .modules.keyboard_control import AuraEffect
-
-            aura_effects_available = True
-        except ImportError:
-            aura_effects_available = False
-
-        def set_keyboard_effect(effect_name: str):
-            """Set keyboard effect using asusctl"""
-            if not kbd or not aura_effects_available:
-                effects_status.configure(
-                    text="Keyboard effects not available", text_color=COLOR_WARNING
-                )
-                return
-
+            # Import AuraEffect for the effects
             try:
-                # Map display names to enum values
-                effect_map = {
-                    "Static": AuraEffect.STATIC,
-                    "Breathe": AuraEffect.BREATHE,
-                    "Color Cycle": AuraEffect.COLOR_CYCLE,
-                    "Rainbow": AuraEffect.RAINBOW,
-                    "Star": AuraEffect.STAR,
-                    "Rain": AuraEffect.RAIN,
-                    "Highlight": AuraEffect.HIGHLIGHT,
-                    "Laser": AuraEffect.LASER,
-                    "Ripple": AuraEffect.RIPPLE,
-                    "Strobe": AuraEffect.STROBE,
-                    "Comet": AuraEffect.COMET,
-                    "Flash": AuraEffect.FLASH,
-                    "Multi Static": AuraEffect.MULTI_STATIC,
-                }
+                from .modules.keyboard_control import AuraEffect
 
-                if effect_name not in effect_map:
+                effects_available = True
+            except ImportError:
+                effects_available = False
+
+            def set_keyboard_effect(effect_name: str):
+                """Set keyboard effect using asusctl or gz302-rgb"""
+                if not kbd or not effects_available:
                     effects_status.configure(
-                        text=f"Unknown effect: {effect_name}", text_color=COLOR_WARNING
+                        text="Keyboard effects not available", text_color=COLOR_WARNING
                     )
                     return
 
-                effect = effect_map[effect_name]
-                success, msg = kbd.set_effect(effect)
-                if success:
-                    effects_status.configure(text=f"✓ {msg}", text_color=COLOR_SUCCESS)
-                else:
-                    effects_status.configure(text=f"✗ {msg}", text_color=COLOR_WARNING)
-            except Exception as e:
-                effects_status.configure(
-                    text=f"Error: {str(e)}", text_color=COLOR_WARNING
+                try:
+                    # Map display names to enum values
+                    effect_map = {
+                        "Static": AuraEffect.STATIC,
+                        "Breathe": AuraEffect.BREATHE,
+                        "Color Cycle": AuraEffect.COLOR_CYCLE,
+                        "Rainbow": AuraEffect.RAINBOW,
+                        "Star": AuraEffect.STAR,
+                        "Rain": AuraEffect.RAIN,
+                        "Highlight": AuraEffect.HIGHLIGHT,
+                        "Laser": AuraEffect.LASER,
+                        "Ripple": AuraEffect.RIPPLE,
+                        "Strobe": AuraEffect.STROBE,
+                        "Comet": AuraEffect.COMET,
+                        "Flash": AuraEffect.FLASH,
+                        "Multi Static": AuraEffect.MULTI_STATIC,
+                    }
+
+                    if effect_name not in effect_map:
+                        effects_status.configure(
+                            text=f"Unknown effect: {effect_name}", text_color=COLOR_WARNING
+                        )
+                        return
+
+                    effect = effect_map[effect_name]
+                    success, msg = kbd.set_effect(effect)
+                    if success:
+                        effects_status.configure(text=f"✓ {msg}", text_color=COLOR_SUCCESS)
+                    else:
+                        effects_status.configure(text=f"✗ {msg}", text_color=COLOR_WARNING)
+                except Exception as e:
+                    effects_status.configure(
+                        text=f"Error: {str(e)}", text_color=COLOR_WARNING
+                    )
+
+            # All 13 effects from AuraEffect enum
+            effect_names = [
+                "Static",
+                "Breathe",
+                "Color Cycle",
+                "Rainbow",
+                "Star",
+                "Rain",
+                "Highlight",
+                "Laser",
+                "Ripple",
+                "Strobe",
+                "Comet",
+                "Flash",
+                "Multi Static",
+            ]
+
+            # Create 2 columns for effects
+            effects_grid = ctk.CTkFrame(effects_frame, fg_color="transparent")
+            effects_grid.pack(pady=10, padx=20, fill="x")
+
+            row = 0
+            col = 0
+            for effect in effect_names:
+                btn = ctk.CTkButton(
+                    effects_grid,
+                    text=effect,
+                    fg_color=COLOR_BG_HOVER,
+                    hover_color=COLOR_ACCENT,
+                    corner_radius=6,
+                    height=35,
+                    command=lambda e=effect: set_keyboard_effect(e),
                 )
+                btn.grid(row=row, column=col, padx=5, pady=5, sticky="ew")
 
-        # All 13 effects from AuraEffect enum
-        effect_names = [
-            "Static",
-            "Breathe",
-            "Color Cycle",
-            "Rainbow",
-            "Star",
-            "Rain",
-            "Highlight",
-            "Laser",
-            "Ripple",
-            "Strobe",
-            "Comet",
-            "Flash",
-            "Multi Static",
-        ]
+                col += 1
+                if col >= 2:
+                    col = 0
+                    row += 1
 
-        # Create 2 columns for effects
-        effects_grid = ctk.CTkFrame(effects_frame, fg_color="transparent")
-        effects_grid.pack(pady=10, padx=20, fill="x")
+            # Configure grid columns
+            effects_grid.grid_columnconfigure(0, weight=1)
+            effects_grid.grid_columnconfigure(1, weight=1)
 
-        row = 0
-        col = 0
-        for effect in effect_names:
-            btn = ctk.CTkButton(
-                effects_grid,
-                text=effect,
-                fg_color=COLOR_BG_HOVER,
-                hover_color=COLOR_ACCENT,
-                corner_radius=6,
-                height=35,
-                command=lambda e=effect: set_keyboard_effect(e),
+            ctk.CTkLabel(effects_frame, text=" ", font=("Segoe UI", 5)).pack(pady=5)
+        else:
+            # Show message when Aura effects are not supported
+            effects_info_frame = ctk.CTkFrame(
+                self.main_frame, fg_color=COLOR_BG_CARD, corner_radius=CORNER_RADIUS
             )
-            btn.grid(row=row, column=col, padx=5, pady=5, sticky="ew")
+            effects_info_frame.pack(fill="x", pady=(0, 10))
 
-            col += 1
-            if col >= 2:
-                col = 0
-                row += 1
+            ctk.CTkLabel(
+                effects_info_frame,
+                text="✨ Keyboard Effects",
+                font=("Segoe UI", 14, "bold"),
+                text_color=COLOR_TEXT_PRIMARY,
+            ).pack(pady=(15, 5), padx=20, anchor="w")
 
-        # Configure grid columns
-        effects_grid.grid_columnconfigure(0, weight=1)
-        effects_grid.grid_columnconfigure(1, weight=1)
+            if kbd and kbd.is_supported():
+                # Keyboard supported but no Aura
+                info_text = "Aura RGB effects not supported on this ASUS model.\nBasic brightness control is available above."
+                info_color = COLOR_TEXT_SECONDARY
+            else:
+                # No keyboard support at all
+                info_text = "Keyboard backlight not detected."
+                info_color = COLOR_WARNING
 
-        ctk.CTkLabel(effects_frame, text=" ", font=("Segoe UI", 5)).pack(pady=5)
+            ctk.CTkLabel(
+                effects_info_frame,
+                text=info_text,
+                font=("Segoe UI", 11),
+                text_color=info_color,
+            ).pack(pady=(0, 15), padx=20, anchor="w")
 
     def show_performance(self):
         self.clear_main_frame()
@@ -1804,6 +1834,114 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(limit_frame, text=" ", font=("Segoe UI", 5)).pack(pady=5)
 
+        # Display Color Settings
+        color_frame = ctk.CTkFrame(
+            self.main_frame, fg_color=COLOR_BG_CARD, corner_radius=CORNER_RADIUS
+        )
+        color_frame.pack(fill="x", pady=(0, 10))
+
+        ctk.CTkLabel(
+            color_frame,
+            text="🎨 Display Color Settings",
+            font=("Segoe UI", 14, "bold"),
+            text_color=COLOR_TEXT_PRIMARY,
+        ).pack(pady=(15, 10), padx=20, anchor="w")
+
+        # Import SystemUtils for display color functions
+        from .system_utils import SystemUtils
+
+        # sRGB Gamut Clamp Section
+        srgb_status = SystemUtils.get_srgb_clamp_status()
+        srgb_label = ctk.CTkLabel(
+            color_frame,
+            text=f"sRGB Gamut Clamp: {'Enabled' if srgb_status else 'Disabled' if srgb_status is not None else 'Not supported'}",
+            font=("Segoe UI", 11),
+            text_color=COLOR_TEXT_SECONDARY,
+        )
+        srgb_label.pack(pady=(0, 10), padx=20, anchor="w")
+
+        def toggle_srgb():
+            success, msg = SystemUtils.toggle_srgb_clamp()
+            if success:
+                srgb_label.configure(
+                    text=f"sRGB Gamut Clamp: {msg}", text_color=COLOR_SUCCESS
+                )
+                self.show_toast(msg, "success")
+            else:
+                srgb_label.configure(text=f"Error: {msg}", text_color=COLOR_WARNING)
+                self.show_toast(msg, "warning")
+
+        ctk.CTkButton(
+            color_frame,
+            text="Toggle sRGB Gamut Clamp",
+            fg_color=COLOR_BG_HOVER,
+            hover_color=COLOR_ACCENT,
+            corner_radius=6,
+            height=35,
+            command=toggle_srgb,
+        ).pack(pady=(0, 10), padx=20, fill="x")
+
+        # Color Profile Selection
+        current_profile = SystemUtils.get_color_profile()
+        profile_label = ctk.CTkLabel(
+            color_frame,
+            text=f"Color Profile: {current_profile if current_profile else 'Not detected'}",
+            font=("Segoe UI", 11),
+            text_color=COLOR_TEXT_SECONDARY,
+        )
+        profile_label.pack(pady=(10, 10), padx=20, anchor="w")
+
+        def set_profile(profile):
+            success, msg = SystemUtils.set_color_profile(profile)
+            if success:
+                profile_label.configure(
+                    text=f"Color Profile: {msg}", text_color=COLOR_SUCCESS
+                )
+                self.show_toast(msg, "success")
+            else:
+                profile_label.configure(text=f"Error: {msg}", text_color=COLOR_WARNING)
+                self.show_toast(msg, "warning")
+
+        # Color profile buttons
+        profiles_grid = ctk.CTkFrame(color_frame, fg_color="transparent")
+        profiles_grid.pack(pady=10, padx=20, fill="x")
+
+        color_profiles = [
+            ("📊 sRGB", "srgb"),
+            ("🎨 Adobe RGB", "adobe-rgb"),
+            ("🎬 DCI-P3", "dci-p3"),
+        ]
+
+        col = 0
+        for display_name, profile_id in color_profiles:
+            is_current = current_profile and profile_id in current_profile.lower()
+            btn = ctk.CTkButton(
+                profiles_grid,
+                text=display_name,
+                fg_color=COLOR_ACCENT if is_current else COLOR_BG_HOVER,
+                hover_color=COLOR_ACCENT,
+                corner_radius=6,
+                height=35,
+                command=lambda p=profile_id: set_profile(p),
+            )
+            btn.grid(row=0, column=col, padx=5, pady=5, sticky="ew")
+            col += 1
+
+        profiles_grid.grid_columnconfigure(0, weight=1)
+        profiles_grid.grid_columnconfigure(1, weight=1)
+        profiles_grid.grid_columnconfigure(2, weight=1)
+
+        ctk.CTkLabel(color_frame, text=" ", font=("Segoe UI", 5)).pack(pady=5)
+
+        # Info text about sRGB gamut clamp
+        info_text = ctk.CTkLabel(
+            color_frame,
+            text="💡 sRGB gamut clamp fixes over-saturated colors on Flow Z13 displays",
+            font=("Segoe UI", 9),
+            text_color=COLOR_TEXT_SECONDARY,
+        )
+        info_text.pack(pady=(0, 15), padx=20, anchor="w")
+
     def show_settings(self):
         self.clear_main_frame()
 
@@ -2005,23 +2143,24 @@ class App(ctk.CTk):
                 if hasattr(self, "monitor_card"):
                     # Update monitor UI via a small helper (keeps lines short)
                     def _update_monitor():
-                        self.monitor_card.update_stats(
-                            cpu_usage,
-                            cpu_temp,
-                            gpu_usage,
-                            gpu_temp,
-                            ram_usage,
-                            ram_used_gb,
-                            ram_total_gb,
-                            disk_usage,
-                            disk_used_gb,
-                            disk_total_gb,
-                        )
+                        if hasattr(self, "monitor_card") and self.monitor_card.winfo_exists():
+                            self.monitor_card.update_stats(
+                                cpu_usage,
+                                cpu_temp,
+                                gpu_usage,
+                                gpu_temp,
+                                ram_usage,
+                                ram_used_gb,
+                                ram_total_gb,
+                                disk_usage,
+                                disk_used_gb,
+                                disk_total_gb,
+                            )
 
                         # Update real-time graphs
-                        if hasattr(self, "cpu_graph"):
+                        if hasattr(self, "cpu_graph") and self.cpu_graph.winfo_exists():
                             self.cpu_graph.update_data(cpu_usage)
-                        if hasattr(self, "gpu_graph"):
+                        if hasattr(self, "gpu_graph") and self.gpu_graph.winfo_exists():
                             self.gpu_graph.update_data(gpu_usage)
 
                     self.after(0, _update_monitor)

@@ -187,6 +187,29 @@ https://github.com/th3cavalry/Linux-Armoury
             help="Set keyboard RGB color",
         )
 
+        # Display color settings (new feature)
+        parser.add_argument(
+            "--srgb-clamp",
+            type=str,
+            choices=["on", "off", "toggle"],
+            metavar="STATE",
+            help="Enable/disable sRGB gamut clamp (fixes over-saturated colors)",
+        )
+
+        parser.add_argument(
+            "--color-profile",
+            type=str,
+            choices=["srgb", "adobe-rgb", "dci-p3"],
+            metavar="PROFILE",
+            help="Set color profile (sRGB, adobe-rgb, dci-p3)",
+        )
+
+        parser.add_argument(
+            "--get-color-settings",
+            action="store_true",
+            help="Show current display color settings",
+        )
+
         # Hardware capabilities
         parser.add_argument(
             "--capabilities",
@@ -274,17 +297,17 @@ https://github.com/th3cavalry/Linux-Armoury
         # Try to get profile info if available in config, but don't fail if not
         profile_info = Config.POWER_PROFILES.get(profile)
         if profile_info:
-            print(f"Applying {profile_info['name']} profile...")
+            print(f"[*] Applying {profile_info['name']} profile...")
             if "tdp" in profile_info:
-                print(f"  Target TDP: {profile_info['tdp']}W")
+                print(f"[*]   Target TDP: {profile_info['tdp']}W")
         else:
-            print(f"Applying {profile} profile...")
+            print(f"[*] Applying {profile} profile...")
 
         try:
             success, message = SystemUtils.set_power_profile(profile)
 
             if success:
-                print(f"✓ {message}")
+                print(f"[+] {message}")
 
                 # Optional: Set refresh rate if defined in profile
                 # and we are not using pwrcfg
@@ -294,38 +317,38 @@ https://github.com/th3cavalry/Linux-Armoury
                     and not SystemUtils.check_command_exists("pwrcfg")
                 ):
                     rate = int(str(profile_info["refresh"]))
-                    print(f"  Setting refresh rate to {rate}Hz...")
+                    print(f"[*]   Setting refresh rate to {rate}Hz...")
                     r_success, r_msg = SystemUtils.set_refresh_rate(rate)
                     if r_success:
-                        print("  ✓ Refresh rate set")
+                        print("[+]   Refresh rate set")
                     else:
-                        print(f"  ! Could not set refresh rate: {r_msg}")
+                        print(f"[-]   Could not set refresh rate: {r_msg}")
 
                 return True
             else:
-                print(f"✗ Failed to apply profile: {message}")
+                print(f"[-] Failed to apply profile: {message}")
                 return False
 
         except Exception as e:
-            print(f"✗ Error: {e}")
+            print(f"[-] Error: {e}")
             return False
 
     def set_refresh_rate(self, rate: int) -> bool:
         """Set display refresh rate"""
-        print(f"Setting refresh rate to {rate}Hz...")
+        print(f"[*] Setting refresh rate to {rate}Hz...")
 
         try:
             success, message = SystemUtils.set_refresh_rate(rate)
 
             if success:
-                print(f"✓ {message}")
+                print(f"[+] {message}")
                 return True
             else:
-                print(f"✗ Failed to set refresh rate: {message}")
+                print(f"[-] Failed to set refresh rate: {message}")
                 return False
 
         except Exception as e:
-            print(f"✗ Error: {e}")
+            print(f"[-] Error: {e}")
             return False
 
     def show_status(self):
@@ -708,6 +731,41 @@ https://github.com/th3cavalry/Linux-Armoury
             print(f"✗ {message}")
             return False
 
+    def set_srgb_clamp(self, state: str):
+        """Enable, disable, or toggle sRGB gamut clamp"""
+        if state == "toggle":
+            success, message = SystemUtils.toggle_srgb_clamp()
+        else:
+            enabled = state == "on"
+            success, message = SystemUtils.set_srgb_clamp(enabled)
+
+        if success:
+            print(f"✓ {message}")
+        else:
+            print(f"✗ {message}")
+
+    def set_color_profile(self, profile: str):
+        """Set color profile"""
+        print(f"Setting color profile to {profile}...")
+        success, message = SystemUtils.set_color_profile(profile)
+
+        if success:
+            print(f"✓ {message}")
+        else:
+            print(f"✗ {message}")
+
+    def show_color_settings(self):
+        """Show current display color settings"""
+        print("\n🎨 Display Color Settings")
+        print("=" * 50)
+
+        settings = SystemUtils.get_display_color_settings()
+        print(f"  sRGB Gamut Clamp: {settings['srgb_clamp']}")
+        print(f"  Color Profile: {settings['color_profile']}")
+        print(f"  Available Profiles: {settings['available_profiles']}")
+
+        print()
+
     # === Overclocking Methods ===
 
     def set_cpu_governor(self, governor: str):
@@ -1001,6 +1059,15 @@ https://github.com/th3cavalry/Linux-Armoury
         if args.kbd_color:
             self.set_keyboard_color(args.kbd_color)
 
+        if args.srgb_clamp:
+            self.set_srgb_clamp(args.srgb_clamp)
+
+        if args.color_profile:
+            self.set_color_profile(args.color_profile)
+
+        if args.get_color_settings:
+            self.show_color_settings()
+
         if args.capabilities:
             self.show_capabilities()
 
@@ -1017,8 +1084,8 @@ https://github.com/th3cavalry/Linux-Armoury
         if args.tdp_custom:
             self.apply_custom_tdp(args.tdp_custom)
 
-        if args.gpu_perf:
-            self.set_gpu_perf_level(args.gpu_perf)
+        if args.gpu_per:
+            self.set_gpu_perf_level(args.gpu_per)
 
         if args.cpu_info:
             self.show_cpu_info()
